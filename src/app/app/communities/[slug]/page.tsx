@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { joinCommunity, createChannel } from "../actions";
 import ChannelChat from "./ChannelChat";
+import { AskMentorPanel } from "@/components/mentor/AskMentorPanel";
 import type { ChannelMessage, Community } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -173,6 +174,15 @@ export default async function CommunityHome({
                   + Add channel
                 </button>
               </form>
+            )}
+
+            {isMod && (
+              <Link
+                href={`/app/communities/${c.slug}/mentor`}
+                className="mt-3 flex items-center justify-center gap-1 rounded-sm border border-accent bg-[#ecfdf5] px-2 py-2 text-caption font-semibold text-[#047857] hover:bg-[#d1fae5]"
+              >
+                ✦ Mentor Workspace
+              </Link>
             )}
           </div>
 
