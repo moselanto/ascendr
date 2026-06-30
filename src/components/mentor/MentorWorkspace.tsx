@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Source = { id: string; title: string; status: string; created_at: string };
@@ -17,8 +17,28 @@ export function MentorWorkspace({
   const [content, setContent] = useState("");
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  async function submit(e: React.FormEvent) {
+  function show(kind: "ok" | "err", text: string) {
+    setMsg({ kind, text });
+  }
+
+  // Shared handler: posts the response, refreshes the list on success.
+  async function handleResponse(res: Response) {
+    const data = await res.json();
+    if (!res.ok) {
+      show("err", data.error || "Could not add source.");
+    } else {
+      show("ok", `Added "${data.title}" — ${data.chunks} chunks embedded.`);
+      setTitle("");
+      setContent("");
+      if (fileRef.current) fileRef.current.value = "";
+      router.refresh();
+    }
+  }
+
+  // Paste-text submit (JSON).
+  async function submitText(e: React.FormEvent) {
     e.preventDefault();
     if (!content.trim()) return;
     setBusy(true);
@@ -29,17 +49,29 @@ export function MentorWorkspace({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ community_id: communityId, title: title.trim() || "Untitled source", content }),
       });
-      const data = await res.json();
-      if (!res.ok) {
-        setMsg({ kind: "err", text: data.error || "Could not add source." });
-      } else {
-        setMsg({ kind: "ok", text: `Added "${data.title}" — ${data.chunks} chunks embedded.` });
-        setTitle("");
-        setContent("");
-        router.refresh();
-      }
+      await handleResponse(res);
     } catch {
-      setMsg({ kind: "err", text: "Network error. Please try again." });
+      show("err", "Network error. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  // File upload (multipart form-data).
+  async function onFileChosen(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      const fd = new FormData();
+      fd.append("community_id", communityId);
+      fd.append("title", title.trim() || file.name);
+      fd.append("file", file);
+      const res = await fetch("/api/ai/mentor/ingest", { method: "POST", body: fd });
+      await handleResponse(res);
+    } catch {
+      show("err", "Network error. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -47,7 +79,7 @@ export function MentorWorkspace({
 
   return (
     <div className="space-y-8">
-      <form onSubmit={submit} className="rounded-xl border border-[#E2E8F0] bg-white p-5">
+      <form onSubmit={submitText} className="rounded-xl border border-[#E2E8F0] bg-white p-5">
         <label className="block text-sm font-medium text-[#0F172A]">Source title</label>
         <input
           value={title}
@@ -55,6 +87,7 @@ export function MentorWorkspace({
           placeholder="e.g. My interview prep framework"
           className="mt-1 w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#4F46E5]"
         />
+
         <label className="mt-4 block text-sm font-medium text-[#0F172A]">Content</label>
         <textarea
           value={content}
@@ -63,7 +96,8 @@ export function MentorWorkspace({
           placeholder="Paste a playbook, FAQ answers, a talk transcript, or your written advice. The more specific, the better the clone."
           className="mt-1 w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#4F46E5]"
         />
-        <div className="mt-4 flex items-center gap-3">
+
+        <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={busy || !content.trim()}
@@ -71,12 +105,37 @@ export function MentorWorkspace({
           >
             {busy ? "Embedding…" : "Add to my AI clone"}
           </button>
+
+          <span className="text-sm text-[#64748B]">or</span>
+
+          {/* File upload — uses the title field above as the source title if set */}
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => fileRef.current?.click()}
+            className="rounded-lg border border-[#4F46E5] px-4 py-2 text-sm font-medium text-[#4F46E5] disabled:opacity-50"
+          >
+            Upload a file
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".txt,.md,.markdown,.csv,.text"
+            onChange={onFileChosen}
+            className="hidden"
+          />
+
           {msg && (
             <span className={`text-sm ${msg.kind === "ok" ? "text-[#10B981]" : "text-[#EF4444]"}`}>
               {msg.text}
             </span>
           )}
         </div>
+
+        <p className="mt-2 text-xs text-[#64748B]">
+          Upload supports .txt, .md, and .csv files (up to 2 MB). For PDFs, copy the text and paste it
+          for now — PDF parsing is coming next.
+        </p>
       </form>
 
       <div>
