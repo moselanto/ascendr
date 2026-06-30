@@ -102,6 +102,7 @@ export default async function CommunityHome({ params }: { params: { slug: string
             communityId={c.id}
             slug={c.slug}
             meId={profile!.id}
+            meName={profile!.full_name || "Member"}
             initialMessages={messages}
           />
         )}

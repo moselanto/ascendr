@@ -16,32 +16,40 @@ export default function ChannelChat({
   communityId,
   slug,
   meId,
+  meName,
   initialMessages,
 }: {
   channelId: string;
   communityId: string;
   slug: string;
   meId: string;
+  meName: string;
   initialMessages: MsgWithReactions[];
 }) {
   const [messages, setMessages] = useState<MsgWithReactions[]>(initialMessages);
+  const [onlineCount, setOnlineCount] = useState(1);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const typingTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const supabase = createClient();
 
-  // Mark the channel read on mount and whenever new messages arrive.
   useEffect(() => {
     markChannelRead(channelId);
   }, [channelId, messages.length]);
 
   useEffect(() => {
-    const channel = supabase
-      .channel(`room:${channelId}`)
+    const channel = supabase.channel(`room:${channelId}`, {
+      config: { presence: { key: meId } },
+    });
+    channelRef.current = channel;
+
+    channel
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "channel_messages", filter: `channel_id=eq.${channelId}` },
         async (payload) => {
           const row = payload.new as ChannelMessage;
-          // Fetch author display info for the new row.
           const { data: prof } = await supabase
             .from("profiles")
             .select("full_name, handle, avatar_url")
@@ -52,20 +60,36 @@ export default function ChannelChat({
               ? prev
               : [...prev, { ...row, profiles: prof ?? null, reactions: [] }]
           );
+          // Someone sent a message -> they're no longer "typing".
+          setTypingUsers((prev) => prev.filter((n) => n !== (prof?.full_name || "")));
         }
       )
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "message_reactions" },
-        () => {
-          // Lightweight: re-pull reactions for visible messages.
-          refreshReactions();
-        }
+        () => refreshReactions()
       )
-      .subscribe();
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        setOnlineCount(Object.keys(state).length || 1);
+      })
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        const name = payload?.name as string;
+        const id = payload?.id as string;
+        if (!name || id === meId) return;
+        setTypingUsers((prev) => (prev.includes(name) ? prev : [...prev, name]));
+        // Auto-clear this user's typing state after 3s of silence.
+        setTimeout(() => setTypingUsers((prev) => prev.filter((n) => n !== name)), 3000);
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED") {
+          await channel.track({ id: meId, name: meName, at: Date.now() });
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      channelRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [channelId]);
@@ -87,12 +111,33 @@ export default function ChannelChat({
     );
   }
 
+  function handleTyping() {
+    channelRef.current?.send({
+      type: "broadcast",
+      event: "typing",
+      payload: { id: meId, name: meName },
+    });
+  }
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
 
+  const typingLabel =
+    typingUsers.length === 1
+      ? `${typingUsers[0]} is typing…`
+      : typingUsers.length > 1
+      ? `${typingUsers.length} people are typing…`
+      : "";
+
   return (
     <>
+      {/* Presence row */}
+      <div className="flex items-center gap-2 border-b border-border px-5 py-2 text-caption text-text-secondary">
+        <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+        {onlineCount} online
+      </div>
+
       <div className="flex flex-col gap-4 p-5 max-h-[440px] overflow-auto">
         {messages.length ? (
           messages.map((m) => {
@@ -147,6 +192,11 @@ export default function ChannelChat({
         <div ref={bottomRef} />
       </div>
 
+      {/* Typing indicator */}
+      <div className="h-5 px-5 text-caption text-text-secondary italic">
+        {typingLabel}
+      </div>
+
       <form action={sendMessage} className="flex gap-2 border-t border-border p-4">
         <input type="hidden" name="channel_id" value={channelId} />
         <input type="hidden" name="community_id" value={communityId} />
@@ -155,6 +205,7 @@ export default function ChannelChat({
           name="body"
           required
           autoComplete="off"
+          onChange={handleTyping}
           placeholder="Message #discussion…"
           className="flex-1 rounded-sm border border-border px-4 py-2.5 text-body"
         />
