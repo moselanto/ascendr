@@ -6,7 +6,7 @@ import {
   askQuestion,
   toggleQuestionVote,
   setQuestionStatus,
-} from "../../live-actions";
+} from "../../../live-actions";
 
 type Question = {
   id: string;

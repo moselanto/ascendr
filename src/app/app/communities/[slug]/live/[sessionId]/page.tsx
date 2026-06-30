@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
-import { setSessionStatus } from "../../live-actions";
+import { setSessionStatus } from "../../../live-actions";
 import LiveQA from "./LiveQA";
 
 export const dynamic = "force-dynamic";
