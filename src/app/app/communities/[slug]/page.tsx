@@ -160,6 +160,14 @@ export default async function CommunityHome({
               ))}
             </div>
 
+            {/* Live Sessions — visible to all members */}
+            <Link
+              href={`/app/communities/${c.slug}/live`}
+              className="mt-3 flex items-center justify-center gap-1 rounded-sm border border-primary bg-[#eef2ff] px-2 py-2 text-caption font-semibold text-primary hover:bg-[#e0e7ff]"
+            >
+              ◉ Live Sessions
+            </Link>
+
             {isMod && (
               <form action={createChannel} className="mt-3 border-t border-border pt-3">
                 <input type="hidden" name="community_id" value={c.id} />
