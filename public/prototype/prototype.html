@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ASCENDR — P1 High-Fidelity Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#4F46E5; --secondary:#2563EB; --accent:#10B981;
+  --warning:#F59E0B; --danger:#EF4444;
+  --bg:#F8FAFC; --card:#FFFFFF; --text:#0F172A; --text-2:#64748B; --border:#E2E8F0;
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px;
+  --shadow:0 1px 3px rgba(15,23,42,.08),0 1px 2px rgba(15,23,42,.04);
+  --shadow-lg:0 10px 30px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#EEF1F6;color:var(--text);-webkit-font-smoothing:antialiased}
+.app-chrome{position:sticky;top:0;z-index:50;background:#0F172A;color:#fff;display:flex;align-items:center;gap:16px;padding:12px 20px;flex-wrap:wrap}
+.app-chrome .brand{font-weight:900;letter-spacing:.5px;font-size:18px}
+.app-chrome .brand span{color:#a5b4fc}
+.app-chrome .sub{color:#94a3b8;font-size:12px;font-weight:500}
+.controls{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;background:#1E293B;border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:#94a3b8;font-weight:600;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--primary);color:#fff}
+.screen-nav{display:flex;gap:6px;flex-wrap:wrap;padding:12px 20px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:49px;z-index:40}
+.screen-nav button{border:1px solid var(--border);background:#fff;color:var(--text-2);font-weight:600;font-size:13px;padding:7px 13px;border-radius:999px;cursor:pointer;font-family:inherit}
+.screen-nav button.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.stage{padding:28px 20px 60px;display:flex;justify-content:center}
+.device{transition:width .25s ease}
+.device.desktop{width:100%;max-width:1280px}
+.device.mobile{width:390px;max-width:100%}
+.frame{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
+.device.mobile .frame{border-radius:32px;border:8px solid #0F172A}
+.screen{display:none}
+.screen.on{display:block}
+/* generic */
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:var(--r-sm);font-family:inherit;font-weight:600;font-size:14px;padding:11px 18px;cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn-block{width:100%;justify-content:center}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
+.pill-accent{background:#ecfdf5;color:#047857}
+.pill-primary{background:#eef2ff;color:#4338ca}
+.pill-warn{background:#fffbeb;color:#b45309}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.muted{color:var(--text-2)}
+.avatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,#6366f1,#2563eb);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto}
+.h-sec{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2)}
+/* ---- App shell (desktop) ---- */
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:680px}
+.device.mobile .shell{grid-template-columns:1fr;min-height:720px}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
+.device.mobile .sidebar{display:none}
+.side-brand{font-weight:900;font-size:20px;padding:6px 10px 18px}
+.side-brand span{color:var(--primary)}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-sm);color:var(--text-2);font-weight:600;font-size:14px;cursor:pointer}
+.nav-item .ic{width:18px;text-align:center}
+.nav-item.on{background:#eef2ff;color:var(--primary)}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:#fff;border-bottom:1px solid var(--border)}
+.device.mobile .topbar{padding:14px 16px}
+.search{flex:1;max-width:420px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:9px 14px;color:var(--text-2);font-size:13px}
+.topbar .sp{margin-left:auto}
+.iconbtn{position:relative;width:38px;height:38px;border-radius:999px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.dot{position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:999px;background:var(--danger);border:2px solid #fff}
+.content{padding:22px;overflow:auto}
+.device.mobile .content{padding:16px 16px 86px}
+.mobnav{display:none}
+.device.mobile .mobnav{display:flex;position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);justify-content:space-around;padding:8px 6px}
+.mobnav button{border:0;background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:var(--text-2);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.mobnav button .ic{font-size:18px}
+.mobnav button.on{color:var(--primary)}
+.fab{width:46px;height:46px;border-radius:999px;background:var(--primary);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;margin-top:-18px;box-shadow:var(--shadow-lg)}
+.grid{display:grid;gap:16px}
+.streak{background:linear-gradient(120deg,#4F46E5,#2563EB);color:#fff;border-radius:var(--r-md);padding:18px 20px;display:flex;align-items:center;gap:16px}
+.streak .flame{font-size:30px}
+.statline{display:flex;gap:18px;flex-wrap:wrap}
+.stat{flex:1;min-width:120px}
+.stat .n{font-size:24px;font-weight:800}
+.progress{height:8px;background:var(--border);border-radius:999px;overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--accent)}
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow:auto}
+.tabbar button{border:0;background:transparent;font-family:inherit;font-weight:600;font-size:14px;color:var(--text-2);padding:12px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+.tabbar button.on{color:var(--primary);border-bottom-color:var(--primary)}
+.note{font-size:12px;color:var(--text-2);background:#fff;border:1px dashed var(--border);border-radius:var(--r-sm);padding:10px 12px}
+.legend{max-width:1280px;margin:0 auto 18px;font-size:12px;color:#64748b}
+@media(max-width:520px){.stage{padding:16px 8px 50px}}
+</style>
+</head>
+<body>
+<div class="app-chrome">
+  <div class="brand">ASCEND<span>R</span></div>
+  <div class="sub">P1 High-Fidelity Prototype · Stages 1–4 design system</div>
+  <div class="controls">
+    <div class="seg" id="deviceSeg">
+      <button data-d="desktop" class="on">Desktop</button>
+      <button data-d="mobile">Mobile</button>
+    </div>
+  </div>
+</div>
+<div class="screen-nav" id="screenNav">
+  <button data-s="onboarding" class="on">1 · Onboarding</button>
+  <button data-s="home">2 · Home</button>
+  <button data-s="community">3 · Community + Chat</button>
+  <button data-s="live">4 · Live + Q&amp;A</button>
+  <button data-s="ai">5 · AI Coach / Clone</button>
+</div>
+<div class="legend">Colors, type (Inter), 8px grid and components are driven by the ASCENDR Stage 1 design tokens. Toggle Desktop / Mobile to see the responsive treatment of each screen.</div>
+<div class="stage">
+  <div class="device desktop" id="device">
+    <div class="frame">
+      <!-- SCREENS INJECTED BELOW -->
+      <div id="screens"></div>
+    </div>
+  </div>
+</div>
+<script>
+const screens = {};
+
+/* ===== Shared shell builder (Home, Community, AI all use the app shell) ===== */
+function shell(active, contentHTML, mobActive){
+  const nav=[['home','◳','Home'],['comm','◎','Communities'],['learn','▦','Learn'],['live','◉','Live'],['net','⚇','Networking'],['jobs','▤','Jobs'],['ai','✦','AI'],['profile','◍','Profile']];
+  const side=nav.map(n=>`<div class="nav-item ${n[0]===active?'on':''}"><span class="ic">${n[1]}</span>${n[2]}</div>`).join('');
+  const mob=[['home','◳','Home'],['comm','◎','Communities'],['add','＋',''],['live','◉','Live'],['profile','◍','Profile']];
+  const mobHTML=mob.map(m=>m[0]==='add'?`<button><span class="fab">＋</span></button>`:`<button class="${m[0]===mobActive?'on':''}"><span class="ic">${m[1]}</span>${m[2]}</button>`).join('');
+  return `<div class="shell">
+    <aside class="sidebar"><div class="side-brand">ASCEND<span>R</span></div>${side}</aside>
+    <div class="main">
+      <div class="topbar">
+        <div class="iconbtn">☰</div>
+        <div class="search">Search people, communities, courses…</div>
+        <div class="sp"></div>
+        <div class="iconbtn">✦</div>
+        <div class="iconbtn">🔔<span class="dot"></span></div>
+        <div class="avatar">MM</div>
+      </div>
+      <div class="content">${contentHTML}</div>
+      <div class="mobnav">${mobHTML}</div>
+    </div>
+  </div>`;
+}
+
+/* ===== 1 · ONBOARDING (AUTH-006/007) ===== */
+screens.onboarding = `
+<div style="display:grid;grid-template-columns:1.05fr .95fr;min-height:680px" class="ob-grid">
+  <div style="background:linear-gradient(150deg,#4F46E5,#1E293B);color:#fff;padding:48px 44px;display:flex;flex-direction:column">
+    <div style="font-weight:900;font-size:24px">ASCEND<span style="color:#a5b4fc">R</span></div>
+    <div style="margin-top:auto">
+      <span class="pill" style="background:rgba(255,255,255,.15);color:#fff">Step 2 of 4</span>
+      <h1 style="font-size:34px;font-weight:800;line-height:1.2;margin:16px 0 10px">Let's set your career goal</h1>
+      <p style="color:#c7d2fe;font-size:15px;max-width:380px">Your goal shapes everything — the mentors we match, the AI coach's plan, and the communities we suggest. You can change it anytime.</p>
+      <div style="display:flex;gap:8px;margin-top:28px">
+        <i style="width:34px;height:5px;border-radius:9px;background:#fff;opacity:.9"></i>
+        <i style="width:34px;height:5px;border-radius:9px;background:#fff"></i>
+        <i style="width:34px;height:5px;border-radius:9px;background:#fff;opacity:.3"></i>
+        <i style="width:34px;height:5px;border-radius:9px;background:#fff;opacity:.3"></i>
+      </div>
+    </div>
+  </div>
+  <div style="padding:44px 40px;display:flex;flex-direction:column;background:#fff">
+    <div class="h-sec">What do you want to achieve?</div>
+    <div class="grid" style="grid-template-columns:1fr 1fr;margin-top:14px">
+      <div class="card" style="padding:16px;border:2px solid var(--primary);background:#eef2ff"><div style="font-size:22px">🚀</div><div style="font-weight:700;margin-top:6px">Switch careers</div><div class="muted" style="font-size:13px">Move into a new field or role</div></div>
+      <div class="card" style="padding:16px"><div style="font-size:22px">📈</div><div style="font-weight:700;margin-top:6px">Get promoted</div><div class="muted" style="font-size:13px">Grow in my current track</div></div>
+      <div class="card" style="padding:16px"><div style="font-size:22px">🧭</div><div style="font-weight:700;margin-top:6px">Build a startup</div><div class="muted" style="font-size:13px">Founder & growth mentoring</div></div>
+      <div class="card" style="padding:16px"><div style="font-size:22px">🎓</div><div style="font-weight:700;margin-top:6px">Learn a skill</div><div class="muted" style="font-size:13px">Courses, paths & certificates</div></div>
+    </div>
+    <div class="h-sec" style="margin-top:24px">Target role <span style="font-weight:500;text-transform:none">(optional)</span></div>
+    <div class="search" style="max-width:none;margin-top:10px;background:var(--bg)">e.g. Product Manager</div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <span class="pill pill-primary">Product Manager ✕</span>
+      <span class="pill pill-primary">UX Design ✕</span>
+    </div>
+    <div style="margin-top:auto;display:flex;gap:12px;padding-top:28px">
+      <button class="btn btn-ghost">Back</button>
+      <button class="btn btn-primary btn-block">Continue →</button>
+    </div>
+  </div>
+</div>`;
+
+/* ===== 2 · HOME (HOME-001) ===== */
+screens.home = shell('home', `
+  <div class="streak">
+    <div class="flame">🔥</div>
+    <div style="flex:1"><div style="font-weight:800;font-size:18px">7-day streak — don't break it!</div><div style="opacity:.9;font-size:13px">Post or finish a lesson today to keep it alive.</div></div>
+    <button class="btn" style="background:rgba(255,255,255,.2);color:#fff">+40 XP today</button>
+  </div>
+  <div class="grid" style="grid-template-columns:2fr 1fr;margin-top:18px" id="homeGrid">
+    <div class="grid">
+      <div class="card" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div class="h-sec">Continue learning</div><span class="muted" style="font-size:12px">60% complete</span></div>
+        <div style="font-weight:700;margin:8px 0 6px">Leadership 101 · Lesson 4: Delegation</div>
+        <div class="progress"><i style="width:60%"></i></div>
+        <button class="btn btn-primary" style="margin-top:14px">▶ Resume lesson</button>
+      </div>
+      <div class="card" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center"><div class="h-sec">Today's live session</div><span class="pill pill-warn">● 6:00 PM</span></div>
+        <div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div class="avatar">JN</div><div><div style="font-weight:700">Q&A with John — Scaling Teams</div><div class="muted" style="font-size:13px">John's Leadership Community · 214 going</div></div><button class="btn btn-accent" style="margin-left:auto">Remind me</button></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="h-sec">Community feed</div>
+        <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">AO</div><div><div style="font-size:14px"><b>Aisha</b> earned the <b>Closer</b> badge 🏅</div><div class="muted" style="font-size:12px">12 reactions · 2h</div></div></div>
+        <div style="display:flex;gap:12px;padding:12px 0"><div class="avatar">JN</div><div><div style="font-size:14px"><b>John</b> posted in Leadership: "This week's challenge — write your delegation playbook…"</div><div class="muted" style="font-size:12px">8 comments · 4h</div></div></div>
+      </div>
+    </div>
+    <div class="grid" id="homeRail">
+      <div class="card" style="padding:16px">
+        <div class="h-sec">AI Career Coach</div>
+        <p class="muted" style="font-size:13px;margin:8px 0 12px">"Based on your goal, your next best step is mock interviews."</p>
+        <button class="btn btn-ghost btn-block">✦ Ask your coach</button>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="h-sec">Recommended mentors</div>
+        <div style="display:flex;gap:10px;align-items:center;margin-top:10px"><div class="avatar">DM</div><div style="font-size:13px"><b>David M.</b><div class="muted">PM Leadership</div></div><button class="btn btn-ghost" style="margin-left:auto;padding:6px 10px">View</button></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div class="h-sec">Recommended jobs</div>
+        <div style="font-size:13px;margin-top:10px"><b>Associate PM</b><div class="muted">Remote · 92% match</div></div>
+      </div>
+    </div>
+  </div>
+`, 'home');
+
+/* ===== 3 · COMMUNITY + CHAT (COMM-002/003) ===== */
+screens.community = shell('comm', `
+  <div class="card" style="overflow:hidden">
+    <div style="height:110px;background:linear-gradient(120deg,#4F46E5,#10B981)"></div>
+    <div style="padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <div class="avatar" style="width:56px;height:56px;font-size:18px;margin-top:-44px;border:3px solid #fff">JL</div>
+      <div><div style="font-weight:800;font-size:18px">John's Leadership Community</div><div class="muted" style="font-size:13px">1,204 members · 38 online</div></div>
+      <button class="btn btn-primary" style="margin-left:auto">Subscribe · $19/mo</button>
+    </div>
+    <div class="tabbar" style="padding:0 12px">
+      <button class="on">Discussion</button><button>Courses</button><button>Live</button><button>Members</button><button>Leaderboard</button><button>Events</button><button>Resources</button>
+    </div>
+  </div>
+  <div class="grid" style="grid-template-columns:200px 1fr 240px;margin-top:16px" id="commGrid">
+    <div class="card" style="padding:12px;height:fit-content" id="commChannels">
+      <div class="h-sec">Channels</div>
+      <div class="nav-item on" style="padding:8px 10px"># general</div>
+      <div class="nav-item" style="padding:8px 10px"># introductions</div>
+      <div class="nav-item" style="padding:8px 10px"># career-advice <span class="dot" style="position:static;margin-left:auto"></span></div>
+      <div class="nav-item" style="padding:8px 10px">📣 announcements</div>
+    </div>
+    <div class="card" style="padding:14px;display:flex;flex-direction:column;min-height:420px">
+      <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div class="avatar">JN</div><div><div style="font-size:14px"><b>John</b> <span class="muted" style="font-size:12px">· 9:02 AM</span></div><div style="font-size:14px;margin-top:2px">Morning all 👋 This week we're tackling delegation. Drop one task you'd struggle to hand off.</div><div style="margin-top:6px"><span class="pill pill-accent">👍 14</span></div></div></div>
+      <div style="display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)"><div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AO</div><div><div style="font-size:14px"><b>Aisha</b> <span class="muted" style="font-size:12px">· 9:14 AM</span></div><div style="font-size:14px;margin-top:2px">Reviewing every PR myself 😅 @John how do you let go of that?</div></div></div>
+      <div style="display:flex;gap:10px;padding:10px 0"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">✦</div><div><div style="font-size:14px"><b>Ask John's AI</b> <span class="pill pill-primary" style="margin-left:4px">AI</span></div><div style="font-size:14px;margin-top:2px">John teaches the "decide–delegate–check" loop. <span class="muted">↳ From: Module 3 · Lesson 2</span></div></div></div>
+      <div style="margin-top:auto;display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px solid var(--border)"><div class="search" style="flex:1;max-width:none;background:var(--bg)">Message #general…  @ mention · 😊 · 📎</div><button class="btn btn-primary">Send</button></div>
+    </div>
+    <div class="grid" id="commRail">
+      <div class="card" style="padding:14px">
+        <div class="h-sec">Leaderboard · this week</div>
+        <div style="font-size:14px;margin-top:10px"><div style="display:flex;justify-content:space-between;padding:5px 0"><span>🥇 Aisha O.</span><b>820 XP</b></div><div style="display:flex;justify-content:space-between;padding:5px 0"><span>🥈 David M.</span><b>640 XP</b></div><div style="display:flex;justify-content:space-between;padding:5px 0;color:var(--primary)"><span>🥉 You</span><b>590 XP</b></div></div>
+      </div>
+      <div class="card" style="padding:14px;text-align:center"><div class="h-sec">Ask the mentor's AI</div><button class="btn btn-accent btn-block" style="margin-top:10px">✦ Ask John's AI</button></div>
+    </div>
+  </div>
+`, 'comm');
+
+/* ===== 4 · LIVE + Q&A (COMM-007) ===== */
+screens.live = shell('live', `
+  <div class="grid" style="grid-template-columns:1fr 320px" id="liveGrid">
+    <div class="grid">
+      <div class="card" style="overflow:hidden">
+        <div style="aspect-ratio:16/9;background:radial-gradient(circle at 50% 40%,#1e293b,#0f172a);color:#fff;display:flex;align-items:center;justify-content:center;position:relative">
+          <div style="text-align:center"><div class="avatar" style="width:64px;height:64px;font-size:22px;margin:0 auto 10px">JN</div><div style="font-weight:700">John Njoroge</div><div style="opacity:.7;font-size:13px">Host · presenting</div></div>
+          <span class="pill" style="position:absolute;top:12px;left:12px;background:var(--danger);color:#fff">● LIVE</span>
+          <span class="pill" style="position:absolute;top:12px;right:12px;background:rgba(255,255,255,.15);color:#fff">⦿ REC</span>
+          <span class="pill" style="position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.15);color:#fff">👁 214 watching</span>
+        </div>
+        <div style="display:flex;gap:8px;padding:12px 14px;flex-wrap:wrap"><button class="btn btn-ghost">✋ Raise hand</button><button class="btn btn-ghost">👍 React</button><button class="btn btn-ghost">📊 Poll</button><button class="btn btn-primary" style="margin-left:auto">Submit a question</button></div>
+      </div>
+      <div class="note">Q&A is the heartbeat: members submit and upvote questions; the host answers the top-voted without being interrupted. Session auto-records and the AI posts a summary + action items afterward.</div>
+    </div>
+    <div class="card" style="padding:14px;display:flex;flex-direction:column" id="liveRail">
+      <div class="tabbar" style="margin-bottom:8px"><button class="on">Q&amp;A</button><button>Chat</button><button>Participants</button></div>
+      <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px"><div style="display:flex;justify-content:space-between"><b style="font-size:14px">How do you delegate without losing quality?</b><span class="pill pill-primary">📌</span></div><div class="muted" style="font-size:12px;margin-top:4px">▲ 14 · pinned</div></div>
+      <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px"><b style="font-size:14px">Handling underperformers on a remote team?</b><div class="muted" style="font-size:12px;margin-top:4px">▲ 9 · open</div></div>
+      <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);opacity:.7"><b style="font-size:14px">Best 1:1 cadence?</b><div class="muted" style="font-size:12px;margin-top:4px">▲ 5 · ✅ answered</div></div>
+      <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border)"><div class="search" style="max-width:none;background:var(--bg)">Ask a question…</div><label class="muted" style="font-size:12px;display:flex;gap:6px;align-items:center;margin-top:8px"><input type="checkbox"> Ask anonymously</label></div>
+    </div>
+  </div>
+`, 'live');
+
+/* ===== 5 · AI COACH / MENTOR CLONE (AI-001/002) ===== */
+screens.ai = shell('ai', `
+  <div class="grid" style="grid-template-columns:230px 1fr 280px" id="aiGrid">
+    <div class="card" style="padding:12px;height:fit-content" id="aiLeft">
+      <div class="h-sec">Saved conversations</div>
+      <div class="nav-item on" style="padding:8px 10px">Career plan → PM</div>
+      <div class="nav-item" style="padding:8px 10px">Resume review</div>
+      <div class="nav-item" style="padding:8px 10px">Interview prep</div>
+      <button class="btn btn-ghost btn-block" style="margin-top:10px">+ New chat</button>
+    </div>
+    <div class="card" style="padding:0;display:flex;flex-direction:column;min-height:440px">
+      <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">✦</div><div><b>ASCENDR AI Coach</b> <span class="pill pill-primary">AI</span><div class="muted" style="font-size:12px">Grounded in John's content · cites sources</div></div></div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:14px;flex:1">
+        <div style="align-self:flex-end;background:var(--primary);color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;max-width:80%;font-size:14px">What did John teach about delegation?</div>
+        <div style="background:var(--bg);border:1px solid var(--border);padding:12px 14px;border-radius:14px 14px 14px 4px;max-width:85%;font-size:14px">John recommends the <b>"decide–delegate–check"</b> loop: decide what only you can do, delegate the rest with clear outcomes, and check at agreed milestones — not constantly.<div style="margin-top:8px;font-size:12px;color:var(--secondary)">↳ From: Module 3 · Lesson 2 — Delegation</div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="pill pill-primary">Suggest a delegation checklist</span><span class="pill pill-primary">How do I start?</span></div>
+      </div>
+      <div style="padding:12px 14px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center"><div class="search" style="flex:1;max-width:none;background:var(--bg)">Ask the coach anything…</div><button class="btn btn-ghost">Ask the real mentor</button><button class="btn btn-primary">Send</button></div>
+    </div>
+    <div class="grid" id="aiRail">
+      <div class="card" style="padding:14px">
+        <div class="h-sec">Your career roadmap</div>
+        <div style="margin-top:10px;font-size:13px"><div style="display:flex;gap:8px;align-items:center;padding:6px 0"><span class="pill pill-accent">✓</span> Define goal: PM</div><div style="display:flex;gap:8px;align-items:center;padding:6px 0"><span class="pill pill-accent">✓</span> Join 2 communities</div><div style="display:flex;gap:8px;align-items:center;padding:6px 0;color:var(--primary)"><span class="pill pill-primary">▶</span> Mock interviews ×3</div><div style="display:flex;gap:8px;align-items:center;padding:6px 0;color:var(--text-2)"><span class="pill" style="background:var(--border)">○</span> Apply to 5 roles</div></div>
+      </div>
+      <div class="card" style="padding:14px"><div class="h-sec">Skill gap</div><div class="progress" style="margin-top:10px"><i style="width:72%"></i></div><div class="muted" style="font-size:12px;margin-top:6px">72% ready for Associate PM</div></div>
+    </div>
+  </div>
+`, 'ai');
+
+/* ===== render + controls ===== */
+const elScreens=document.getElementById('screens');
+const device=document.getElementById('device');
+let cur='onboarding';
+function render(){elScreens.innerHTML=`<div class="screen on">${screens[cur]}</div>`;}
+render();
+document.getElementById('screenNav').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;cur=b.dataset.s;document.querySelectorAll('#screenNav button').forEach(x=>x.classList.toggle('on',x===b));render();});
+document.getElementById('deviceSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;device.className='device '+b.dataset.d;document.querySelectorAll('#deviceSeg button').forEach(x=>x.classList.toggle('on',x===b));applyResponsive();});
+function applyResponsive(){
+  const mobile=device.classList.contains('mobile');
+  const collapse=(id)=>{const g=document.getElementById(id);if(g)g.style.gridTemplateColumns=mobile?'1fr':g.dataset.cols||g.style.gridTemplateColumns;};
+  // store + collapse multi-column grids on mobile
+  ['homeGrid','homeRail','commGrid','commRail','liveGrid','aiGrid','aiRail','ob-grid'].forEach(()=>{});
+  document.querySelectorAll('#homeGrid,#commGrid,#liveGrid,#aiGrid').forEach(g=>{if(!g.dataset.cols)g.dataset.cols=g.style.gridTemplateColumns;g.style.gridTemplateColumns=mobile?'1fr':g.dataset.cols;});
+  document.querySelectorAll('#commChannels,#commRail,#aiLeft,#aiRail,#liveRail').forEach(el=>{el.style.display=mobile?'none':'';});
+  const ob=document.querySelector('.ob-grid');if(ob){ob.style.gridTemplateColumns=mobile?'1fr':'1.05fr .95fr';}
+}
+const _r=render;render=function(){_r();applyResponsive();};render();
+</script>
+</body>
+</html>
