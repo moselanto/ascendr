@@ -17,6 +17,17 @@ function slugify(name: string) {
   );
 }
 
+function channelName(name: string) {
+  return (
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 24) || "channel"
+  );
+}
+
 /** Create a community + its default discussion channel; owner auto-joins. Awards +25 XP. */
 export async function createCommunity(formData: FormData) {
   const name = String(formData.get("name") || "").trim();
@@ -52,15 +63,57 @@ export async function createCommunity(formData: FormData) {
     role: "owner",
     status: "active",
   });
-  await supabase.from("community_channels").insert({
-    community_id: community.id,
-    kind: "discussion",
-    name: "discussion",
-    position: 0,
-  });
+  // Seed with two starter channels.
+  await supabase.from("community_channels").insert([
+    { community_id: community.id, kind: "discussion", name: "general", position: 0 },
+    { community_id: community.id, kind: "discussion", name: "introductions", position: 1 },
+  ]);
 
   await awardXp(profile.id, "community_create", 25, community.id);
   redirect(`/app/communities/${community.slug}`);
+}
+
+/** Create an additional channel in a community (mods/owner only). */
+export async function createChannel(formData: FormData) {
+  const communityId = String(formData.get("community_id"));
+  const slug = String(formData.get("slug"));
+  const raw = String(formData.get("name") || "").trim();
+  if (!raw) return;
+
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+
+  const supabase = createClient();
+  // Authorization: must be owner/moderator (RLS also enforces this).
+  const { data: membership } = await supabase
+    .from("community_members")
+    .select("role")
+    .eq("community_id", communityId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  if (!membership || !["owner", "moderator"].includes(membership.role)) {
+    redirect(`/app/communities/${slug}`);
+  }
+
+  // Position = current channel count.
+  const { count } = await supabase
+    .from("community_channels")
+    .select("id", { count: "exact", head: true })
+    .eq("community_id", communityId);
+
+  const { data: created } = await supabase
+    .from("community_channels")
+    .insert({
+      community_id: communityId,
+      kind: "discussion",
+      name: channelName(raw),
+      position: count ?? 0,
+    })
+    .select("id")
+    .single();
+
+  revalidatePath(`/app/communities/${slug}`);
+  redirect(`/app/communities/${slug}${created ? `?channel=${created.id}` : ""}`);
 }
 
 /** Join a public community instantly. Awards +15 XP. */
@@ -97,7 +150,7 @@ export async function joinCommunity(formData: FormData) {
   redirect(`/app/communities/${slug}`);
 }
 
-/** Post a message to a community discussion channel. Awards +5 XP + notifies the owner. */
+/** Post a message to a channel. Awards +5 XP + notifies the owner. */
 export async function sendMessage(formData: FormData) {
   const channelId = String(formData.get("channel_id"));
   const communityId = String(formData.get("community_id"));
@@ -115,7 +168,6 @@ export async function sendMessage(formData: FormData) {
     body,
   });
 
-  // Notify the community owner of new activity (unless they posted it).
   const { data: community } = await supabase
     .from("communities")
     .select("owner_id, name")
