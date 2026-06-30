@@ -46,7 +46,6 @@ export async function createCommunity(formData: FormData) {
     redirect(`/app/communities/new?error=${encodeURIComponent(error?.message || "Could not create")}`);
   }
 
-  // Owner membership + default discussion channel.
   await supabase.from("community_members").insert({
     community_id: community.id,
     user_id: profile.id,
@@ -80,7 +79,6 @@ export async function joinCommunity(formData: FormData) {
   });
 
   if (!error) {
-    // Increment member_count (best-effort; replace with an RPC for atomicity later).
     const { data: c } = await supabase
       .from("communities")
       .select("member_count")
@@ -99,7 +97,7 @@ export async function joinCommunity(formData: FormData) {
   redirect(`/app/communities/${slug}`);
 }
 
-/** Post a message to a community discussion channel. Awards +5 XP. */
+/** Post a message to a community discussion channel. Awards +5 XP + notifies the owner. */
 export async function sendMessage(formData: FormData) {
   const channelId = String(formData.get("channel_id"));
   const communityId = String(formData.get("community_id"));
@@ -117,6 +115,70 @@ export async function sendMessage(formData: FormData) {
     body,
   });
 
+  // Notify the community owner of new activity (unless they posted it).
+  const { data: community } = await supabase
+    .from("communities")
+    .select("owner_id, name")
+    .eq("id", communityId)
+    .maybeSingle();
+  if (community && community.owner_id !== profile.id) {
+    await supabase.from("notifications").insert({
+      user_id: community.owner_id,
+      type: "message",
+      actor_id: profile.id,
+      entity_type: "community",
+      entity_id: communityId,
+      body: `${profile.full_name || "A member"} posted in ${community.name}`,
+    });
+  }
+
   await awardXp(profile.id, "channel_message", 5, communityId);
   revalidatePath(`/app/communities/${slug}`);
+}
+
+/** Toggle a reaction emoji on a message (add if absent, remove if present). */
+export async function toggleReaction(
+  messageId: string,
+  emoji: string,
+  communityId: string,
+  slug: string
+) {
+  const profile = await getCurrentProfile();
+  if (!profile) return;
+
+  const supabase = createClient();
+  const { data: existing } = await supabase
+    .from("message_reactions")
+    .select("emoji")
+    .eq("message_id", messageId)
+    .eq("user_id", profile.id)
+    .eq("emoji", emoji)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("message_reactions")
+      .delete()
+      .eq("message_id", messageId)
+      .eq("user_id", profile.id)
+      .eq("emoji", emoji);
+  } else {
+    await supabase
+      .from("message_reactions")
+      .insert({ message_id: messageId, user_id: profile.id, emoji });
+  }
+  revalidatePath(`/app/communities/${slug}`);
+}
+
+/** Record that the current user has read a channel up to now (drives unread badges). */
+export async function markChannelRead(channelId: string) {
+  const profile = await getCurrentProfile();
+  if (!profile) return;
+  const supabase = createClient();
+  await supabase
+    .from("channel_reads")
+    .upsert(
+      { channel_id: channelId, user_id: profile.id, last_read_at: new Date().toISOString() },
+      { onConflict: "channel_id,user_id" }
+    );
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
+import NotificationBell from "./NotificationBell";
 
 const NAV = [
   { href: "/app", label: "Home", icon: "◳" },
@@ -20,6 +21,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .select("current_len")
     .eq("user_id", profile.id)
     .maybeSingle();
+
+  const { data: notifs } = await supabase
+    .from("notifications")
+    .select("id, type, body, read_at, created_at")
+    .eq("user_id", profile.id)
+    .order("created_at", { ascending: false })
+    .limit(30);
 
   const initials =
     (profile.full_name || "Me")
@@ -59,6 +67,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <span className="text-small text-text-secondary hidden sm:block">
               {profile.full_name || "Member"}
             </span>
+            <NotificationBell meId={profile.id} initial={notifs ?? []} />
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold">
               {initials}
             </div>
