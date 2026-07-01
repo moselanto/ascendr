@@ -1,0 +1,312 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ASCENDR — Complete Clickable Prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#4F46E5; --secondary:#2563EB; --accent:#10B981;
+  --warning:#F59E0B; --danger:#EF4444;
+  --bg:#F8FAFC; --card:#FFFFFF; --text:#0F172A; --text-2:#64748B; --border:#E2E8F0;
+  --r-sm:8px; --r-md:12px; --r-lg:16px; --r-xl:24px;
+  --shadow:0 1px 3px rgba(15,23,42,.08),0 1px 2px rgba(15,23,42,.04);
+  --shadow-lg:0 10px 30px rgba(15,23,42,.10);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',system-ui,sans-serif;background:#EEF1F6;color:var(--text);-webkit-font-smoothing:antialiased}
+.app-chrome{position:sticky;top:0;z-index:50;background:#0F172A;color:#fff;display:flex;align-items:center;gap:16px;padding:12px 20px;flex-wrap:wrap}
+.app-chrome .brand{font-weight:900;letter-spacing:.5px;font-size:18px}
+.app-chrome .brand span{color:#a5b4fc}
+.app-chrome .sub{color:#94a3b8;font-size:12px;font-weight:500}
+.controls{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.seg{display:flex;background:#1E293B;border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;color:#94a3b8;font-weight:600;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer;font-family:inherit}
+.seg button.on{background:var(--primary);color:#fff}
+.legend{max-width:1280px;margin:14px auto 0;font-size:12px;color:#64748b;padding:0 20px}
+.stage{padding:18px 20px 60px;display:flex;justify-content:center}
+.device{transition:width .25s ease}
+.device.desktop{width:100%;max-width:1280px}
+.device.mobile{width:390px;max-width:100%}
+.frame{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;box-shadow:var(--shadow-lg)}
+.device.mobile .frame{border-radius:32px;border:8px solid #0F172A}
+/* generic */
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:var(--r-sm);font-family:inherit;font-weight:600;font-size:14px;padding:11px 18px;cursor:pointer}
+.btn-sm{padding:7px 12px;font-size:13px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn-block{width:100%;justify-content:center}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px}
+.pill-accent{background:#ecfdf5;color:#047857}
+.pill-primary{background:#eef2ff;color:#4338ca}
+.pill-warn{background:#fffbeb;color:#b45309}
+.pill-danger{background:#fef2f2;color:#b91c1c}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-md);box-shadow:var(--shadow)}
+.muted{color:var(--text-2)}
+.avatar{width:36px;height:36px;border-radius:999px;background:linear-gradient(135deg,#6366f1,#2563eb);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:0 0 auto}
+.h-sec{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text-2)}
+.h-page{font-size:22px;font-weight:800;margin-bottom:2px}
+/* App shell */
+.shell{display:grid;grid-template-columns:240px 1fr;min-height:680px}
+.device.mobile .shell{grid-template-columns:1fr;min-height:720px}
+.sidebar{background:#fff;border-right:1px solid var(--border);padding:20px 14px;display:flex;flex-direction:column;gap:4px}
+.device.mobile .sidebar{display:none}
+.side-brand{font-weight:900;font-size:20px;padding:6px 10px 18px}
+.side-brand span{color:var(--primary)}
+.nav-item{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:var(--r-sm);color:var(--text-2);font-weight:600;font-size:14px;cursor:pointer}
+.nav-item:hover{background:var(--bg)}
+.nav-item .ic{width:18px;text-align:center}
+.nav-item.on{background:#eef2ff;color:var(--primary)}
+.main{display:flex;flex-direction:column;min-width:0}
+.topbar{display:flex;align-items:center;gap:14px;padding:14px 22px;background:#fff;border-bottom:1px solid var(--border)}
+.device.mobile .topbar{padding:14px 16px}
+.search{flex:1;max-width:420px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:9px 14px;color:var(--text-2);font-size:13px}
+.topbar .sp{margin-left:auto}
+.iconbtn{position:relative;width:38px;height:38px;border-radius:999px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
+.dot{position:absolute;top:6px;right:7px;width:8px;height:8px;border-radius:999px;background:var(--danger);border:2px solid #fff}
+.content{padding:22px;overflow:auto}
+.device.mobile .content{padding:16px 16px 86px}
+.mobnav{display:none}
+.device.mobile .mobnav{display:flex;position:sticky;bottom:0;background:#fff;border-top:1px solid var(--border);justify-content:space-around;padding:8px 6px}
+.mobnav button{border:0;background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:var(--text-2);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.mobnav button .ic{font-size:18px}
+.mobnav button.on{color:var(--primary)}
+.fab{width:46px;height:46px;border-radius:999px;background:var(--primary);color:#fff;font-size:24px;display:flex;align-items:center;justify-content:center;margin-top:-18px;box-shadow:var(--shadow-lg)}
+.grid{display:grid;gap:16px}
+.streak{background:linear-gradient(120deg,#4F46E5,#2563EB);color:#fff;border-radius:var(--r-md);padding:18px 20px;display:flex;align-items:center;gap:16px}
+.streak .flame{font-size:30px}
+.progress{height:8px;background:var(--border);border-radius:999px;overflow:hidden}
+.progress > i{display:block;height:100%;background:var(--accent)}
+.tabbar{display:flex;gap:4px;border-bottom:1px solid var(--border);overflow:auto}
+.tabbar button{border:0;background:transparent;font-family:inherit;font-weight:600;font-size:14px;color:var(--text-2);padding:12px 14px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent}
+.tabbar button.on{color:var(--primary);border-bottom-color:var(--primary)}
+.note{font-size:12px;color:var(--text-2);background:#fff;border:1px dashed var(--border);border-radius:var(--r-sm);padding:10px 12px}
+.row{display:flex;align-items:center;gap:12px}
+.list-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.list-item:last-child{border-bottom:0}
+.tag{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--bg);color:var(--text-2);border:1px solid var(--border)}
+.link{color:var(--primary);font-weight:600;cursor:pointer}
+.bubble-me{align-self:flex-end;background:var(--primary);color:#fff;padding:10px 14px;border-radius:14px 14px 4px 14px;max-width:80%;font-size:14px}
+.bubble-ai{background:var(--bg);border:1px solid var(--border);padding:12px 14px;border-radius:14px 14px 14px 4px;max-width:85%;font-size:14px}
+@media(max-width:520px){.stage{padding:12px 8px 50px}}
+</style>
+</head>
+<body>
+<div class="app-chrome">
+  <div class="brand">ASCEND<span>R</span></div>
+  <div class="sub">Complete Clickable Prototype · The Global AI Career Growth Ecosystem</div>
+  <div class="controls">
+    <div class="seg" id="deviceSeg">
+      <button data-d="desktop" class="on">Desktop</button>
+      <button data-d="mobile">Mobile</button>
+    </div>
+  </div>
+</div>
+<div class="legend">Click the left sidebar (or bottom bar on mobile) to move between sections. Inside Communities, Live, and AI, use the tabs to explore sub-screens. All data is illustrative. Toggle Desktop / Mobile for the responsive treatment.</div>
+<div class="stage">
+  <div class="device desktop" id="device">
+    <div class="frame"><div id="screens"></div></div>
+  </div>
+</div>
+<script>
+/* ============================================================= MOCK DATA ============================================================= */
+const ME={initials:'MM',name:'Moses M.'};
+const COMMUNITIES=[
+  {id:'lead',initials:'JL',name:"John's Leadership Community",members:'1,204',online:38,price:'$19/mo',grad:'#4F46E5,#10B981'},
+  {id:'pm',initials:'PM',name:'Product Managers Africa',members:'3,810',online:122,price:'Free',grad:'#2563EB,#4F46E5'},
+  {id:'design',initials:'UX',name:'UX & Product Design Guild',members:'2,140',online:64,price:'$12/mo',grad:'#10B981,#2563EB'},
+  {id:'found',initials:'FN',name:'Founders Network EA',members:'980',online:21,price:'$29/mo',grad:'#F59E0B,#EF4444'},
+];
+const COURSES=[
+  {t:'Leadership 101',by:'John Njoroge',mods:6,pct:60,tag:'Leadership'},
+  {t:'Product Strategy Foundations',by:'David M.',mods:8,pct:25,tag:'Product'},
+  {t:'Breaking into PM',by:'Aisha O.',mods:5,pct:0,tag:'Career'},
+  {t:'UX Research Essentials',by:'Lena K.',mods:7,pct:100,tag:'Design'},
+];
+const SESSIONS=[
+  {id:'s1',t:'Q&A with John — Scaling Teams',host:'JN',when:'Today · 6:00 PM',status:'live',going:214},
+  {id:'s2',t:'PM Portfolio Teardown',host:'DM',when:'Thu · 5:00 PM',status:'scheduled',going:88},
+  {id:'s3',t:'Founder AMA: Raising Pre-Seed',host:'FN',when:'Sat · 3:00 PM',status:'scheduled',going:142},
+  {id:'s4',t:'UX Critique Clinic',host:'LK',when:'Last week',status:'ended',going:60},
+];
+const PEOPLE=[
+  {i:'DM',n:'David M.',r:'PM Leadership · Nairobi',mutual:'12 mutual'},
+  {i:'AO',n:'Aisha O.',r:'Senior PM · Remote',mutual:'8 mutual'},
+  {i:'LK',n:'Lena K.',r:'UX Researcher · Kigali',mutual:'5 mutual'},
+  {i:'TS',n:'Tom S.',r:'Founder · Lagos',mutual:'3 mutual'},
+];
+const JOBS=[
+  {t:'Associate Product Manager',co:'Flutterwave',loc:'Remote',match:92,tags:['Product','Remote','Mid']},
+  {t:'UX Designer',co:'M-KOPA',loc:'Nairobi',match:84,tags:['Design','Hybrid']},
+  {t:'Founding Engineer',co:'Stealth Startup',loc:'Remote',match:77,tags:['Eng','Equity']},
+  {t:'Program Manager',co:'AWIVEST',loc:'Nairobi',match:71,tags:['Ops','Onsite']},
+];
+const MEMBERS=[
+  {i:'JN',n:'John Njoroge',role:'Owner',xp:'12,400'},
+  {i:'AO',n:'Aisha O.',role:'Moderator',xp:'8,820'},
+  {i:'DM',n:'David M.',role:'Member',xp:'6,640'},
+  {i:'MM',n:'Moses M. (You)',role:'Member',xp:'5,900'},
+  {i:'LK',n:'Lena K.',role:'Member',xp:'4,210'},
+];
+
+/* ============================================================= SHELL ============================================================= */
+const NAV=[['home','◳','Home'],['comm','◎','Communities'],['learn','▦','Learn'],['live','◉','Live'],['net','⚇','Networking'],['jobs','▤','Jobs'],['ai','✦','AI'],['profile','◍','Profile']];
+const MOB=[['home','◳','Home'],['comm','◎','Communities'],['add','＋',''],['ai','✦','AI'],['profile','◍','Profile']];
+function shell(active, contentHTML){
+  const side=NAV.map(n=>`<div class="nav-item ${n[0]===active?'on':''}" data-nav="${n[0]}"><span class="ic">${n[1]}</span>${n[2]}</div>`).join('');
+  const mob=MOB.map(m=>m[0]==='add'?`<button><span class="fab">＋</span></button>`:`<button class="${m[0]===active?'on':''}" data-nav="${m[0]}"><span class="ic">${m[1]}</span>${m[2]}</button>`).join('');
+  return `<div class="shell">
+    <aside class="sidebar"><div class="side-brand">ASCEND<span>R</span></div>${side}</aside>
+    <div class="main">
+      <div class="topbar"><div class="iconbtn">☰</div><div class="search">Search people, communities, courses…</div><div class="sp"></div><div class="iconbtn">✦</div><div class="iconbtn">🔔<span class="dot"></span></div><div class="avatar">${ME.initials}</div></div>
+      <div class="content">${contentHTML}</div>
+      <div class="mobnav">${mob}</div>
+    </div>
+  </div>`;
+}
+function tabs(items, active, group){
+  return `<div class="tabbar" data-tabgroup="${group}">`+items.map(t=>`<button class="${t[0]===active?'on':''}" data-tab="${t[0]}">${t[1]}</button>`).join('')+`</div>`;
+}
+
+/* ============================================================= TOP-LEVEL SCREENS ============================================================= */
+const SCREENS={};
+
+/* ---- HOME ---- */
+SCREENS.home=()=>shell('home',`
+  <div class="streak"><div class="flame">🔥</div><div style="flex:1"><div style="font-weight:800;font-size:18px">7-day streak — keep it alive!</div><div style="opacity:.9;font-size:13px">Post or finish a lesson today.</div></div><button class="btn" style="background:rgba(255,255,255,.2);color:#fff">Level 6 · 5,900 XP</button></div>
+  <div class="grid" data-cols="2fr 1fr" style="grid-template-columns:2fr 1fr;margin-top:18px">
+    <div class="grid">
+      <div class="card" style="padding:16px"><div class="row" style="justify-content:space-between"><div class="h-sec">Continue learning</div><span class="muted" style="font-size:12px">60%</span></div><div style="font-weight:700;margin:8px 0 6px">Leadership 101 · Lesson 4: Delegation</div><div class="progress"><i style="width:60%"></i></div><button class="btn btn-primary" style="margin-top:14px" data-nav="learn">▶ Resume lesson</button></div>
+      <div class="card" style="padding:16px"><div class="row" style="justify-content:space-between"><div class="h-sec">Next live session</div><span class="pill pill-danger">● LIVE now</span></div><div class="row" style="margin-top:10px"><div class="avatar">JN</div><div><div style="font-weight:700">Q&A with John — Scaling Teams</div><div class="muted" style="font-size:13px">214 watching</div></div><button class="btn btn-accent" style="margin-left:auto" data-nav="live">Join</button></div></div>
+      <div class="card" style="padding:16px"><div class="h-sec">Community feed</div>
+        <div class="list-item"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">AO</div><div><div style="font-size:14px"><b>Aisha</b> earned the <b>Closer</b> badge</div><div class="muted" style="font-size:12px">12 reactions · 2h</div></div></div>
+        <div class="list-item"><div class="avatar">JN</div><div><div style="font-size:14px"><b>John</b> posted in Leadership: "This week's challenge — write your delegation playbook…"</div><div class="muted" style="font-size:12px">8 comments · 4h</div></div></div>
+      </div>
+    </div>
+    <div class="grid">
+      <div class="card" style="padding:16px"><div class="h-sec">AI Career Coach</div><p class="muted" style="font-size:13px;margin:8px 0 12px">"Your next best step is 3 mock interviews."</p><button class="btn btn-ghost btn-block" data-nav="ai">✦ Ask your coach</button></div>
+      <div class="card" style="padding:16px"><div class="h-sec">Suggested communities</div>${COMMUNITIES.slice(1,3).map(c=>`<div class="row" style="margin-top:10px"><div class="avatar">${c.initials}</div><div style="font-size:13px"><b>${c.name}</b><div class="muted">${c.members} members</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto" data-nav="comm">View</button></div>`).join('')}</div>
+      <div class="card" style="padding:16px"><div class="h-sec">Top job match</div><div style="font-size:13px;margin-top:10px"><b>Associate PM · Flutterwave</b><div class="muted">Remote · 92% match</div></div><button class="btn btn-ghost btn-sm btn-block" style="margin-top:10px" data-nav="jobs">See all jobs</button></div>
+    </div>
+  </div>`);
+
+/* ---- COMMUNITIES (list) ---- */
+SCREENS.comm=()=>shell('comm',`
+  <div class="h-page">Communities</div><div class="muted" style="margin-bottom:16px">Your communities and ones to discover.</div>
+  <div class="grid" data-cols="1fr 1fr" style="grid-template-columns:1fr 1fr">
+    ${COMMUNITIES.map(c=>`<div class="card" style="overflow:hidden;cursor:pointer" data-open="community"><div style="height:70px;background:linear-gradient(120deg,${c.grad})"></div><div style="padding:14px"><div class="row"><div class="avatar" style="margin-top:-34px;border:3px solid #fff;width:48px;height:48px">${c.initials}</div><span class="pill ${c.price==='Free'?'pill-accent':'pill-primary'}" style="margin-left:auto">${c.price}</span></div><div style="font-weight:700;margin-top:6px">${c.name}</div><div class="muted" style="font-size:13px">${c.members} members · ${c.online} online</div><button class="btn btn-primary btn-sm btn-block" style="margin-top:12px" data-open="community">Open</button></div></div>`).join('')}
+  </div>`);
+
+/* ---- COMMUNITY DETAIL (6 sub-tabs) ---- */
+const COMM_TABS=[['disc','Discussion'],['courses','Courses'],['live','Live'],['members','Members'],['leader','Leaderboard'],['res','Event resources']];
+function communityDetail(tab='disc'){
+  const c=COMMUNITIES[0];
+  let body='';
+  if(tab==='disc') body=`<div class="grid" data-cols="200px 1fr" style="grid-template-columns:200px 1fr">
+    <div class="card" style="padding:12px;height:fit-content"><div class="h-sec">Channels</div><div class="nav-item on" style="padding:8px 10px"># general</div><div class="nav-item" style="padding:8px 10px"># introductions</div><div class="nav-item" style="padding:8px 10px"># career-advice <span class="dot" style="position:static;margin-left:auto"></span></div><div class="nav-item" style="padding:8px 10px">📣 announcements</div></div>
+    <div class="card" style="padding:14px;display:flex;flex-direction:column;min-height:380px">
+      <div class="list-item"><div class="avatar">JN</div><div><div style="font-size:14px"><b>John</b> <span class="muted" style="font-size:12px">· 9:02 AM</span></div><div style="font-size:14px">Morning all 👋 This week: delegation. Drop one task you'd struggle to hand off.</div><span class="pill pill-accent" style="margin-top:6px">👍 14</span></div></div>
+      <div class="list-item"><div class="avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">AO</div><div><div style="font-size:14px"><b>Aisha</b> <span class="muted" style="font-size:12px">· 9:14 AM</span></div><div style="font-size:14px">Reviewing every PR myself 😅 how do you let go?</div></div></div>
+      <div class="muted" style="font-size:12px;padding:6px 0">Aisha is typing…</div>
+      <div class="row" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border)"><div class="search" style="flex:1;max-width:none">Message #general…  @ · 😊 · 📎</div><button class="btn btn-primary">Send</button></div>
+    </div></div>`;
+  if(tab==='courses') body=`<div class="grid" data-cols="1fr 1fr" style="grid-template-columns:1fr 1fr">${COURSES.slice(0,2).map(courseCard).join('')}</div>`;
+  if(tab==='live') body=`<div class="grid">${SESSIONS.slice(0,2).map(sessionRow).join('')}</div>`;
+  if(tab==='members') body=`<div class="card" style="padding:8px 16px">${MEMBERS.map(m=>`<div class="list-item"><div class="avatar">${m.i}</div><div><b style="font-size:14px">${m.n}</b> ${m.role!=='Member'?`<span class="pill pill-primary">${m.role}</span>`:''}<div class="muted" style="font-size:12px">${m.xp} XP</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto" data-nav="net">Connect</button></div>`).join('')}</div>`;
+  if(tab==='leader') body=`<div class="card" style="padding:8px 16px">${MEMBERS.slice().sort((a,b)=>parseInt(b.xp.replace(/,/g,''))-parseInt(a.xp.replace(/,/g,''))).map((m,i)=>`<div class="list-item"><div style="font-size:18px;width:30px;text-align:center">${['🥇','🥈','🥉'][i]||('#'+(i+1))}</div><div class="avatar">${m.i}</div><div><b style="font-size:14px">${m.n}</b></div><b style="margin-left:auto">${m.xp} XP</b></div>`).join('')}</div>`;
+  if(tab==='res') body=`<div class="card" style="padding:8px 16px">${[['📄','Delegation Playbook (PDF)','2.1 MB'],['📊','Scaling Teams — Slides','5.4 MB'],['🎥','Last session recording','58 min'],['📝','Q&A summary + action items','AI generated']].map(r=>`<div class="list-item"><div style="font-size:22px">${r[0]}</div><div><b style="font-size:14px">${r[1]}</b><div class="muted" style="font-size:12px">${r[2]}</div></div><button class="btn btn-ghost btn-sm" style="margin-left:auto">Open</button></div>`).join('')}</div>`;
+  return shell('comm',`
+    <div class="link" data-nav="comm">← All communities</div>
+    <div class="card" style="overflow:hidden;margin-top:10px"><div style="height:90px;background:linear-gradient(120deg,${c.grad})"></div><div style="padding:14px 16px" class="row"><div class="avatar" style="width:52px;height:52px;font-size:17px;margin-top:-40px;border:3px solid #fff">${c.initials}</div><div><div style="font-weight:800;font-size:18px">${c.name}</div><div class="muted" style="font-size:13px">${c.members} members · ${c.online} online</div></div><button class="btn btn-primary" style="margin-left:auto">Subscribe · ${c.price}</button></div>${tabs(COMM_TABS,tab,'comm')}</div>
+    <div style="margin-top:16px">${body}</div>`);
+}
+
+/* ---- LEARN ---- */
+function courseCard(c){return `<div class="card" style="padding:16px;cursor:pointer" data-open="course"><span class="tag">${c.tag}</span><div style="font-weight:700;margin:8px 0 4px">${c.t}</div><div class="muted" style="font-size:13px">by ${c.by} · ${c.mods} modules</div><div class="progress" style="margin-top:12px"><i style="width:${c.pct}%"></i></div><div class="muted" style="font-size:12px;margin-top:6px">${c.pct===100?'✓ Completed':c.pct+'% complete'}</div><button class="btn btn-primary btn-sm btn-block" style="margin-top:12px" data-open="course">${c.pct===0?'Start':c.pct===100?'Review':'Resume'}</button></div>`;}
+SCREENS.learn=()=>shell('learn',`<div class="h-page">Learn</div><div class="muted" style="margin-bottom:16px">Courses and paths matched to your goal: Product Manager.</div><div class="grid" data-cols="1fr 1fr" style="grid-template-columns:1fr 1fr">${COURSES.map(courseCard).join('')}</div>`);
+SCREENS.course=()=>shell('learn',`<div class="link" data-nav="learn">← Back to Learn</div>
+  <div class="card" style="padding:18px;margin-top:10px"><span class="tag">Leadership</span><div class="h-page" style="margin-top:8px">Leadership 101</div><div class="muted">by John Njoroge · 6 modules · 60% complete</div><div class="progress" style="margin-top:12px"><i style="width:60%"></i></div><button class="btn btn-primary" style="margin-top:14px">▶ Resume Lesson 4</button></div>
+  <div class="card" style="padding:8px 16px;margin-top:16px"><div class="h-sec" style="padding:10px 0">Modules</div>${[['✓','1 · Foundations of Leadership','done'],['✓','2 · Communication','done'],['✓','3 · Delegation','done'],['▶','4 · Delegation in Practice','now'],['○','5 · Difficult Conversations',''],['○','6 · Leading at Scale','']].map(m=>`<div class="list-item"><span class="pill ${m[2]==='done'?'pill-accent':m[2]==='now'?'pill-primary':''}" style="${m[2]===''?'background:var(--border)':''}">${m[0]}</span><div style="font-size:14px;${m[2]==='now'?'font-weight:700;color:var(--primary)':''}">${m[1]}</div></div>`).join('')}</div>`);
+
+/* ---- LIVE (list) ---- */
+function sessionRow(s){const st=s.status==='live'?'pill-danger':s.status==='scheduled'?'pill-primary':'';return `<div class="card" style="padding:14px;cursor:pointer" data-open="${s.status==='ended'?'':'liveroom'}"><div class="row"><div class="avatar">${s.host}</div><div><b style="font-size:14px">${s.t}</b><div class="muted" style="font-size:12px">${s.when} · ${s.going} ${s.status==='ended'?'attended':'going'}</div></div><span class="pill ${st}" style="margin-left:auto">${s.status==='live'?'● LIVE':s.status}</span></div>${s.status!=='ended'?`<button class="btn ${s.status==='live'?'btn-accent':'btn-ghost'} btn-sm btn-block" style="margin-top:12px" data-open="liveroom">${s.status==='live'?'Join now':'Remind me'}</button>`:`<button class="btn btn-ghost btn-sm btn-block" style="margin-top:12px">Watch recording</button>`}</div>`;}
+SCREENS.live=()=>shell('live',`<div class="h-page">Live Sessions</div><div class="muted" style="margin-bottom:16px">Upcoming and live across your communities.</div><div class="h-sec" style="margin-bottom:8px">Live & upcoming</div><div class="grid" style="margin-bottom:20px">${SESSIONS.filter(s=>s.status!=='ended').map(sessionRow).join('')}</div><div class="h-sec" style="margin-bottom:8px">Past</div><div class="grid">${SESSIONS.filter(s=>s.status==='ended').map(sessionRow).join('')}</div>`);
+
+/* ---- LIVE ROOM (4 sub-tabs) ---- */
+const LIVE_TABS=[['qa','Live + Q&A'],['qonly','Q&A'],['chat','Chat'],['parts','Participants']];
+function liveRoom(tab='qa'){
+  const stage=`<div class="card" style="overflow:hidden"><div style="aspect-ratio:16/9;background:radial-gradient(circle at 50% 40%,#1e293b,#0f172a);color:#fff;display:flex;align-items:center;justify-content:center;position:relative"><div style="text-align:center"><div class="avatar" style="width:64px;height:64px;font-size:22px;margin:0 auto 10px">JN</div><div style="font-weight:700">John Njoroge</div><div style="opacity:.7;font-size:13px">Host · presenting</div></div><span class="pill pill-danger" style="position:absolute;top:12px;left:12px;background:var(--danger);color:#fff">● LIVE</span><span class="pill" style="position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.15);color:#fff">👁 214 watching</span></div><div class="row" style="padding:12px 14px;flex-wrap:wrap;gap:8px"><button class="btn btn-ghost btn-sm">✋ Raise hand</button><button class="btn btn-ghost btn-sm">👍 React</button><button class="btn btn-primary btn-sm" style="margin-left:auto">Submit a question</button></div></div>`;
+  const qaBoard=`<div class="card" style="padding:14px;display:flex;flex-direction:column;min-height:300px">
+    <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px"><div class="row" style="justify-content:space-between"><b style="font-size:14px">How do you delegate without losing quality?</b><span class="pill pill-warn">📌</span></div><div class="muted" style="font-size:12px;margin-top:4px">▲ 14 · Aisha · pinned</div></div>
+    <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px"><b style="font-size:14px">Handling underperformers remotely?</b><div class="muted" style="font-size:12px;margin-top:4px">▲ 9 · David · open</div></div>
+    <div style="padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);opacity:.7"><b style="font-size:14px">Best 1:1 cadence?</b><div class="muted" style="font-size:12px;margin-top:4px">▲ 5 · ✅ answered</div></div>
+    <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border)"><div class="search" style="max-width:none">Ask a question…</div><label class="muted" style="font-size:12px;display:flex;gap:6px;margin-top:8px"><input type="checkbox"> Ask anonymously</label></div></div>`;
+  let body='';
+  if(tab==='qa') body=`<div class="grid" data-cols="1fr 340px" style="grid-template-columns:1fr 340px">${stage}${qaBoard}</div>`;
+  if(tab==='qonly') body=qaBoard;
+  if(tab==='chat') body=`<div class="card" style="padding:14px;display:flex;flex-direction:column;min-height:320px"><div class="list-item"><div class="avatar">AO</div><div style="font-size:14px"><b>Aisha</b> Great point on outcomes vs tasks!</div></div><div class="list-item"><div class="avatar">DM</div><div style="font-size:14px"><b>David</b> 🔥🔥</div></div><div class="list-item"><div class="avatar">LK</div><div style="font-size:14px"><b>Lena</b> Can you share the playbook template?</div></div><div class="row" style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border)"><div class="search" style="flex:1;max-width:none">Message…</div><button class="btn btn-primary">Send</button></div></div>`;
+  if(tab==='parts') body=`<div class="card" style="padding:8px 16px">${[['JN','John Njoroge','Host'],['AO','Aisha O.',''],['DM','David M.',''],['MM','Moses M. (You)',''],['LK','Lena K.','']].map(p=>`<div class="list-item"><div class="avatar" style="position:relative">${p[0]}</div><b style="font-size:14px">${p[1]}</b>${p[2]?`<span class="pill pill-primary">${p[2]}</span>`:''}<span class="pill pill-accent" style="margin-left:auto">● online</span></div>`).join('')}<div class="muted" style="font-size:12px;padding:10px 0">+ 209 more watching</div></div>`;
+  return shell('live',`<div class="link" data-nav="live">← All sessions</div>
+    <div class="card" style="padding:14px;margin-top:10px"><div class="row"><span class="pill pill-danger">● LIVE now</span><span class="muted" style="font-size:13px">Today · 6:00 PM</span></div><div class="h-page" style="margin-top:6px">Q&A with John — Scaling Teams</div>${tabs(LIVE_TABS,tab,'live')}</div>
+    <div style="margin-top:16px">${body}</div>`);
+}
+
+/* ---- NETWORKING ---- */
+SCREENS.net=()=>shell('net',`<div class="h-page">Networking</div><div class="muted" style="margin-bottom:16px">People in your communities and suggested connections.</div>
+  <div class="grid" data-cols="1fr 320px" style="grid-template-columns:1fr 320px">
+    <div class="grid" data-cols="1fr 1fr" style="grid-template-columns:1fr 1fr">${PEOPLE.map(p=>`<div class="card" style="padding:16px;text-align:center"><div class="avatar" style="width:56px;height:56px;font-size:18px;margin:0 auto 8px">${p.i}</div><b>${p.n}</b><div class="muted" style="font-size:13px">${p.r}</div><div class="muted" style="font-size:12px;margin-top:2px">${p.mutual}</div><button class="btn btn-primary btn-sm btn-block" style="margin-top:12px">+ Connect</button></div>`).join('')}</div>
+    <div class="card" style="padding:14px;height:fit-content"><div class="h-sec">Messages</div><div class="list-item"><div class="avatar">DM</div><div style="font-size:13px"><b>David M.</b><div class="muted">Sure, happy to review your portfolio…</div></div></div><div class="list-item"><div class="avatar">AO</div><div style="font-size:13px"><b>Aisha O.</b><div class="muted">See you at the live session!</div></div></div><button class="btn btn-ghost btn-sm btn-block" style="margin-top:10px">Open inbox</button></div>
+  </div>`);
+
+/* ---- JOBS ---- */
+SCREENS.jobs=()=>shell('jobs',`<div class="h-page">Jobs</div><div class="muted" style="margin-bottom:14px">Matched to your goal & skills.</div>
+  <div class="row" style="gap:8px;flex-wrap:wrap;margin-bottom:16px"><span class="pill pill-primary">All</span><span class="tag">Product</span><span class="tag">Design</span><span class="tag">Remote</span><span class="tag">Nairobi</span></div>
+  <div class="grid" data-cols="1fr 1fr" style="grid-template-columns:1fr 1fr">${JOBS.map(j=>`<div class="card" style="padding:16px"><div class="row" style="justify-content:space-between"><div><b>${j.t}</b><div class="muted" style="font-size:13px">${j.co} · ${j.loc}</div></div><span class="pill pill-accent">${j.match}% match</span></div><div class="row" style="gap:6px;flex-wrap:wrap;margin-top:10px">${j.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div><div class="row" style="gap:8px;margin-top:14px"><button class="btn btn-primary btn-sm">Apply</button><button class="btn btn-ghost btn-sm">Save</button></div></div>`).join('')}</div>`);
+
+/* ---- AI HUB (4 tabs) ---- */
+const AI_TABS=[['coach','AI Coaches & Clone'],['plan','Career Plan'],['resume','Resume Review'],['interview','Interview Prep']];
+function aiHub(tab='coach'){
+  let body='';
+  if(tab==='coach') body=`<div class="grid" data-cols="1fr 280px" style="grid-template-columns:1fr 280px">
+    <div class="card" style="padding:0;display:flex;flex-direction:column;min-height:420px"><div class="row" style="padding:12px 16px;border-bottom:1px solid var(--border)"><div class="avatar" style="background:linear-gradient(135deg,#10b981,#059669)">✦</div><div><b>John's Mentor Clone</b> <span class="pill pill-primary">AI</span><div class="muted" style="font-size:12px">Grounded in John's content · cites sources</div></div></div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:14px;flex:1"><div class="bubble-me">What did John teach about delegation?</div><div class="bubble-ai">John recommends the <b>"decide–delegate–check"</b> loop: decide what only you can do, delegate the rest with clear outcomes, check at milestones — not constantly.<div style="margin-top:8px;font-size:12px;color:var(--secondary)">↳ Source: Module 3 · Lesson 2 — Delegation</div></div><div class="row" style="gap:8px;flex-wrap:wrap"><span class="pill pill-primary">Give me a checklist</span><span class="pill pill-primary">How do I start?</span></div></div>
+      <div class="row" style="padding:12px 14px;border-top:1px solid var(--border);gap:10px"><div class="search" style="flex:1;max-width:none">Ask the coach…</div><button class="btn btn-ghost btn-sm">Ask the real mentor</button><button class="btn btn-primary btn-sm">Send</button></div></div>
+    <div class="card" style="padding:14px;height:fit-content"><div class="h-sec">Pick a clone</div><div class="nav-item on" style="padding:8px 10px">✦ John's Clone</div><div class="nav-item" style="padding:8px 10px">✦ David's Clone</div><div class="nav-item" style="padding:8px 10px">✦ ASCENDR General Coach</div></div></div>`;
+  if(tab==='plan') body=`<div class="card" style="padding:18px"><div class="h-sec">Your goal</div><div style="font-weight:700;margin:6px 0 14px">Become a Product Manager in 6 months</div><div class="h-sec">Generated roadmap</div>${[['✓','Define goal & target role','done'],['✓','Join 2 PM communities','done'],['▶','Complete Leadership 101','now'],['○','Do 3 mock interviews',''],['○','Build a PM portfolio',''],['○','Apply to 5 matched roles','']].map(s=>`<div class="list-item"><span class="pill ${s[2]==='done'?'pill-accent':s[2]==='now'?'pill-primary':''}" style="${s[2]===''?'background:var(--border)':''}">${s[0]}</span><div style="font-size:14px;${s[2]==='now'?'font-weight:700;color:var(--primary)':''}">${s[1]}</div></div>`).join('')}<button class="btn btn-primary" style="margin-top:14px">✦ Regenerate plan</button></div>`;
+  if(tab==='resume') body=`<div class="grid" data-cols="1fr 1fr" style="grid-template-columns:1fr 1fr"><div class="card" style="padding:18px"><div class="h-sec">Your resume</div><div class="note" style="margin-top:10px">📎 Moses_Munyi_CV.pdf uploaded</div><div style="text-align:center;margin-top:18px"><div style="font-size:42px;font-weight:800;color:var(--accent)">78<span style="font-size:18px">/100</span></div><div class="muted" style="font-size:13px">Strong — a few quick wins</div></div></div><div class="card" style="padding:18px"><div class="h-sec">Fixes</div><div class="list-item"><span class="pill pill-accent">✓</span><div style="font-size:14px">Quantified 3 achievements</div></div><div class="list-item"><span class="pill pill-warn">!</span><div style="font-size:14px">Add metrics to "led team"</div></div><div class="list-item"><span class="pill pill-warn">!</span><div style="font-size:14px">Tailor summary to PM role</div></div><div class="note" style="margin-top:10px"><b>Rewrite:</b> "Led delivery of a member portal cutting onboarding time 40%."</div></div></div>`;
+  if(tab==='interview') body=`<div class="card" style="padding:18px"><div class="row" style="gap:8px;flex-wrap:wrap"><span class="pill pill-primary">Product Manager</span><span class="tag">Behavioral</span><span class="tag">Case</span></div><div style="font-weight:700;margin:16px 0 6px">Q: Tell me about a time you influenced without authority.</div><details style="margin-top:8px"><summary class="link">Reveal sample answer</summary><div class="bubble-ai" style="margin-top:10px;max-width:none">Use STAR: set the Situation, your Task, the specific Actions (data, alignment, stakeholder buy-in), and the measurable Result. Keep it under 2 minutes.</div></details><div class="row" style="gap:8px;margin-top:16px"><span class="pill pill-accent">Clear structure</span><span class="pill pill-warn">Add a metric</span></div><button class="btn btn-primary" style="margin-top:16px">Next question →</button></div>`;
+  return shell('ai',`<div class="h-page">AI Studio</div><div class="muted" style="margin-bottom:12px">Your coach, clones, and career tools.</div><div class="card" style="padding:0 8px">${tabs(AI_TABS,tab,'ai')}</div><div style="margin-top:16px">${body}</div>`);
+}
+
+/* ---- PROFILE ---- */
+SCREENS.profile=()=>shell('profile',`<div class="card" style="overflow:hidden"><div style="height:90px;background:linear-gradient(120deg,#4F46E5,#10B981)"></div><div style="padding:16px" class="row"><div class="avatar" style="width:64px;height:64px;font-size:22px;margin-top:-46px;border:3px solid #fff">MM</div><div><div style="font-weight:800;font-size:18px">Moses Munyi</div><div class="muted" style="font-size:13px">Aspiring Product Manager · Nairobi</div></div><button class="btn btn-ghost" style="margin-left:auto">Edit profile</button></div></div>
+  <div class="grid" data-cols="1fr 1fr 1fr" style="grid-template-columns:1fr 1fr 1fr;margin-top:16px"><div class="card" style="padding:16px;text-align:center"><div style="font-size:24px;font-weight:800">Level 6</div><div class="muted" style="font-size:12px">5,900 XP</div></div><div class="card" style="padding:16px;text-align:center"><div style="font-size:24px;font-weight:800">🔥 7</div><div class="muted" style="font-size:12px">day streak</div></div><div class="card" style="padding:16px;text-align:center"><div style="font-size:24px;font-weight:800">4</div><div class="muted" style="font-size:12px">communities</div></div></div>
+  <div class="card" style="padding:16px;margin-top:16px"><div class="h-sec">Badges</div><div class="row" style="gap:14px;margin-top:12px;flex-wrap:wrap">${[['🏅','Closer'],['🚀','Fast Start'],['💬','Conversationalist'],['🎓','Course Grad'],['🔒','Locked']].map(b=>`<div style="text-align:center;${b[1]==='Locked'?'opacity:.4':''}"><div style="font-size:30px">${b[0]}</div><div class="muted" style="font-size:11px">${b[1]}</div></div>`).join('')}</div></div>
+  <div class="card" style="padding:16px;margin-top:16px"><div class="h-sec">Recent activity</div><div class="list-item"><span class="pill pill-accent">+25 XP</span><div style="font-size:14px">Completed Lesson 3 · Leadership 101</div></div><div class="list-item"><span class="pill pill-accent">+5 XP</span><div style="font-size:14px">Asked a question in Live Q&A</div></div></div>`);
+
+/* ============================================================= ROUTER ============================================================= */
+const el=document.getElementById('screens'),device=document.getElementById('device');
+const state={view:'home',commTab:'disc',liveTab:'qa',aiTab:'coach'};
+function current(){
+  if(state.view==='community') return communityDetail(state.commTab);
+  if(state.view==='liveroom') return liveRoom(state.liveTab);
+  if(state.view==='ai') return aiHub(state.aiTab);
+  return (SCREENS[state.view]||SCREENS.home)();
+}
+function render(){el.innerHTML=`<div>${current()}</div>`;applyResponsive();}
+document.addEventListener('click',e=>{
+  const nav=e.target.closest('[data-nav]'); const open=e.target.closest('[data-open]'); const tab=e.target.closest('[data-tab]');
+  if(tab){const grp=tab.closest('[data-tabgroup]').dataset.tabgroup;if(grp==='comm')state.commTab=tab.dataset.tab;if(grp==='live')state.liveTab=tab.dataset.tab;if(grp==='ai')state.aiTab=tab.dataset.tab;render();return;}
+  if(open&&open.dataset.open){state.view=open.dataset.open;render();return;}
+  if(nav){state.view=nav.dataset.nav;render();return;}
+});
+const seg=document.getElementById('deviceSeg');
+seg.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;device.className='device '+b.dataset.d;seg.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));applyResponsive();});
+function applyResponsive(){const mobile=device.classList.contains('mobile');document.querySelectorAll('.grid[data-cols]').forEach(g=>{g.style.gridTemplateColumns=mobile?'1fr':g.dataset.cols;});}
+render();
+</script>
+</body>
+</html>
