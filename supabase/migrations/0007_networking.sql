@@ -77,5 +77,15 @@ create policy "dm_update_recipient" on direct_messages
   for update using (recipient_id = current_profile_id());
 
 -- ============ Realtime for DMs ============
-alter publication supabase_realtime add table direct_messages;
-alter publication supabase_realtime add table connections;
+-- Guarded so re-running doesn't error if the table is already published.
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='direct_messages') then
+    alter publication supabase_realtime add table direct_messages;
+  end if;
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='connections') then
+    alter publication supabase_realtime add table connections;
+  end if;
+end $$;

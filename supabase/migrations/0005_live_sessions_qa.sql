@@ -101,5 +101,15 @@ create policy "question_votes_delete_own" on question_votes
   for delete using (user_id = current_profile_id());
 
 -- ============ Realtime: stream questions + votes for the live board ============
-alter publication supabase_realtime add table live_questions;
-alter publication supabase_realtime add table question_votes;
+-- Guarded so re-running doesn't error if the table is already published.
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='live_questions') then
+    alter publication supabase_realtime add table live_questions;
+  end if;
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='question_votes') then
+    alter publication supabase_realtime add table question_votes;
+  end if;
+end $$;

@@ -53,6 +53,19 @@ create policy "post_comments_delete_own" on post_comments
   for delete using (author_id = current_profile_id());
 
 -- ============ Realtime for the feed ============
-alter publication supabase_realtime add table feed_posts;
-alter publication supabase_realtime add table post_reactions;
-alter publication supabase_realtime add table post_comments;
+-- Guarded so re-running doesn't error if the table is already published.
+do $$
+begin
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='feed_posts') then
+    alter publication supabase_realtime add table feed_posts;
+  end if;
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='post_reactions') then
+    alter publication supabase_realtime add table post_reactions;
+  end if;
+  if not exists (select 1 from pg_publication_tables
+                 where pubname='supabase_realtime' and schemaname='public' and tablename='post_comments') then
+    alter publication supabase_realtime add table post_comments;
+  end if;
+end $$;
