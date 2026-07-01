@@ -54,8 +54,13 @@ export default async function HomePage() {
     .eq("status", "active")
     .limit(6);
   const myCommunities = (myMemberships ?? [])
-    // @ts-expect-error supabase join shape
-    .map((m) => m.communities)
+    .map((m) => {
+      const raw = (m as unknown as { communities?: unknown }).communities;
+      return (Array.isArray(raw) ? raw[0] : raw) as
+        | { id: string; name: string; slug: string; member_count: number }
+        | null
+        | undefined;
+    })
     .filter(Boolean) as { id: string; name: string; slug: string; member_count: number }[];
   const communityIds = myCommunities.map((c) => c.id);
 
