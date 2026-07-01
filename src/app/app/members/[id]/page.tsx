@@ -140,8 +140,7 @@ export default async function MemberProfile({ params }: { params: { id: string }
         {memberships && memberships.length > 0 ? (
           <div className="mt-3 flex flex-col gap-2">
             {memberships.map((m, i) => {
-              // @ts-expect-error supabase join shape
-              const comm = m.communities;
+              const comm = (m as { communities?: { id: string; name: string; slug: string } | null }).communities;
               if (!comm) return null;
               return (
                 <Link
