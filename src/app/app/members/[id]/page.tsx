@@ -140,7 +140,11 @@ export default async function MemberProfile({ params }: { params: { id: string }
         {memberships && memberships.length > 0 ? (
           <div className="mt-3 flex flex-col gap-2">
             {memberships.map((m, i) => {
-              const comm = (m as { communities?: { id: string; name: string; slug: string } | null }).communities;
+              const raw = (m as unknown as { communities?: unknown }).communities;
+              const comm = (Array.isArray(raw) ? raw[0] : raw) as
+                | { id: string; name: string; slug: string }
+                | null
+                | undefined;
               if (!comm) return null;
               return (
                 <Link
