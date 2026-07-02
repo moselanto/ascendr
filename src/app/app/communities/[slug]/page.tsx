@@ -98,18 +98,25 @@ export default async function CommunityHome({
   if (isMember && (tab === "members" || tab === "leaderboard")) {
     const { data: rows } = await supabase
       .from("community_members")
-      .select("role, profiles:user_id(id, full_name, handle, avatar_url, xp)")
+      .select("user_id, role, profiles:user_id(id, full_name, handle, avatar_url, xp)")
       .eq("community_id", c.id)
       .eq("status", "active");
     members = (rows ?? [])
-      .map((r: any) => ({
-        id: r.profiles?.id,
-        role: r.role,
-        full_name: r.profiles?.full_name || "Member",
-        handle: r.profiles?.handle ?? null,
-        avatar_url: r.profiles?.avatar_url ?? null,
-        xp: r.profiles?.xp ?? 0,
-      }))
+      .map((r: any) => {
+        // Supabase can return the joined `profiles` as either an object or a
+        // single-element array depending on the relationship inference — handle both.
+        const p = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
+        return {
+          // Fall back to the row's user_id so a member never disappears even if
+          // the profile join is missing.
+          id: p?.id ?? r.user_id,
+          role: r.role,
+          full_name: p?.full_name || "Member",
+          handle: p?.handle ?? null,
+          avatar_url: p?.avatar_url ?? null,
+          xp: p?.xp ?? 0,
+        };
+      })
       .filter((m) => m.id);
     if (tab === "leaderboard") members.sort((a, b) => b.xp - a.xp);
   }
