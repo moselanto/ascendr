@@ -2,17 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import QaPanel, { type LiveQuestion } from "./QaPanel";
 
 export const dynamic = "force-dynamic";
-
-type QuestionRow = {
-  id: string;
-  body: string | null;
-  votes: number;
-  status: "open" | "answered" | "pinned";
-  anonymous: boolean;
-  created_at: string;
-};
 
 function initials(name: string | null | undefined) {
   return (
@@ -30,7 +22,7 @@ export default async function LiveRoomPage({
 }: {
   params: { slug: string; id: string };
 }) {
-  const profile = await getCurrentProfile();
+  await getCurrentProfile();
   const supabase = createClient();
 
   const { data: session } = await supabase
@@ -57,9 +49,10 @@ export default async function LiveRoomPage({
     .eq("session_id", params.id)
     .order("votes", { ascending: false });
 
-  const questions = (questionRows as QuestionRow[]) ?? [];
+  const questions = (questionRows as LiveQuestion[]) ?? [];
   const isLive = session.status === "live";
   const hostName = host?.full_name || "Host";
+  const communitySlug = community?.slug ?? params.slug;
 
   return (
     <div>
@@ -68,10 +61,7 @@ export default async function LiveRoomPage({
           Live
         </Link>
         <span>/</span>
-        <Link
-          href={`/app/communities/${community?.slug ?? params.slug}`}
-          className="hover:text-text"
-        >
+        <Link href={`/app/communities/${communitySlug}`} className="hover:text-text">
           {community?.name ?? "Community"}
         </Link>
       </div>
@@ -112,9 +102,9 @@ export default async function LiveRoomPage({
               <button className="rounded-sm border border-border bg-card px-4 py-2.5 text-small font-semibold">
                 📊 Poll
               </button>
-              <button className="ml-auto rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white">
-                Submit a question
-              </button>
+              <span className="ml-auto text-caption text-text-secondary">
+                Ask below to add to the Q&amp;A board
+              </span>
             </div>
           </div>
 
@@ -125,67 +115,9 @@ export default async function LiveRoomPage({
           </div>
         </div>
 
-        {/* Side rail */}
+        {/* Side rail — realtime Q&A */}
         <div className="flex flex-col rounded-lg border border-border bg-card p-3.5">
-          <div className="mb-2 flex gap-1 border-b border-border">
-            <button className="border-b-2 border-primary px-3.5 py-2.5 text-small font-semibold text-primary">
-              Q&amp;A
-            </button>
-            <button className="px-3.5 py-2.5 text-small font-semibold text-text-secondary">
-              Chat
-            </button>
-            <button className="px-3.5 py-2.5 text-small font-semibold text-text-secondary">
-              Participants
-            </button>
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {questions.length === 0 && (
-              <p className="py-6 text-center text-small text-text-secondary">
-                No questions yet. Be the first to ask.
-              </p>
-            )}
-            {questions.map((q) => {
-              const answered = q.status === "answered";
-              const pinned = q.status === "pinned";
-              return (
-                <div
-                  key={q.id}
-                  className={`rounded-sm border border-border p-2.5 ${answered ? "opacity-70" : ""}`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <b className="text-small">{q.body}</b>
-                    {pinned && (
-                      <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
-                        📌
-                      </span>
-                    )}
-                  </div>
-                  <div className="mt-1 text-caption text-text-secondary">
-                    ▲ {q.votes} ·{" "}
-                    {answered ? "✅ answered" : pinned ? "pinned" : "open"}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Ask box */}
-          <div className="mt-auto border-t border-border pt-3">
-            <form
-              action={`/app/communities/${community?.slug ?? params.slug}/live/${params.id}/ask`}
-              method="post"
-            >
-              <input
-                name="body"
-                placeholder="Ask a question…"
-                className="w-full rounded-full border border-border bg-bg px-4 py-2.5 text-small placeholder:text-text-secondary focus:outline-none focus:border-primary"
-              />
-              <label className="mt-2 flex items-center gap-1.5 text-caption text-text-secondary">
-                <input type="checkbox" name="anonymous" value="1" /> Ask anonymously
-              </label>
-            </form>
-          </div>
+          <QaPanel sessionId={params.id} slug={communitySlug} initialQuestions={questions} />
         </div>
       </div>
     </div>
