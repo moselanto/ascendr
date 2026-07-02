@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { setSessionStatus } from "../../../live-actions";
 import LiveQA from "./LiveQA";
+import LiveInteractions from "./LiveInteractions";
+import PollPanel, { type LivePoll } from "./PollPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,8 @@ export default async function LiveSessionRoom({
     );
   }
 
+  const canModerate = isMod || session.host_id === profile!.id;
+
   // Initial questions (most-voted first, then newest). Realtime keeps it fresh.
   const { data: questionRows } = await supabase
     .from("live_questions")
@@ -82,6 +86,26 @@ export default async function LiveSessionRoom({
       .eq("user_id", profile!.id)
       .in("question_id", ids);
     (myVotes ?? []).forEach((v) => votedSet.push(v.question_id));
+  }
+
+  // Polls for this session + the current user's votes.
+  const { data: pollRows } = await supabase
+    .from("live_polls")
+    .select("id, session_id, question, options, status, created_at")
+    .eq("session_id", session.id)
+    .order("created_at", { ascending: false });
+  const polls = (pollRows as LivePoll[]) ?? [];
+
+  let pollVotes: { poll_id: string; user_id: string; option_index: number }[] = [];
+  if (polls.length) {
+    const { data: voteRows } = await supabase
+      .from("live_poll_votes")
+      .select("poll_id, user_id, option_index")
+      .in(
+        "poll_id",
+        polls.map((p) => p.id)
+      );
+    pollVotes = voteRows ?? [];
   }
 
   const statusBadge =
@@ -125,7 +149,26 @@ export default async function LiveSessionRoom({
             )}
           </div>
         )}
+
+        {/* Live-room interactions: Raise hand + React (realtime broadcast) */}
+        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+          <LiveInteractions
+            sessionId={session.id}
+            meId={profile!.id}
+            meName={profile!.full_name || "Member"}
+          />
+        </div>
       </div>
+
+      {/* Polls */}
+      <PollPanel
+        sessionId={session.id}
+        slug={community.slug}
+        meId={profile!.id}
+        canModerate={canModerate}
+        initialPolls={polls}
+        initialVotes={pollVotes}
+      />
 
       <LiveQA
         sessionId={session.id}
