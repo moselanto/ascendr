@@ -161,3 +161,100 @@ export async function setQuestionStatus(
 
   return { status: next };
 }
+
+/** Confirm the caller is owner/moderator of the session's community, or its host. */
+async function canModerateSession(
+  supabase: ReturnType<typeof createClient>,
+  sessionId: string,
+  profileId: string
+): Promise<{ ok: boolean; communityId: string | null }> {
+  const { data: session } = await supabase
+    .from("live_sessions")
+    .select("host_id, community_id")
+    .eq("id", sessionId)
+    .maybeSingle();
+  if (!session) return { ok: false, communityId: null };
+  if (session.host_id === profileId) return { ok: true, communityId: session.community_id };
+  if (!session.community_id) return { ok: false, communityId: null };
+
+  const { data: membership } = await supabase
+    .from("community_members")
+    .select("role")
+    .eq("community_id", session.community_id)
+    .eq("user_id", profileId)
+    .maybeSingle();
+  const ok = membership?.role === "owner" || membership?.role === "moderator";
+  return { ok, communityId: session.community_id };
+}
+
+/**
+ * Host/mod control: create a poll in a live session. Options come in as
+ * option_0, option_1, … form fields. Streams to viewers via realtime.
+ */
+export async function createLivePoll(formData: FormData) {
+  const sessionId = String(formData.get("session_id") || "");
+  const question = String(formData.get("question") || "").trim();
+  if (!sessionId || !question) return;
+
+  const options: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const opt = String(formData.get(`option_${i}`) || "").trim();
+    if (opt) options.push(opt);
+  }
+  if (options.length < 2) return; // need at least two choices
+
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+
+  const supabase = createClient();
+  const { ok } = await canModerateSession(supabase, sessionId, profile.id);
+  if (!ok) return;
+
+  await supabase.from("live_polls").insert({
+    session_id: sessionId,
+    created_by: profile.id,
+    question,
+    options,
+    status: "open",
+  });
+}
+
+/** Cast (or change) the current user's vote on an open poll. */
+export async function voteLivePoll(
+  pollId: string,
+  optionIndex: number
+): Promise<{ voted: boolean }> {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+  if (!pollId || optionIndex < 0) return { voted: false };
+
+  const supabase = createClient();
+  // Upsert the user's single vote for this poll (PK is poll_id + user_id).
+  await supabase
+    .from("live_poll_votes")
+    .upsert(
+      { poll_id: pollId, user_id: profile.id, option_index: optionIndex },
+      { onConflict: "poll_id,user_id" }
+    );
+  return { voted: true };
+}
+
+/** Host/mod control: close a poll so no further votes are accepted. */
+export async function closeLivePoll(pollId: string) {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+  if (!pollId) return;
+
+  const supabase = createClient();
+  const { data: poll } = await supabase
+    .from("live_polls")
+    .select("session_id")
+    .eq("id", pollId)
+    .maybeSingle();
+  if (!poll) return;
+
+  const { ok } = await canModerateSession(supabase, poll.session_id, profile.id);
+  if (!ok) return;
+
+  await supabase.from("live_polls").update({ status: "closed" }).eq("id", pollId);
+}

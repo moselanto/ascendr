@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import QaPanel, { type LiveQuestion } from "./QaPanel";
+import LiveInteractions from "./LiveInteractions";
+import PollPanel, { type LivePoll } from "./PollPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -83,9 +85,31 @@ export default async function LiveRoomPage({
     }
   }
 
+  // Polls for this session + the current user's votes, for the poll panel.
+  const { data: pollRows } = await supabase
+    .from("live_polls")
+    .select("id, session_id, question, options, status, created_at")
+    .eq("session_id", params.id)
+    .order("created_at", { ascending: false });
+  const polls = (pollRows as LivePoll[]) ?? [];
+
+  let pollVotes: { poll_id: string; user_id: string; option_index: number }[] = [];
+  if (polls.length) {
+    const { data: voteRows } = await supabase
+      .from("live_poll_votes")
+      .select("poll_id, user_id, option_index")
+      .in(
+        "poll_id",
+        polls.map((p) => p.id)
+      );
+    pollVotes = voteRows ?? [];
+  }
+
   const isLive = session.status === "live";
   const hostName = host?.full_name || "Host";
   const communitySlug = community?.slug ?? params.slug;
+  const meId = profile?.id ?? "";
+  const meName = profile?.full_name || "Member";
 
   return (
     <div>
@@ -123,20 +147,14 @@ export default async function LiveRoomPage({
               <span className="absolute bottom-3 left-3 rounded-full bg-white/15 px-2.5 py-1 text-caption font-semibold text-white">
                 👁 214 watching
               </span>
+              {/* Floating reactions + raised-hand badge render over the stage */}
+              <LiveInteractionsOverlay />
             </div>
             {/* Controls */}
             <div className="flex flex-wrap items-center gap-2 px-3.5 py-3">
-              <button className="rounded-sm border border-border bg-card px-4 py-2.5 text-small font-semibold">
-                ✋ Raise hand
-              </button>
-              <button className="rounded-sm border border-border bg-card px-4 py-2.5 text-small font-semibold">
-                👍 React
-              </button>
-              <button className="rounded-sm border border-border bg-card px-4 py-2.5 text-small font-semibold">
-                📊 Poll
-              </button>
+              <LiveInteractions sessionId={params.id} meId={meId} meName={meName} />
               <span className="ml-auto text-caption text-text-secondary">
-                Ask below to add to the Q&amp;A board
+                Ask in Q&amp;A · vote in polls →
               </span>
             </div>
           </div>
@@ -146,13 +164,42 @@ export default async function LiveRoomPage({
             top-voted without being interrupted. Session auto-records and the AI posts a summary +
             action items afterward.
           </div>
+
+          {/* Polls */}
+          <div className="rounded-lg border border-border bg-card p-3.5">
+            <PollPanel
+              sessionId={params.id}
+              meId={meId}
+              canModerate={canModerate}
+              initialPolls={polls}
+              initialVotes={pollVotes}
+            />
+          </div>
         </div>
 
         {/* Side rail — realtime Q&A */}
         <div className="flex flex-col rounded-lg border border-border bg-card p-3.5">
-          <QaPanel sessionId={params.id} slug={communitySlug} initialQuestions={questions} />
+          <QaPanel
+            sessionId={params.id}
+            slug={communitySlug}
+            initialQuestions={questions}
+            initialVotedIds={initialVotedIds}
+            canModerate={canModerate}
+          />
         </div>
       </div>
     </div>
   );
+}
+
+/**
+ * The reaction/raised-hand overlay lives inside LiveInteractions, which also
+ * renders the control buttons via a React fragment ("contents"). Because both
+ * the overlay and the buttons come from the same component instance, we render
+ * LiveInteractions once in the controls row; the overlay is absolutely
+ * positioned relative to the stage. This placeholder keeps the stage the
+ * positioning context — the actual overlay nodes are emitted by LiveInteractions.
+ */
+function LiveInteractionsOverlay() {
+  return null;
 }

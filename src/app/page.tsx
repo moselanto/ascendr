@@ -158,6 +158,117 @@ export default function Home() {
             <span>Cited AI answers</span>
           </div>
         </div>
+
+        {/* Product preview — real ASCENDR UI rendered in HTML/CSS */}
+        <div className="relative mx-auto mt-4 max-w-5xl px-6 pb-20">
+          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-[0_20px_60px_rgba(15,23,42,.14)]">
+            {/* Browser chrome */}
+            <div className="flex items-center gap-2 border-b border-border bg-bg px-4 py-3">
+              <span className="h-3 w-3 rounded-full bg-[#EF4444]" />
+              <span className="h-3 w-3 rounded-full bg-[#F59E0B]" />
+              <span className="h-3 w-3 rounded-full bg-[#10B981]" />
+              <span className="ml-3 hidden rounded-full bg-card px-3 py-1 text-caption text-text-secondary ring-1 ring-border sm:block">
+                ascendr.app/app
+              </span>
+            </div>
+            {/* App shell */}
+            <div className="grid grid-cols-[180px_1fr] text-left md:grid-cols-[200px_1fr]">
+              {/* Sidebar */}
+              <aside className="hidden flex-col gap-1 border-r border-border bg-card p-3 sm:flex">
+                <div className="px-2 pb-3 pt-1 text-body font-black">
+                  ASCEND<span className="text-primary">R</span>
+                </div>
+                {[
+                  ["◳", "Home", true],
+                  ["◎", "Communities", false],
+                  ["▦", "Learn", false],
+                  ["◉", "Live", false],
+                  ["✦", "AI Coach", false],
+                ].map(([ic, label, on]) => (
+                  <div
+                    key={label as string}
+                    className={`flex items-center gap-2.5 rounded-sm px-2.5 py-2 text-caption font-semibold ${
+                      on ? "bg-[#eef2ff] text-primary" : "text-text-secondary"
+                    }`}
+                  >
+                    <span className="w-4 text-center">{ic}</span>
+                    {label}
+                  </div>
+                ))}
+              </aside>
+
+              {/* Content */}
+              <div className="p-4 md:p-5">
+                {/* Streak banner */}
+                <div className="flex items-center gap-3 rounded-md bg-gradient-to-br from-primary to-secondary px-4 py-3 text-white">
+                  <span className="text-h4">🔥</span>
+                  <div className="flex-1">
+                    <div className="text-small font-bold">7-day streak — keep it alive!</div>
+                    <div className="text-caption opacity-90">Post or finish a lesson today.</div>
+                  </div>
+                  <span className="rounded-full bg-white/20 px-2.5 py-1 text-caption font-semibold">
+                    +40 XP
+                  </span>
+                </div>
+
+                <div className="mt-4 grid gap-4 md:grid-cols-[1.6fr_1fr]">
+                  {/* Left column */}
+                  <div className="flex flex-col gap-4">
+                    <div className="rounded-md border border-border p-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-caption font-bold uppercase tracking-wide text-text-secondary">
+                          Continue learning
+                        </span>
+                        <span className="text-caption text-text-secondary">60%</span>
+                      </div>
+                      <div className="mt-2 text-small font-bold">
+                        Leadership 101 · Delegation
+                      </div>
+                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-border">
+                        <i className="block h-full bg-accent" style={{ width: "60%" }} />
+                      </div>
+                    </div>
+                    <div className="rounded-md border border-border p-4">
+                      <div className="text-caption font-bold uppercase tracking-wide text-text-secondary">
+                        Today&apos;s live session
+                      </div>
+                      <div className="mt-2 flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-caption font-bold text-white">
+                          JN
+                        </div>
+                        <div className="min-w-0">
+                          <div className="truncate text-small font-bold">Q&amp;A — Scaling Teams</div>
+                          <div className="text-caption text-text-secondary">214 going · 6:00 PM</div>
+                        </div>
+                        <span className="ml-auto rounded-full bg-[#fffbeb] px-2.5 py-1 text-caption font-semibold text-[#b45309]">
+                          Live soon
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right rail — AI coach */}
+                  <div className="rounded-md border border-border p-4">
+                    <div className="flex items-center gap-2">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-accent to-[#059669] text-caption font-bold text-white">
+                        ✦
+                      </span>
+                      <span className="text-caption font-bold uppercase tracking-wide text-text-secondary">
+                        AI Career Coach
+                      </span>
+                    </div>
+                    <p className="mt-3 text-small text-text">
+                      “Your next best step is <b>3 mock interviews</b> this week.”
+                    </p>
+                    <div className="mt-3 rounded-sm bg-[#eef2ff] px-3 py-2 text-caption text-primary">
+                      ↳ Cited from your roadmap
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* ===== Stats ===== */}
