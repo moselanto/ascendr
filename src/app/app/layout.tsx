@@ -9,6 +9,7 @@ const NAV = [
   { href: "/app", label: "Home", icon: "◳" },
   { href: "/app/feed", label: "Feed", icon: "▤" },
   { href: "/app/communities", label: "Communities", icon: "◎" },
+  { href: "/app/learn", label: "Learn", icon: "▦" },
   { href: "/app/live", label: "Live", icon: "◉" },
   { href: "/app/members", label: "Members", icon: "⚇" },
   { href: "/app/networking", label: "Networking", icon: "⇄" },
@@ -137,13 +138,20 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             ASCEND<span className="text-primary">R</span>
           </Link>
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-small text-text-secondary hidden sm:block">
+            <Link
+              href="/app/settings"
+              className="text-small text-text-secondary hidden sm:block hover:text-text"
+            >
               {profile.full_name || "Member"}
-            </span>
+            </Link>
             <NotificationBell meId={profile.id} initial={notifs ?? []} />
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold">
+            <Link
+              href="/app/settings"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold"
+              aria-label="Account settings"
+            >
               {initials}
-            </div>
+            </Link>
             <form action={signOut}>
               <button className="text-caption text-text-secondary hover:text-text">Sign out</button>
             </form>
