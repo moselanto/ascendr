@@ -1,3 +1,5 @@
+// ASCENDR AI Studio — coach, mentor clones, and career tools.
+// (redeploy marker: force production onto latest main)
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
