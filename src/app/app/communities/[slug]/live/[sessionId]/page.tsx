@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { setSessionStatus } from "../../../live-actions";
-import LiveQA from "./LiveQA";
+import LiveRail from "./LiveRail";
 import LiveInteractions from "./LiveInteractions";
 import LiveStage from "./LiveStage";
 import PollPanel, { type LivePoll } from "./PollPanel";
@@ -120,6 +120,14 @@ export default async function LiveSessionRoom({
     pollVotes = voteRows ?? [];
   }
 
+  // Initial side-chat messages for the Chat tab (realtime keeps it fresh).
+  const { data: chatRows } = await supabase
+    .from("live_chat_messages")
+    .select("id, body, author_id, created_at, profiles:author_id(full_name)")
+    .eq("session_id", session.id)
+    .order("created_at", { ascending: true })
+    .limit(200);
+
   const statusBadge =
     session.status === "live"
       ? "bg-danger/10 text-danger"
@@ -198,12 +206,13 @@ export default async function LiveSessionRoom({
 
         {/* Right rail: Q&A / Chat / Participants */}
         <div className="rounded-lg border border-border bg-card p-4">
-          <LiveQA
+          <LiveRail
             sessionId={session.id}
             communityId={community.id}
             slug={community.slug}
             meId={profile!.id}
             isMod={isMod}
+            isHost={isHost}
             initialQuestions={(questionRows ?? []).map((q) => ({
               id: q.id,
               body: q.body,
@@ -214,6 +223,14 @@ export default async function LiveSessionRoom({
               // @ts-expect-error supabase join shape
               author_name: q.profiles?.full_name ?? "Member",
               voted: votedSet.includes(q.id),
+            }))}
+            initialChat={(chatRows ?? []).map((m) => ({
+              id: m.id,
+              body: m.body,
+              author_id: m.author_id,
+              created_at: m.created_at,
+              // @ts-expect-error supabase join shape
+              author_name: m.profiles?.full_name ?? "Member",
             }))}
           />
         </div>
