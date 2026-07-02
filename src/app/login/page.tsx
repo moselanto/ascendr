@@ -1,4 +1,6 @@
 import { login, signup } from "./actions";
+import BrandSlideshow from "./BrandSlideshow";
+import PasswordField from "./PasswordField";
 
 export default function LoginPage({
   searchParams,
@@ -9,20 +11,24 @@ export default function LoginPage({
   return (
     <main className="min-h-screen grid md:grid-cols-2 bg-[#EEF1F6]">
       {/* Brand panel */}
-      <div className="hidden md:flex flex-col justify-end p-12 text-white bg-gradient-to-br from-primary to-dark-bg">
-        <div className="text-2xl font-black">
-          ASCEND<span className="text-[#a5b4fc]">R</span>
-        </div>
-        <h1 className="text-h2 mt-auto font-extrabold leading-tight max-w-md">
-          Accelerate your career with AI and world-class mentors
-        </h1>
-        <p className="text-[#c7d2fe] text-small mt-3 max-w-sm">
-          Learning, mentorship, community, and AI coaching — in one ecosystem.
-        </p>
-        <div className="flex gap-2 mt-8">
-          <i className="w-9 h-1.5 rounded-full bg-white/90" />
-          <i className="w-9 h-1.5 rounded-full bg-white/40" />
-          <i className="w-9 h-1.5 rounded-full bg-white/40" />
+      <div className="relative hidden md:flex flex-col justify-end overflow-hidden p-12 text-white">
+        {/* Hero photo */}
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('/login-hero.png')" }}
+          aria-hidden
+        />
+        {/* Brand gradient wash for legibility + on-brand color */}
+        <div
+          className="absolute inset-0 bg-gradient-to-br from-primary/85 to-dark-bg/95"
+          aria-hidden
+        />
+
+        <div className="relative flex h-full flex-col">
+          <div className="text-2xl font-black">
+            ASCEND<span className="text-[#a5b4fc]">R</span>
+          </div>
+          <BrandSlideshow />
         </div>
       </div>
 
@@ -55,6 +61,7 @@ export default function LoginPage({
               name="full_name"
               placeholder="Full name"
               required
+              autoComplete="name"
               className="rounded-sm border border-border px-4 py-3 text-body focus:outline-none focus:border-primary"
             />
           )}
@@ -63,15 +70,11 @@ export default function LoginPage({
             type="email"
             placeholder="Email"
             required
+            autoComplete="email"
             className="rounded-sm border border-border px-4 py-3 text-body focus:outline-none focus:border-primary"
           />
-          <input
-            name="password"
-            type="password"
-            placeholder="Password (min 6 chars)"
-            required
-            minLength={6}
-            className="rounded-sm border border-border px-4 py-3 text-body focus:outline-none focus:border-primary"
+          <PasswordField
+            autoComplete={isSignup ? "new-password" : "current-password"}
           />
           <button
             formAction={isSignup ? signup : login}
