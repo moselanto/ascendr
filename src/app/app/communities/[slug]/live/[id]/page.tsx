@@ -22,7 +22,7 @@ export default async function LiveRoomPage({
 }: {
   params: { slug: string; id: string };
 }) {
-  await getCurrentProfile();
+  const profile = await getCurrentProfile();
   const supabase = createClient();
 
   const { data: session } = await supabase
@@ -50,6 +50,22 @@ export default async function LiveRoomPage({
     .order("votes", { ascending: false });
 
   const questions = (questionRows as LiveQuestion[]) ?? [];
+
+  // The current user's existing upvotes among these questions, so the button
+  // renders in its correct pressed/unpressed state on first paint.
+  let initialVotedIds: string[] = [];
+  if (profile && questions.length) {
+    const { data: myVotes } = await supabase
+      .from("question_votes")
+      .select("question_id")
+      .eq("user_id", profile.id)
+      .in(
+        "question_id",
+        questions.map((q) => q.id)
+      );
+    initialVotedIds = (myVotes ?? []).map((v) => v.question_id);
+  }
+
   const isLive = session.status === "live";
   const hostName = host?.full_name || "Host";
   const communitySlug = community?.slug ?? params.slug;

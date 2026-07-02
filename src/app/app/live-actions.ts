@@ -56,3 +56,40 @@ export async function askLiveQuestion(formData: FormData) {
 
   if (slug) revalidatePath(`/app/communities/${slug}/live/${sessionId}`);
 }
+
+/**
+ * Toggle the current user's upvote on a question. Inserts a question_votes row
+ * (or removes it if already voted); a DB trigger keeps live_questions.votes in
+ * sync, and realtime streams the updated count to all viewers. Returns the
+ * user's new voted state so the client can update optimistically.
+ */
+export async function toggleQuestionVote(
+  questionId: string
+): Promise<{ voted: boolean }> {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+  if (!questionId) return { voted: false };
+
+  const supabase = createClient();
+
+  const { data: existing } = await supabase
+    .from("question_votes")
+    .select("question_id")
+    .eq("question_id", questionId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+
+  if (existing) {
+    await supabase
+      .from("question_votes")
+      .delete()
+      .eq("question_id", questionId)
+      .eq("user_id", profile.id);
+    return { voted: false };
+  }
+
+  await supabase
+    .from("question_votes")
+    .insert({ question_id: questionId, user_id: profile.id });
+  return { voted: true };
+}

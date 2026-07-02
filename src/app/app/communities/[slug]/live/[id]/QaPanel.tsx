@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { askLiveQuestion } from "@/app/app/live-actions";
+import { askLiveQuestion, toggleQuestionVote } from "@/app/app/live-actions";
 
 export type LiveQuestion = {
   id: string;
@@ -14,21 +14,25 @@ export type LiveQuestion = {
 };
 
 /**
- * Realtime Q&A panel for a live session. Renders the question board and the
- * ask box, subscribes to INSERT/UPDATE on live_questions for this session so
- * new questions from any account appear instantly, and submits new questions
- * through the askLiveQuestion server action.
+ * Realtime Q&A panel for a live session. Renders the question board, ask box,
+ * and per-question upvote. Subscribes to INSERT/UPDATE on live_questions for
+ * this session so new questions and vote counts update instantly for every
+ * viewer. Votes are toggled through the toggleQuestionVote server action; a DB
+ * trigger keeps live_questions.votes in sync, which streams back via realtime.
  */
 export default function QaPanel({
   sessionId,
   slug,
   initialQuestions,
+  initialVotedIds,
 }: {
   sessionId: string;
   slug: string;
   initialQuestions: LiveQuestion[];
+  initialVotedIds: string[];
 }) {
   const [questions, setQuestions] = useState<LiveQuestion[]>(initialQuestions);
+  const [votedIds, setVotedIds] = useState<Set<string>>(new Set(initialVotedIds));
   const [pending, startTransition] = useTransition();
   const formRef = useRef<HTMLFormElement>(null);
 
@@ -37,7 +41,11 @@ export default function QaPanel({
     setQuestions(initialQuestions);
   }, [initialQuestions]);
 
-  // Realtime: stream inserts + updates for this session's questions.
+  useEffect(() => {
+    setVotedIds(new Set(initialVotedIds));
+  }, [initialVotedIds]);
+
+  // Realtime: stream inserts + updates (incl. vote-count changes) for this session.
   useEffect(() => {
     const supabase = createClient();
     const channel = supabase
@@ -90,6 +98,37 @@ export default function QaPanel({
     });
   }
 
+  function handleVote(questionId: string) {
+    const alreadyVoted = votedIds.has(questionId);
+
+    // Optimistic update: flip voted state + adjust the count locally. The DB
+    // trigger + realtime UPDATE will reconcile the authoritative count shortly.
+    setVotedIds((prev) => {
+      const next = new Set(prev);
+      if (alreadyVoted) next.delete(questionId);
+      else next.add(questionId);
+      return next;
+    });
+    setQuestions((prev) =>
+      prev.map((q) =>
+        q.id === questionId
+          ? { ...q, votes: Math.max(0, q.votes + (alreadyVoted ? -1 : 1)) }
+          : q
+      )
+    );
+
+    startTransition(async () => {
+      const res = await toggleQuestionVote(questionId);
+      // Reconcile voted state with the server's truth.
+      setVotedIds((prev) => {
+        const next = new Set(prev);
+        if (res.voted) next.add(questionId);
+        else next.delete(questionId);
+        return next;
+      });
+    });
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex gap-1 border-b border-border">
@@ -111,21 +150,42 @@ export default function QaPanel({
         {sorted.map((q) => {
           const answered = q.status === "answered";
           const pinned = q.status === "pinned";
+          const voted = votedIds.has(q.id);
           return (
             <div
               key={q.id}
-              className={`rounded-sm border border-border p-2.5 ${answered ? "opacity-70" : ""}`}
+              className={`flex gap-2.5 rounded-sm border border-border p-2.5 ${
+                answered ? "opacity-70" : ""
+              }`}
             >
-              <div className="flex items-start justify-between gap-2">
-                <b className="text-small">{q.body}</b>
-                {pinned && (
-                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
-                    📌
-                  </span>
-                )}
-              </div>
-              <div className="mt-1 text-caption text-text-secondary">
-                ▲ {q.votes} · {answered ? "✅ answered" : pinned ? "pinned" : "open"}
+              {/* Upvote control */}
+              <button
+                type="button"
+                onClick={() => handleVote(q.id)}
+                aria-pressed={voted}
+                aria-label={voted ? "Remove upvote" : "Upvote question"}
+                className={`flex h-11 w-9 flex-none flex-col items-center justify-center rounded-sm border text-caption font-bold transition ${
+                  voted
+                    ? "border-primary bg-[#eef2ff] text-primary"
+                    : "border-border bg-card text-text-secondary hover:border-primary hover:text-primary"
+                }`}
+              >
+                <span className="text-[13px] leading-none">▲</span>
+                <span className="mt-0.5 leading-none">{q.votes}</span>
+              </button>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <b className="text-small">{q.body}</b>
+                  {pinned && (
+                    <span className="flex-none rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
+                      📌
+                    </span>
+                  )}
+                </div>
+                <div className="mt-1 text-caption text-text-secondary">
+                  {answered ? "✅ answered" : pinned ? "pinned" : "open"}
+                </div>
               </div>
             </div>
           );
