@@ -5,7 +5,19 @@ import { getCurrentProfile } from "@/lib/data";
 import { setSessionStatus } from "../../../live-actions";
 import LiveQA from "./LiveQA";
 import LiveInteractions from "./LiveInteractions";
+import LiveStage from "./LiveStage";
 import PollPanel, { type LivePoll } from "./PollPanel";
+
+function initialsOf(name: string) {
+  return (
+    name
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "H"
+  );
+}
 
 export const dynamic = "force-dynamic";
 
@@ -115,81 +127,109 @@ export default async function LiveSessionRoom({
       ? "bg-[#eef2ff] text-primary"
       : "bg-bg text-text-secondary";
 
+  const isHost = session.host_id === profile!.id;
+  const hostName = session.title ? "Host" : "Host";
+  const hostDisplay = profileHostName(session, profile!, isHost);
+
   return (
-    <div className="max-w-3xl mx-auto">
-      <Link href={`/app/communities/${community.slug}/live`} className="text-small text-primary font-semibold">
-        ← All sessions
-      </Link>
-
-      <div className="mt-3 rounded-md border border-border bg-card p-5">
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className={`rounded-full px-2.5 py-0.5 text-caption font-semibold capitalize ${statusBadge}`}>
-            {session.status === "live" ? "● Live now" : session.status}
-          </span>
-          <span className="text-caption text-text-secondary">{fmt(session.scheduled_at)}</span>
-        </div>
-        <h1 className="mt-2 text-h3 font-bold">{session.title}</h1>
-
-        {session.recording_url && session.status === "ended" && (
-          <a
-            href={session.recording_url}
-            className="mt-3 inline-block rounded-sm bg-primary px-4 py-2 text-small font-semibold text-white"
-          >
-            Watch the recording
-          </a>
-        )}
-
+    <div>
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <Link
+          href={`/app/communities/${community.slug}/live`}
+          className="text-small text-primary font-semibold"
+        >
+          ← All sessions
+        </Link>
+        <span className="text-caption text-text-secondary">
+          {community.name} · {fmt(session.scheduled_at)}
+        </span>
         {isMod && (
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+          <div className="ml-auto flex gap-2">
             {session.status !== "live" && (
-              <StatusButton sessionId={session.id} communityId={community.id} slug={community.slug} status="live" label="Go live" />
+              <StatusButton sessionId={session.id} communityId={community.id} slug={community.slug} status="live" label="Set live" />
             )}
             {session.status === "live" && (
               <StatusButton sessionId={session.id} communityId={community.id} slug={community.slug} status="ended" label="End session" />
             )}
           </div>
         )}
+      </div>
 
-        {/* Live-room interactions: Raise hand + React (realtime broadcast) */}
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
-          <LiveInteractions
+      <h1 className="mb-4 text-h3 font-bold">{session.title}</h1>
+
+      {/* Two-column live layout: stage + controls (left), Q&A/Chat rail (right) */}
+      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+        <div className="flex flex-col gap-4">
+          <LiveStage
+            hostName={hostDisplay}
+            hostInitials={initialsOf(hostDisplay)}
+            isHost={isHost}
+            isLive={session.status === "live"}
+            watching={0}
+          />
+
+          {/* Interaction controls row (matches the screenshot: Raise hand · React · Poll) */}
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3">
+            <LiveInteractions
+              sessionId={session.id}
+              meId={profile!.id}
+              meName={profile!.full_name || "Member"}
+            />
+          </div>
+
+          <p className="rounded-lg border border-dashed border-border bg-card px-4 py-3 text-caption text-text-secondary">
+            Q&amp;A is the heartbeat: members submit and upvote questions; the host answers the
+            top-voted without being interrupted. Sessions can record and the AI posts a summary +
+            action items afterward.
+          </p>
+
+          {/* Polls under the stage */}
+          <div className="rounded-lg border border-border bg-card p-4">
+            <PollPanel
+              sessionId={session.id}
+              slug={community.slug}
+              meId={profile!.id}
+              canModerate={canModerate}
+              initialPolls={polls}
+              initialVotes={pollVotes}
+            />
+          </div>
+        </div>
+
+        {/* Right rail: Q&A / Chat / Participants */}
+        <div className="rounded-lg border border-border bg-card p-4">
+          <LiveQA
             sessionId={session.id}
+            communityId={community.id}
+            slug={community.slug}
             meId={profile!.id}
-            meName={profile!.full_name || "Member"}
+            isMod={isMod}
+            initialQuestions={(questionRows ?? []).map((q) => ({
+              id: q.id,
+              body: q.body,
+              votes: q.votes ?? 0,
+              status: q.status,
+              anonymous: q.anonymous,
+              author_id: q.author_id,
+              // @ts-expect-error supabase join shape
+              author_name: q.profiles?.full_name ?? "Member",
+              voted: votedSet.includes(q.id),
+            }))}
           />
         </div>
       </div>
-
-      {/* Polls */}
-      <PollPanel
-        sessionId={session.id}
-        slug={community.slug}
-        meId={profile!.id}
-        canModerate={canModerate}
-        initialPolls={polls}
-        initialVotes={pollVotes}
-      />
-
-      <LiveQA
-        sessionId={session.id}
-        communityId={community.id}
-        slug={community.slug}
-        meId={profile!.id}
-        isMod={isMod}
-        initialQuestions={(questionRows ?? []).map((q) => ({
-          id: q.id,
-          body: q.body,
-          votes: q.votes ?? 0,
-          status: q.status,
-          anonymous: q.anonymous,
-          author_id: q.author_id,
-          // @ts-expect-error supabase join shape
-          author_name: q.profiles?.full_name ?? "Member",
-          voted: votedSet.includes(q.id),
-        }))}
-      />
     </div>
   );
+}
+
+/** Resolve a display name for the host (falls back to "Host"). */
+function profileHostName(
+  session: { host_id: string | null },
+  profile: { id: string; full_name: string | null },
+  isHost: boolean
+) {
+  if (isHost) return profile.full_name || "You";
+  return "Host";
 }
 
 function StatusButton({

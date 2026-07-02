@@ -35,18 +35,23 @@ export default function LoginPage({
       {/* Form panel */}
       <div className="flex flex-col bg-card md:justify-center">
         {/* Mobile hero banner — mirrors the desktop photo above the form */}
-        <div className="relative flex h-40 flex-col justify-end overflow-hidden p-6 text-white md:hidden">
+        <div className="relative flex h-56 flex-col justify-end overflow-hidden p-6 text-white md:hidden">
           <div
             className="absolute inset-0 bg-cover bg-center"
             style={{ backgroundImage: "url('/login-hero.png')" }}
             aria-hidden
           />
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/85 to-dark-bg/95" aria-hidden />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/95 via-primary/70 to-primary/40" aria-hidden />
           <div className="relative">
-            <div className="text-xl font-black">
+            <div className="text-2xl font-black">
               ASCEND<span className="text-[#a5b4fc]">R</span>
             </div>
-            <p className="mt-1 text-caption text-[#c7d2fe]">Rise. Learn. Connect. Lead.</p>
+            <p className="mt-1.5 text-small font-semibold text-[#c7d2fe]">
+              Rise. Learn. Connect. Lead.
+            </p>
+            <p className="mt-0.5 text-caption text-white/70">
+              Your global AI career growth ecosystem
+            </p>
           </div>
         </div>
 

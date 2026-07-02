@@ -157,20 +157,26 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </form>
           </div>
         </header>
-        <main className="p-5 md:p-6">{children}</main>
-        <nav className="md:hidden sticky bottom-0 flex justify-around border-t border-border bg-card py-2">
+        <main className="p-5 pr-16 md:p-6 md:pr-6">{children}</main>
+        {/* Mobile nav — vertical rail down the right edge, top to bottom */}
+        <nav
+          className="md:hidden fixed right-0 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-l-lg border border-r-0 border-border bg-card/95 py-2 pl-1.5 pr-1 shadow-[0_4px_20px_rgba(15,23,42,.12)] backdrop-blur"
+          aria-label="Primary"
+        >
           {NAV.map((n) => {
             const showDot = n.href === "/app/communities" && communitiesUnread;
             return (
               <Link
                 key={n.href}
                 href={n.href}
-                className="relative flex flex-col items-center gap-0.5 text-caption font-semibold text-text-secondary"
+                title={n.label}
+                aria-label={n.label}
+                className="relative flex h-11 w-11 flex-col items-center justify-center gap-0.5 rounded-md text-text-secondary hover:bg-bg active:bg-[#eef2ff]"
               >
-                <span className="text-lg">{n.icon}</span>
-                {n.label}
+                <span className="text-lg leading-none">{n.icon}</span>
+                <span className="text-[9px] font-semibold leading-none">{n.label}</span>
                 {showDot && (
-                  <span className="absolute -top-0.5 right-2 h-2 w-2 rounded-full bg-danger" aria-label="Unread activity" />
+                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-danger" aria-label="Unread activity" />
                 )}
               </Link>
             );
