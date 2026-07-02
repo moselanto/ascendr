@@ -77,6 +77,14 @@ npm run dev
 
 That's it — every push to `main` now auto-deploys to Vercel, backed by your independent Supabase database.
 
+### Database migrations
+
+Apply migrations in order in the Supabase SQL Editor:
+
+- `0001_phase1_foundation.sql` … `0007_networking.sql` — foundation through networking
+- `0008_onboarding_goals.sql` — onboarding career-goal fields on `profiles`
+- `0009_live_polls.sql` — live-session polls (`live_polls`, `live_poll_votes`)
+
 ---
 
 ## Roadmap
