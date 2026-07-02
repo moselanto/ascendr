@@ -66,6 +66,23 @@ export default async function LiveRoomPage({
     initialVotedIds = (myVotes ?? []).map((v) => v.question_id);
   }
 
+  // Can the current user moderate this session's Q&A? True for the session
+  // host, or an owner/moderator of the community. Drives the host controls.
+  let canModerate = false;
+  if (profile) {
+    if (session.host_id === profile.id) {
+      canModerate = true;
+    } else if (session.community_id) {
+      const { data: membership } = await supabase
+        .from("community_members")
+        .select("role")
+        .eq("community_id", session.community_id)
+        .eq("user_id", profile.id)
+        .maybeSingle();
+      canModerate = membership?.role === "owner" || membership?.role === "moderator";
+    }
+  }
+
   const isLive = session.status === "live";
   const hostName = host?.full_name || "Host";
   const communitySlug = community?.slug ?? params.slug;

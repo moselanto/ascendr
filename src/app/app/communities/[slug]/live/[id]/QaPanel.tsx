@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { askLiveQuestion, toggleQuestionVote } from "@/app/app/live-actions";
+import {
+  askLiveQuestion,
+  toggleQuestionVote,
+  setQuestionStatus,
+} from "@/app/app/live-actions";
 
 export type LiveQuestion = {
   id: string;
@@ -25,11 +29,13 @@ export default function QaPanel({
   slug,
   initialQuestions,
   initialVotedIds,
+  canModerate = false,
 }: {
   sessionId: string;
   slug: string;
   initialQuestions: LiveQuestion[];
   initialVotedIds: string[];
+  canModerate?: boolean;
 }) {
   const [questions, setQuestions] = useState<LiveQuestion[]>(initialQuestions);
   const [votedIds, setVotedIds] = useState<Set<string>>(new Set(initialVotedIds));
@@ -95,6 +101,23 @@ export default function QaPanel({
     startTransition(async () => {
       await askLiveQuestion(formData);
       formRef.current?.reset();
+    });
+  }
+
+  function handleStatus(questionId: string, status: "open" | "answered" | "pinned") {
+    // Optimistic: update this question's status locally. If pinning, unpin any
+    // other pinned question so the board never shows two pins. Realtime UPDATE
+    // events reconcile the authoritative state for all viewers.
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) return { ...q, status };
+        if (status === "pinned" && q.status === "pinned") return { ...q, status: "open" };
+        return q;
+      })
+    );
+
+    startTransition(async () => {
+      await setQuestionStatus(questionId, status);
     });
   }
 
@@ -186,6 +209,33 @@ export default function QaPanel({
                 <div className="mt-1 text-caption text-text-secondary">
                   {answered ? "✅ answered" : pinned ? "pinned" : "open"}
                 </div>
+
+                {canModerate && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handleStatus(q.id, pinned ? "open" : "pinned")}
+                      className={`rounded-full border px-2.5 py-0.5 text-caption font-semibold transition ${
+                        pinned
+                          ? "border-primary bg-[#eef2ff] text-primary"
+                          : "border-border text-text-secondary hover:border-primary hover:text-primary"
+                      }`}
+                    >
+                      {pinned ? "📌 Unpin" : "📌 Pin"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleStatus(q.id, answered ? "open" : "answered")}
+                      className={`rounded-full border px-2.5 py-0.5 text-caption font-semibold transition ${
+                        answered
+                          ? "border-accent bg-[#ecfdf5] text-[#047857]"
+                          : "border-border text-text-secondary hover:border-accent hover:text-[#047857]"
+                      }`}
+                    >
+                      {answered ? "↺ Reopen" : "✅ Mark answered"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );

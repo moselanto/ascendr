@@ -93,3 +93,71 @@ export async function toggleQuestionVote(
     .insert({ question_id: questionId, user_id: profile.id });
   return { voted: true };
 }
+
+const VALID_STATUS = ["open", "answered", "pinned"] as const;
+type QuestionStatus = (typeof VALID_STATUS)[number];
+
+/**
+ * Host/mod control: set a question's status (open / answered / pinned).
+ * RLS (live_questions_update) only permits community mods to update, so a
+ * non-mod call is a safe no-op at the database layer; we also verify server
+ * side and pin at most one question at a time. The status change streams to
+ * all viewers via the existing realtime UPDATE subscription. Returns the new
+ * status so the client can reconcile.
+ */
+export async function setQuestionStatus(
+  questionId: string,
+  status: string
+): Promise<{ status: QuestionStatus | null }> {
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+  if (!questionId || !(VALID_STATUS as readonly string[]).includes(status)) {
+    return { status: null };
+  }
+  const next = status as QuestionStatus;
+
+  const supabase = createClient();
+
+  // Resolve the question's session + community, and confirm the caller is a
+  // moderator/owner of that community before attempting the write.
+  const { data: q } = await supabase
+    .from("live_questions")
+    .select("id, session_id, live_sessions:session_id(community_id)")
+    .eq("id", questionId)
+    .maybeSingle();
+  if (!q) return { status: null };
+
+  const sessionRel = (Array.isArray(q.live_sessions) ? q.live_sessions[0] : q.live_sessions) as
+    | { community_id: string }
+    | null
+    | undefined;
+  const communityId = sessionRel?.community_id;
+  if (!communityId) return { status: null };
+
+  const { data: membership } = await supabase
+    .from("community_members")
+    .select("role")
+    .eq("community_id", communityId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  const canModerate = membership?.role === "owner" || membership?.role === "moderator";
+  if (!canModerate) return { status: null };
+
+  // Only one pinned question per session: unpin any others first.
+  if (next === "pinned") {
+    await supabase
+      .from("live_questions")
+      .update({ status: "open" })
+      .eq("session_id", q.session_id)
+      .eq("status", "pinned")
+      .neq("id", questionId);
+  }
+
+  const { error } = await supabase
+    .from("live_questions")
+    .update({ status: next })
+    .eq("id", questionId);
+  if (error) return { status: null };
+
+  return { status: next };
+}
