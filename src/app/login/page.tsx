@@ -12,9 +12,9 @@ export default function LoginPage({
     <main className="min-h-screen grid md:grid-cols-2 bg-[#EEF1F6]">
       {/* Brand panel */}
       <div className="relative hidden md:flex flex-col justify-end overflow-hidden p-12 text-white">
-        {/* Hero photo */}
+        {/* Hero photo — bg-top keeps faces/heads in frame, never cropped */}
         <div
-          className="absolute inset-0 bg-cover bg-center"
+          className="absolute inset-0 bg-cover bg-top"
           style={{ backgroundImage: "url('/login-hero.png')" }}
           aria-hidden
         />
@@ -34,14 +34,15 @@ export default function LoginPage({
 
       {/* Form panel */}
       <div className="flex flex-col bg-card md:justify-center">
-        {/* Mobile hero banner — mirrors the desktop photo above the form */}
-        <div className="relative flex h-56 flex-col justify-end overflow-hidden p-6 text-white md:hidden">
+        {/* Mobile hero banner — mirrors the desktop photo above the form.
+            bg-top keeps heads/faces in frame so nobody is cropped. */}
+        <div className="relative flex h-52 flex-col justify-end overflow-hidden p-6 text-white md:hidden">
           <div
-            className="absolute inset-0 bg-cover bg-center"
+            className="absolute inset-0 bg-cover bg-top"
             style={{ backgroundImage: "url('/login-hero.png')" }}
             aria-hidden
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/95 via-primary/70 to-primary/40" aria-hidden />
+          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/95 via-primary/55 to-transparent" aria-hidden />
           <div className="relative">
             <div className="text-2xl font-black">
               ASCEND<span className="text-[#a5b4fc]">R</span>

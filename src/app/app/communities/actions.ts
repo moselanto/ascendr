@@ -116,6 +116,46 @@ export async function createChannel(formData: FormData) {
   redirect(`/app/communities/${slug}${created ? `?channel=${created.id}` : ""}`);
 }
 
+/** Delete a channel (mods/owner only). Refuses to delete the last channel. */
+export async function deleteChannel(formData: FormData) {
+  const communityId = String(formData.get("community_id"));
+  const slug = String(formData.get("slug"));
+  const channelId = String(formData.get("channel_id"));
+  if (!channelId) return;
+
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+
+  const supabase = createClient();
+  const { data: membership } = await supabase
+    .from("community_members")
+    .select("role")
+    .eq("community_id", communityId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  if (!membership || !["owner", "moderator"].includes(membership.role)) {
+    redirect(`/app/communities/${slug}`);
+  }
+
+  // Never delete the community's last channel — a community needs at least one.
+  const { count } = await supabase
+    .from("community_channels")
+    .select("id", { count: "exact", head: true })
+    .eq("community_id", communityId);
+  if ((count ?? 0) <= 1) {
+    redirect(`/app/communities/${slug}?error=A community needs at least one channel`);
+  }
+
+  await supabase
+    .from("community_channels")
+    .delete()
+    .eq("id", channelId)
+    .eq("community_id", communityId);
+
+  revalidatePath(`/app/communities/${slug}`);
+  redirect(`/app/communities/${slug}`);
+}
+
 /** Join a public community instantly. Awards +15 XP. */
 export async function joinCommunity(formData: FormData) {
   const communityId = String(formData.get("community_id"));

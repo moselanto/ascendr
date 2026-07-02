@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
-import { joinCommunity, createChannel } from "../actions";
+import { joinCommunity, createChannel, deleteChannel } from "../actions";
 import ChannelChat from "./ChannelChat";
 import { AskMentorPanel } from "@/components/mentor/AskMentorPanel";
 import type { ChannelMessage, Community } from "@/lib/types";
@@ -11,12 +11,23 @@ export const dynamic = "force-dynamic";
 
 type Channel = { id: string; name: string; kind: string; position: number };
 
+// Top-level tabs shown on every community. `discussion` is the default view.
+const TABS: { key: string; label: string; icon: string }[] = [
+  { key: "discussion", label: "Discussion", icon: "💬" },
+  { key: "courses", label: "Courses", icon: "🎓" },
+  { key: "live", label: "Live", icon: "◉" },
+  { key: "members", label: "Members", icon: "👥" },
+  { key: "leaderboard", label: "Leaderboard", icon: "🏆" },
+  { key: "events", label: "Events", icon: "📅" },
+  { key: "resources", label: "Resources", icon: "📎" },
+];
+
 export default async function CommunityHome({
   params,
   searchParams,
 }: {
   params: { slug: string };
-  searchParams: { channel?: string };
+  searchParams: { channel?: string; tab?: string };
 }) {
   const profile = await getCurrentProfile();
   const supabase = createClient();
@@ -37,6 +48,8 @@ export default async function CommunityHome({
     .maybeSingle();
   const isMember = membership?.status === "active";
   const isMod = membership?.role === "owner" || membership?.role === "moderator";
+
+  const tab = TABS.some((t) => t.key === searchParams.tab) ? searchParams.tab! : "discussion";
 
   // Load ALL channels for this community.
   const { data: channelRows } = await supabase
@@ -80,9 +93,30 @@ export default async function CommunityHome({
     });
   }
 
+  // Members list + leaderboard (members ordered by XP) — loaded for those tabs.
+  let members: { id: string; role: string; full_name: string; handle: string | null; avatar_url: string | null; xp: number }[] = [];
+  if (isMember && (tab === "members" || tab === "leaderboard")) {
+    const { data: rows } = await supabase
+      .from("community_members")
+      .select("role, profiles:user_id(id, full_name, handle, avatar_url, xp)")
+      .eq("community_id", c.id)
+      .eq("status", "active");
+    members = (rows ?? [])
+      .map((r: any) => ({
+        id: r.profiles?.id,
+        role: r.role,
+        full_name: r.profiles?.full_name || "Member",
+        handle: r.profiles?.handle ?? null,
+        avatar_url: r.profiles?.avatar_url ?? null,
+        xp: r.profiles?.xp ?? 0,
+      }))
+      .filter((m) => m.id);
+    if (tab === "leaderboard") members.sort((a, b) => b.xp - a.xp);
+  }
+
   // Messages + reactions for the active channel.
   let messages: (ChannelMessage & { reactions?: { emoji: string; user_id: string }[] })[] = [];
-  if (isMember && active) {
+  if (isMember && active && tab === "discussion") {
     const { data } = await supabase
       .from("channel_messages")
       .select("*, profiles:author_id(full_name, handle, avatar_url)")
@@ -105,8 +139,10 @@ export default async function CommunityHome({
     }));
   }
 
+  const tabHref = (key: string) => `/app/communities/${c.slug}?tab=${key}`;
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="rounded-md border border-border bg-card overflow-hidden">
         <div className="h-24 bg-gradient-to-br from-primary to-accent" />
@@ -130,84 +166,195 @@ export default async function CommunityHome({
           )}
         </div>
         {c.description && <p className="px-5 pb-5 text-body text-text-secondary">{c.description}</p>}
+
+        {/* Top tab bar */}
+        {isMember && (
+          <nav className="flex gap-1 overflow-x-auto border-t border-border px-3">
+            {TABS.map((t) => {
+              const activeTab = t.key === tab;
+              const href = t.key === "live" ? `/app/communities/${c.slug}/live` : tabHref(t.key);
+              return (
+                <Link
+                  key={t.key}
+                  href={href}
+                  className={`flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-small font-semibold ${
+                    activeTab
+                      ? "border-primary text-primary"
+                      : "border-transparent text-text-secondary hover:text-text-primary"
+                  }`}
+                >
+                  <span aria-hidden>{t.icon}</span>
+                  {t.label}
+                </Link>
+              );
+            })}
+          </nav>
+        )}
       </div>
 
-      {!isMember || !active ? (
+      {!isMember ? (
         <div className="mt-5 rounded-md border border-border bg-card p-10 text-center text-text-secondary">
           Join the community to read and post in its channels.
         </div>
-      ) : (
-        <div className="mt-5 grid gap-4 md:grid-cols-[200px_1fr]">
-          {/* Channel sidebar */}
-          <div className="rounded-md border border-border bg-card p-3 h-fit">
-            <div className="text-caption font-bold uppercase tracking-wide text-text-secondary px-2 pb-1">
-              Channels
-            </div>
-            <div className="flex flex-col gap-0.5">
-              {channels.map((ch) => (
+      ) : tab === "discussion" ? (
+        !active ? (
+          <div className="mt-5 rounded-md border border-border bg-card p-10 text-center text-text-secondary">
+            No channels yet.
+          </div>
+        ) : (
+          <div className="mt-5 grid gap-4 md:grid-cols-[200px_1fr]">
+            {/* Channel sidebar */}
+            <div className="rounded-md border border-border bg-card p-3 h-fit">
+              <div className="text-caption font-bold uppercase tracking-wide text-text-secondary px-2 pb-1">
+                Channels
+              </div>
+              <div className="flex flex-col gap-0.5">
+                {channels.map((ch) => (
+                  <div
+                    key={ch.id}
+                    className={`group flex items-center gap-2 rounded-sm px-2 py-2 text-small font-semibold ${
+                      ch.id === active.id ? "bg-[#eef2ff] text-primary" : "text-text-secondary hover:bg-bg"
+                    }`}
+                  >
+                    <Link href={`/app/communities/${c.slug}?channel=${ch.id}`} className="flex-1">
+                      # {ch.name}
+                    </Link>
+                    {unreadChannels.has(ch.id) && ch.id !== active.id && (
+                      <span className="h-2 w-2 rounded-full bg-danger" />
+                    )}
+                    {isMod && channels.length > 1 && (
+                      <form action={deleteChannel} className="opacity-0 group-hover:opacity-100">
+                        <input type="hidden" name="community_id" value={c.id} />
+                        <input type="hidden" name="slug" value={c.slug} />
+                        <input type="hidden" name="channel_id" value={ch.id} />
+                        <button
+                          title={`Delete #${ch.name}`}
+                          className="text-caption text-text-secondary hover:text-danger"
+                        >
+                          ✕
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {isMod && (
+                <form action={createChannel} className="mt-3 border-t border-border pt-3">
+                  <input type="hidden" name="community_id" value={c.id} />
+                  <input type="hidden" name="slug" value={c.slug} />
+                  <input
+                    name="name"
+                    required
+                    placeholder="new-channel"
+                    className="w-full rounded-sm border border-border px-2 py-1.5 text-caption"
+                  />
+                  <button className="mt-2 w-full rounded-sm bg-primary px-2 py-1.5 text-caption font-semibold text-white">
+                    + Add channel
+                  </button>
+                </form>
+              )}
+
+              {isMod && (
                 <Link
-                  key={ch.id}
-                  href={`/app/communities/${c.slug}?channel=${ch.id}`}
-                  className={`flex items-center gap-2 rounded-sm px-2 py-2 text-small font-semibold ${
-                    ch.id === active.id ? "bg-[#eef2ff] text-primary" : "text-text-secondary hover:bg-bg"
+                  href={`/app/communities/${c.slug}/mentor`}
+                  className="mt-3 flex items-center justify-center gap-1 rounded-sm border border-accent bg-[#ecfdf5] px-2 py-2 text-caption font-semibold text-[#047857] hover:bg-[#d1fae5]"
+                >
+                  ✦ Mentor Workspace
+                </Link>
+              )}
+            </div>
+
+            {/* Active channel chat */}
+            <div className="rounded-md border border-border bg-card">
+              <div className="border-b border-border px-5 py-3 font-semibold"># {active.name}</div>
+              <ChannelChat
+                key={active.id}
+                channelId={active.id}
+                communityId={c.id}
+                slug={c.slug}
+                channelName={active.name}
+                meId={profile!.id}
+                meName={profile!.full_name || "Member"}
+                initialMessages={messages}
+              />
+            </div>
+          </div>
+        )
+      ) : tab === "leaderboard" ? (
+        <div className="mt-5 rounded-md border border-border bg-card overflow-hidden">
+          <div className="border-b border-border px-5 py-3 font-semibold">Leaderboard</div>
+          <ol className="divide-y divide-border">
+            {members.map((m, i) => (
+              <li key={m.id} className="flex items-center gap-3 px-5 py-3">
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-caption font-bold ${
+                    i === 0
+                      ? "bg-[#fef9c3] text-[#a16207]"
+                      : i === 1
+                      ? "bg-[#f1f5f9] text-[#475569]"
+                      : i === 2
+                      ? "bg-[#fef3c7] text-[#b45309]"
+                      : "bg-bg text-text-secondary"
                   }`}
                 >
-                  <span># {ch.name}</span>
-                  {unreadChannels.has(ch.id) && ch.id !== active.id && (
-                    <span className="ml-auto h-2 w-2 rounded-full bg-danger" />
-                  )}
-                </Link>
-              ))}
-            </div>
-
-            {/* Live Sessions — visible to all members */}
-            <Link
-              href={`/app/communities/${c.slug}/live`}
-              className="mt-3 flex items-center justify-center gap-1 rounded-sm border border-primary bg-[#eef2ff] px-2 py-2 text-caption font-semibold text-primary hover:bg-[#e0e7ff]"
-            >
-              ◉ Live Sessions
-            </Link>
-
-            {isMod && (
-              <form action={createChannel} className="mt-3 border-t border-border pt-3">
-                <input type="hidden" name="community_id" value={c.id} />
-                <input type="hidden" name="slug" value={c.slug} />
-                <input
-                  name="name"
-                  required
-                  placeholder="new-channel"
-                  className="w-full rounded-sm border border-border px-2 py-1.5 text-caption"
-                />
-                <button className="mt-2 w-full rounded-sm bg-primary px-2 py-1.5 text-caption font-semibold text-white">
-                  + Add channel
-                </button>
-              </form>
+                  {i + 1}
+                </span>
+                <span className="font-semibold">{m.full_name}</span>
+                {m.role !== "member" && (
+                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
+                    {m.role}
+                  </span>
+                )}
+                <span className="ml-auto text-small font-semibold text-accent">{m.xp} XP</span>
+              </li>
+            ))}
+            {!members.length && (
+              <li className="px-5 py-8 text-center text-text-secondary">No members yet.</li>
             )}
-
-            {isMod && (
-              <Link
-                href={`/app/communities/${c.slug}/mentor`}
-                className="mt-3 flex items-center justify-center gap-1 rounded-sm border border-accent bg-[#ecfdf5] px-2 py-2 text-caption font-semibold text-[#047857] hover:bg-[#d1fae5]"
-              >
-                ✦ Mentor Workspace
-              </Link>
-            )}
+          </ol>
+        </div>
+      ) : tab === "members" ? (
+        <div className="mt-5 rounded-md border border-border bg-card overflow-hidden">
+          <div className="border-b border-border px-5 py-3 font-semibold">Members ({members.length})</div>
+          <ul className="divide-y divide-border">
+            {members.map((m) => (
+              <li key={m.id} className="flex items-center gap-3 px-5 py-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-small font-bold text-white">
+                  {m.full_name.slice(0, 1).toUpperCase()}
+                </div>
+                <div>
+                  <div className="font-semibold">{m.full_name}</div>
+                  {m.handle && <div className="text-caption text-text-secondary">@{m.handle}</div>}
+                </div>
+                {m.role !== "member" && (
+                  <span className="ml-auto rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
+                    {m.role}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        // Courses / Events / Resources — placeholder scaffolds ready for content.
+        <div className="mt-5 rounded-md border border-dashed border-border bg-card p-10 text-center">
+          <div className="text-h3 mb-2" aria-hidden>
+            {TABS.find((t) => t.key === tab)?.icon}
           </div>
-
-          {/* Active channel chat */}
-          <div className="rounded-md border border-border bg-card">
-            <div className="border-b border-border px-5 py-3 font-semibold"># {active.name}</div>
-            <ChannelChat
-              key={active.id}
-              channelId={active.id}
-              communityId={c.id}
-              slug={c.slug}
-              channelName={active.name}
-              meId={profile!.id}
-              meName={profile!.full_name || "Member"}
-              initialMessages={messages}
-            />
-          </div>
+          <div className="font-semibold">{TABS.find((t) => t.key === tab)?.label}</div>
+          <p className="mt-1 text-small text-text-secondary">
+            {tab === "courses"
+              ? "Structured lessons for this community are coming soon."
+              : tab === "events"
+              ? "Upcoming events and RSVPs will appear here."
+              : "Shared files, links, and resources will live here."}
+          </p>
+          {isMod && (
+            <p className="mt-3 text-caption text-text-secondary">
+              As a moderator you will be able to add {TABS.find((t) => t.key === tab)?.label.toLowerCase()} here.
+            </p>
+          )}
         </div>
       )}
 
