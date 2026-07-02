@@ -12,16 +12,20 @@ import { useEffect, useState } from "react";
 
 const SLIDES = [
   {
-    title: "Accelerate your career with AI and world-class mentors",
-    body: "Learning, mentorship, community, and AI coaching — in one ecosystem.",
+    title: "Rise. Learn. Connect. Lead.",
+    body: "Learning, mentorship, community, and AI coaching — all in one ecosystem built to move your career forward.",
   },
   {
-    title: "Your always-on AI Career Coach",
-    body: "A personalized plan and the single next best step, grounded in your goal.",
+    title: "An AI Career Coach in your corner",
+    body: "A plan tailored to your goal, and the single next best step — every single day.",
+  },
+  {
+    title: "Learn from the world's best mentors",
+    body: "Ask a verified expert's AI clone anything, with answers cited straight from their teaching.",
   },
   {
     title: "Grow with a global community",
-    body: "Live Q&A, realtime chat, streaks, and leaderboards that keep momentum going.",
+    body: "Live Q&A, realtime chat, streaks, and leaderboards that keep your momentum going.",
   },
 ];
 

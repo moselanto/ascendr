@@ -33,10 +33,24 @@ export default function LoginPage({
       </div>
 
       {/* Form panel */}
-      <div className="flex flex-col justify-center p-8 md:p-16 bg-card">
-        <div className="md:hidden text-xl font-black mb-6">
-          ASCEND<span className="text-primary">R</span>
+      <div className="flex flex-col bg-card md:justify-center">
+        {/* Mobile hero banner — mirrors the desktop photo above the form */}
+        <div className="relative flex h-40 flex-col justify-end overflow-hidden p-6 text-white md:hidden">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{ backgroundImage: "url('/login-hero.png')" }}
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/85 to-dark-bg/95" aria-hidden />
+          <div className="relative">
+            <div className="text-xl font-black">
+              ASCEND<span className="text-[#a5b4fc]">R</span>
+            </div>
+            <p className="mt-1 text-caption text-[#c7d2fe]">Rise. Learn. Connect. Lead.</p>
+          </div>
         </div>
+
+        <div className="flex flex-col p-8 md:p-16 md:justify-center">
         <h2 className="text-h3 font-bold">
           {isSignup ? "Create your account" : "Welcome back"}
         </h2>
@@ -101,6 +115,7 @@ export default function LoginPage({
             </>
           )}
         </p>
+        </div>
       </div>
     </main>
   );
