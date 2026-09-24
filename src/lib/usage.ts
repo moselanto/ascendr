@@ -18,7 +18,6 @@ import { createClient } from "@/lib/supabase/server";
 export type QuotaBucket =
   | "ai:coach"
   | "ai:career-plan"
-  | "ai:career-plan-step"
   | "ai:interview"
   | "ai:resume-review"
   | "ai:mentor-ask"

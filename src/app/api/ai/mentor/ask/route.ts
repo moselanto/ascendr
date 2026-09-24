@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
 import { askMentorClone } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,7 @@ export const dynamic = "force-dynamic";
  * POST /api/ai/mentor/ask
  * Body: { community_id, mentor_name, question }
  * Members only. Returns { answer, citations, grounded }.
+ * Rate limited per user per day — see src/lib/usage.ts.
  */
 export async function POST(req: Request) {
   const profile = await getCurrentProfile();
@@ -38,6 +40,12 @@ export async function POST(req: Request) {
   if (membership?.status !== "active") {
     return NextResponse.json({ error: "Join the community to ask its mentor AI." }, { status: 403 });
   }
+
+  // Quota is consumed only after membership passes, so someone probing the
+  // endpoint for a community they haven't joined cannot burn their allowance
+  // (or make a member look like the one exhausting it).
+  const quota = await consumeQuota(profile.id, "ai:mentor-ask", await getTier(profile.id));
+  if (!quota.allowed) return quotaExceededResponse(quota, "ai:mentor-ask");
 
   const result = await askMentorClone(communityId, mentorName, question);
   return NextResponse.json(result);
