@@ -2,28 +2,65 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+/**
+ * ASCENDR design tokens.
+ *
+ * Fonts are NOT imported here. They are loaded with next/font in layout.tsx,
+ * which self-hosts them and exposes --font-display and --font-sans. The old
+ * @import of Inter sat below the @tailwind directives, where CSS @import is
+ * invalid and browsers drop it — so it was also a render-blocking request to
+ * Google for a font the page then had to wait on.
+ *
+ * Brand blue is taken from the logo (#4000F9). The ramp is a mix toward white
+ * matching the lighter chevrons in the mark; keep it in sync with
+ * tailwind.config.ts rather than inventing new blues in components.
+ */
 
 :root {
-  /* ASCENDR Stage 1 design tokens */
-  --primary: #4f46e5;
-  --secondary: #2563eb;
-  --accent: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --bg: #f8fafc;
+  /* Brand */
+  --brand: #4000f9;
+  --brand-600: #3700d6;
+  --brand-50: #f5f2ff;
+
+  /* Semantic */
+  --primary: #4000f9;
+  --secondary: #3700d6;
+  --accent: #0ea47a;
+  --warning: #b45309;
+  --danger: #dc2626;
+
+  /* Surfaces — cool greys, tinted very slightly toward the brand hue so the
+     neutrals sit with the blue instead of fighting it. */
+  --bg: #f7f8fc;
   --card: #ffffff;
-  --text: #0f172a;
-  --text-secondary: #64748b;
-  --border: #e2e8f0;
+  --text: #10192f; /* logo wordmark navy, 17.5:1 on white */
+  --text-secondary: #5a6b8c; /* 5.4:1 on white — AA at body size */
+  --border: #e4e8f0;
 }
 
 html {
-  font-family: "Inter", system-ui, sans-serif;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
   background: var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Manrope carries the brand voice at large sizes, but its default tracking is
+   loose for display type. Tighten as size increases. */
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+
+/* Tabular figures for anything numeric so columns and counters do not shift
+   as values change. */
+.nums {
+  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
 }
