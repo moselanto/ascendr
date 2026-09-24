@@ -1,94 +1,223 @@
 # ASCENDR
 
-**The Global AI Career Growth Ecosystem** — a single platform where professionals, students, founders, executives, and organizations learn, connect, grow, and succeed across the full arc of a career.
+**Your Network. Your Skills. Your Next Opportunity.**
 
-> Accelerate Your Career with AI and World-Class Mentors.
-
-This repository is **fully independent** from any prior project (MentorBay). It has its own GitHub repo, its own Vercel deployment, and its own Supabase database.
+ASCENDR is an AI-powered career intelligence platform that connects your
+goals, skills, mentors, professional network and opportunities — helping you
+turn career ambition into measurable progress.
 
 ---
 
-## Tech stack
+## What it does
 
-- **Next.js 14** (App Router) + **TypeScript**
-- **Tailwind CSS** — themed with the ASCENDR Stage 1 design tokens (`tailwind.config.ts`)
-- **Supabase** (Postgres + Auth + RLS + Storage; `pgvector` for AI)
-- **Vercel** hosting
+ASCENDR answers five questions for a member:
 
-## Project structure
+1. **Where am I now?** — profile, experience, skills
+2. **Where do I want to go?** — a concrete career goal and target role
+3. **What am I missing?** — skill gaps computed against real role requirements
+4. **Who can help me?** — mentors, experts and peers, each with stated reasons
+5. **What should I do next?** — a ranked, trackable next best action
 
-```
-src/
-  app/                 # Next.js App Router (layout, globals, home page)
-  lib/supabase/        # Browser + server Supabase clients
-supabase/
-  migrations/          # SQL schema (0001 = Phase 1 foundation, from the PRD ERD)
-docs/                  # PRD, UI/UX design spec
-public/
-  prototype/           # The P1 high-fidelity clickable prototype (open prototype.html)
-```
+It is deliberately **not** a mentorship marketplace, a course platform, a job
+board, or a chatbot wrapper. See `PRD.md` for the positioning and why it
+changed.
+
+---
 
 ## Documentation
 
-- `docs/ASCENDR_Global_Product_Strategy_Master_PRD.md` — the full 25-section master PRD
-- `docs/ASCENDR_UIUX_Master_Design_Spec.md` — Stages 1–4 (design system, IA, screen inventory, wireframes)
-- `public/prototype/prototype.html` — the five P1 high-fidelity screens (open in a browser)
+| File | Read it when |
+|---|---|
+| **`ARCHITECTURE-ESSENTIALS.md`** | **Start here.** Ten-minute orientation before your first commit |
+| `ARCHITECTURE.md` | You need the full schema, routes, or data flows |
+| `PRD.md` | You need to know what ships when, and why |
+| `AGENTS.md` | You are an AI coding agent, or writing code in this repo |
+| `SECURITY-AUDIT.md` | Before touching auth, RLS, the AI routes, or ingestion |
+
+Historical product material lives in `docs/` and is superseded by `PRD.md`.
+
+---
+
+## Stack
+
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 14 (App Router) + TypeScript |
+| UI | React 18, Tailwind CSS |
+| Database | Supabase Postgres, Row Level Security, pgvector |
+| Auth | Supabase Auth (`@supabase/ssr`), cookie-based |
+| AI | OpenAI `gpt-4o-mini`, `text-embedding-3-small` |
+| Hosting | Vercel |
+
+Five runtime dependencies. Adding one requires justification in the PR.
 
 ---
 
 ## Local setup
 
+**Prerequisites:** Node 20+, a Supabase project, optionally an OpenAI key.
+
 ```bash
-# 1. Install dependencies
+# 1. Install
 npm install
 
-# 2. Configure environment
+# 2. Configure
 cp .env.example .env.local
-# then fill in your NEW Supabase project values
+#    fill in your Supabase project values
 
-# 3. Run the database migration
-#    (Supabase dashboard -> SQL Editor -> paste supabase/migrations/0001_phase1_foundation.sql)
-#    or use the Supabase CLI
+# 3. Apply migrations
+#    Supabase dashboard → SQL Editor → run supabase/migrations/*.sql IN ORDER
 
-# 4. Start the dev server
+# 4. Run
 npm run dev
+```
+
+Open http://localhost:3000.
+
+### Environment variables
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=          # Supabase → Settings → API
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=         # server only — never prefix NEXT_PUBLIC_
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+OPENAI_API_KEY=                    # optional
+OPENAI_MODEL=gpt-4o-mini           # optional
+OPENAI_EMBED_MODEL=text-embedding-3-small   # optional
+```
+
+**The app builds and runs without `OPENAI_API_KEY`.** AI features return a
+clear "not configured" message rather than failing. Preserve this property.
+
+The service role key bypasses all Row Level Security. It must never appear in
+client code or in a `NEXT_PUBLIC_` variable.
+
+---
+
+## Migrations
+
+Applied **in order**, by hand, in the Supabase SQL editor. All are idempotent
+and safe to re-run.
+
+| # | File | Contents |
+|---|---|---|
+| 0001 | `phase1_foundation` | Profiles, communities, channels, feed, notifications, XP, live sessions, AI tables |
+| 0002 | `rls_policies` | RLS helper functions and membership-scoped policies |
+| 0003 | `realtime_reactions_reads_notifications` | Realtime, reactions, read receipts |
+| 0004 | `mentor_clone_rag` | `ai_chunks` extensions, `match_ai_chunks` RPC |
+| 0005 | `live_sessions_qa` | Live Q&A |
+| 0006 | `feed_reactions_comments` | Feed engagement |
+| 0007 | `networking` | Connections and direct messages |
+| 0008 | `onboarding_goals` | Career goal fields on `profiles` |
+| 0009 | `live_polls` | Live session polls |
+| 0010 | `live_chat_presence_ai_studio` | Live chat, presence, AI studio |
+| 0011 | `career_graph` | Skills, roles, goals, actions, outcomes, privacy, quotas, analytics |
+
+Moving to the Supabase CLI with linked staging and production environments is
+tracked work — see `SECURITY-AUDIT.md` M-6.
+
+---
+
+## Project structure
+
+```
+src/
+  app/
+    page.tsx          Public landing
+    login/            Auth
+    onboarding/       Goal capture
+    app/              Authenticated product
+      ai/               Coach, career plan, interview, resume
+      communities/      Channels, live sessions, mentor clones
+      feed/ learn/ live/ members/ networking/ settings/
+    api/ai/           OpenAI route handlers
+  components/         Shared UI
+  lib/
+    ai.ts             All model access
+    usage.ts          Quota enforcement
+    career/gap.ts     Skill gap engine
+    supabase/         Client, server, middleware
+supabase/migrations/  Schema
+docs/                 Historical product material
+public/prototype/     Early clickable prototype
 ```
 
 ---
 
-## Deployment — connect Vercel + Supabase (one-time)
+## Core concepts
 
-### 1. Create a new Supabase project (independent database)
-1. Go to https://supabase.com → **New project** (use a new project name, e.g. `ascendr-prod`).
-2. Wait for it to provision, then open **Project Settings → API**.
-3. Copy: `Project URL`, `anon public` key, and `service_role` key.
-4. Open **SQL Editor**, paste the contents of `supabase/migrations/0001_phase1_foundation.sql`, and run it.
+### Two user IDs
 
-### 2. Create a new Vercel project (independent hosting)
-1. Go to https://vercel.com → **Add New → Project**.
-2. Import the GitHub repo **moselanto/ascendr**.
-3. Framework preset: **Next.js** (auto-detected).
-4. Add Environment Variables (from your Supabase keys above):
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `NEXT_PUBLIC_APP_URL` (your Vercel domain)
-5. Click **Deploy**.
+`auth.users.id` is the Supabase Auth user. `profiles.id` is the app identity,
+and **every domain table foreign-keys to it**. Resolve with
+`getCurrentProfile()` in TypeScript, `current_profile_id()` in SQL. Confusing
+the two compiles cleanly and fails at runtime.
 
-That's it — every push to `main` now auto-deploys to Vercel, backed by your independent Supabase database.
+### RLS is the authorization layer
 
-### Database migrations
+There is no permissions middleware. Access control lives in Postgres policies.
+A query returning nothing is usually a policy working correctly.
 
-Apply migrations in order in the Supabase SQL Editor:
+### The Career Graph
 
-- `0001_phase1_foundation.sql` … `0007_networking.sql` — foundation through networking
-- `0008_onboarding_goals.sql` — onboarding career-goal fields on `profiles`
-- `0009_live_polls.sql` — live-session polls (`live_polls`, `live_poll_votes`)
+Seven node types — Person, Skills, Goals, Knowledge, Relationships,
+Opportunities, Outcomes — implemented as a projection over relational tables,
+not a separate graph store.
+
+### Deterministic logic, narrated by AI
+
+Skill gaps, match bands and recommendation ordering are computed in code. The
+model phrases results; it never derives them. A hallucinated skill gap gets
+acted on by a real person.
+
+Related: the product surfaces match **bands** (strong / partial / stretch),
+never percentages. See `AGENTS.md` §2.2.
 
 ---
 
-## Roadmap
+## Contributing
 
-Build sequence follows the Master PRD (Section 18). **Phase 1** = retention engine (communities, chat, notifications, gamification, feed) + the AI wedge (Career Coach + Mentor Clone) + live Q&A. The `0001` migration already lays down the Phase 1 schema.
+Read `AGENTS.md` before writing code. In short:
+
+- Server Components by default; `"use client"` only when you need state or handlers
+- Mutations are Server Actions in colocated `actions.ts` files
+- New tables holding user data need RLS policies in the same PR
+- New AI routes must call `consumeQuota()` before any model call
+- Update `src/lib/types.ts` when you change the schema — types are hand-written
+- Update `ARCHITECTURE.md` when schema, routes or dependencies change
+
+```bash
+npm run dev     # development
+npm run build   # production build — must pass
+npm run lint    # must pass
+```
+
+---
+
+## Deployment
+
+Vercel, auto-deploying from `main`. Set the environment variables above in
+project settings, then apply any new migrations in Supabase **before** the
+deploy that depends on them.
+
+---
+
+## Current state
+
+The authorization model, community and live features, and the citation-backed
+mentor clone are built and working. The Career Graph schema landed in 0011.
+
+Known gaps, in priority order:
+
+1. AI routes need quota enforcement wired in — see `SECURITY-AUDIT.md` C-1
+2. ESCO taxonomy ingestion, to populate `skills` and `role_profiles`
+3. Opportunity ingestion from public ATS job boards
+4. Error, loading and empty-state boundaries
+5. Monitoring and analytics
+
+Roadmap and phase gates are in `PRD.md` §8.
+
+---
 
 *Rise. Learn. Connect. Lead.*
