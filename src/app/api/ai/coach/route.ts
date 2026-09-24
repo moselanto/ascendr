@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/data";
+import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
 import { runChat, COACH_SYSTEM_PROMPT, type ChatMessage } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
@@ -9,15 +10,16 @@ export const dynamic = "force-dynamic";
  * Body: { messages: { role: "user" | "assistant", content: string }[] }
  * Returns: { reply: string }
  * Auth required (session cookie). The system prompt is injected server-side.
+ * Rate limited per user per day — see src/lib/usage.ts.
  */
 export async function POST(req: Request) {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) {
+  const profile = await getCurrentProfile();
+  if (!profile) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  const quota = await consumeQuota(profile.id, "ai:coach", await getTier(profile.id));
+  if (!quota.allowed) return quotaExceededResponse(quota, "ai:coach");
 
   let body: { messages?: ChatMessage[] };
   try {

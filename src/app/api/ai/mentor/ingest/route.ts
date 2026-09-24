@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
 import { AI_CONFIGURED, embed, chunkText } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
@@ -95,6 +96,13 @@ export async function POST(req: Request) {
   if (!membership || !["owner", "moderator"].includes(membership.role)) {
     return NextResponse.json({ error: "Only the mentor (owner/mod) can add sources." }, { status: 403 });
   }
+
+  // Ingestion is the most expensive AI path — embedding cost scales with
+  // document size, so a single request can be hundreds of API calls. Quota is
+  // consumed here: after authorization (so a non-mentor cannot burn it) and
+  // before any embedding work begins.
+  const quota = await consumeQuota(profile.id, "ai:mentor-ingest", await getTier(profile.id));
+  if (!quota.allowed) return quotaExceededResponse(quota, "ai:mentor-ingest");
 
   // Record the source (with original text for reference).
   const { data: source, error: srcErr } = await supabase

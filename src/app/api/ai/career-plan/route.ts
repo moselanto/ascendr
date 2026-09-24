@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
 import { runChat, AI_CONFIGURED } from "@/lib/ai";
 
 export const dynamic = "force-dynamic";
@@ -12,14 +13,13 @@ export const dynamic = "force-dynamic";
  * career_plans, and returns the saved row. Auth required.
  */
 export async function POST(req: Request) {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
   const profile = await getCurrentProfile();
   if (!profile) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const quota = await consumeQuota(profile.id, "ai:career-plan", await getTier(profile.id));
+  if (!quota.allowed) return quotaExceededResponse(quota, "ai:career-plan");
+
+  const supabase = createClient();
 
   let body: { goal?: string; horizon?: string };
   try {

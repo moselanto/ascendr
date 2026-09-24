@@ -52,11 +52,16 @@ A "87% match" claims a calibration this system does not have. `coverage`
 Any recommended person, opportunity, community, or action must ship with
 human-readable reasons traceable to database rows. No reasons, no card.
 
-### 2.4 All AI routes consume quota
+### 2.4 Every route that calls a model consumes quota
 
-Every route under `src/app/api/ai/` calls `consumeQuota()` before any OpenAI
-call. No exceptions. An unmetered AI route is an open funding line to whoever
+Every route under `src/app/api/ai/` that reaches OpenAI calls `consumeQuota()`
+before doing so. An unmetered AI route is an open funding line to whoever
 finds it.
+
+The one exemption is `api/ai/career-plan/step`, which makes no model call — it
+toggles a boolean on a saved plan. Metering it would cap ordinary use (a user
+ticking off plan steps) without capping any spend. If you add a route under
+`api/ai/` that does not call a model, exempt it too and say why in a comment.
 
 ### 2.5 Never expose `ai_chunks` to clients
 
