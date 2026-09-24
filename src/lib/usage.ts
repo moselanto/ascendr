@@ -18,6 +18,10 @@ import { createClient } from "@/lib/supabase/server";
 export type QuotaBucket =
   | "ai:coach"
   | "ai:career-plan"
+  // Per-step generation inside an existing plan. Cheaper and far more frequent
+  // than generating a whole plan, so it gets its own, looser bucket — sharing
+  // "ai:career-plan" would burn a free user's 3 daily plans on plan edits.
+  | "ai:career-plan-step"
   | "ai:interview"
   | "ai:resume-review"
   | "ai:mentor-ask"
