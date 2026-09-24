@@ -21,12 +21,12 @@ export function Faq() {
   return (
     <section id="faq" className="border-b border-border bg-card">
       <div className="mx-auto max-w-3xl px-6 py-20 md:py-24">
-        <h2 className="text-h2 font-bold">Frequently asked</h2>
+        <h2 className="font-display text-h2">Frequently asked</h2>
 
         <div className="mt-10 divide-y divide-border border-y border-border">
           {FAQ.map((item) => (
             <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-body font-semibold">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 font-display text-body font-semibold">
                 {item.q}
                 <span
                   aria-hidden

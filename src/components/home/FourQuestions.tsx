@@ -32,7 +32,7 @@ export function FourQuestions() {
   return (
     <section id="questions" className="border-b border-border bg-card">
       <div className="mx-auto max-w-6xl px-6 py-20 md:py-24">
-        <h2 className="max-w-2xl text-h2 font-bold md:text-h1">
+        <h2 className="max-w-2xl font-display text-h2 md:text-h1">
           Your career has four questions.
         </h2>
         <p className="mt-4 max-w-2xl text-body text-text-secondary">
@@ -47,13 +47,16 @@ export function FourQuestions() {
               href={SIGNUP}
               className="group flex flex-col rounded-lg border border-border bg-bg p-7 transition-colors hover:border-primary"
             >
-              <span className="text-caption font-bold tracking-widest text-text-secondary">
+              {/* Numerals are Manrope 700 with tabular figures. */}
+              <span className="nums text-caption font-bold tracking-widest text-text-secondary transition-colors group-hover:text-primary">
                 {q.n}
               </span>
-              <h3 className="mt-5 text-h3 font-bold">{q.question}</h3>
-              <span className="mt-2 text-small font-semibold text-primary">{q.answer}</span>
+              <h3 className="mt-5 font-display text-h3">{q.question}</h3>
+              <span className="mt-2 font-display text-small font-semibold text-primary">
+                {q.answer}
+              </span>
               <p className="mt-4 text-small leading-relaxed text-text-secondary">{q.body}</p>
-              <span className="mt-6 text-small font-semibold text-text group-hover:text-primary">
+              <span className="mt-6 font-display text-small font-semibold text-text transition-colors group-hover:text-primary">
                 Start here →
               </span>
             </Link>

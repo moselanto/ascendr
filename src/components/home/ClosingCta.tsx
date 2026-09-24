@@ -5,7 +5,7 @@ export function ClosingCta() {
   return (
     <section className="border-b border-border">
       <div className="mx-auto max-w-3xl px-6 py-20 text-center md:py-24">
-        <h2 className="text-h2 font-bold md:text-h1">
+        <h2 className="font-display text-h2 md:text-h1">
           Where do you want to go next?
         </h2>
         <p className="mx-auto mt-4 max-w-xl text-body text-text-secondary">
@@ -14,7 +14,7 @@ export function ClosingCta() {
         </p>
         <Link
           href={SIGNUP}
-          className="mt-8 inline-block rounded-sm bg-primary px-7 py-3.5 text-body font-semibold text-white hover:opacity-95"
+          className="mt-8 inline-block rounded-sm bg-primary px-7 py-3.5 font-display text-body font-semibold text-white transition-colors hover:bg-brand-600"
         >
           Build My Career Plan
         </Link>

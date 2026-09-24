@@ -6,7 +6,7 @@ export function SiteFooter() {
     <footer className="bg-card">
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-12 sm:flex-row sm:items-center">
         <div>
-          <Link href="/" className="text-body font-black">
+          <Link href="/" className="font-display text-body font-extrabold tracking-tight">
             ASCEND<span className="text-primary">R</span>
           </Link>
           <p className="mt-2 max-w-sm text-caption text-text-secondary">
@@ -14,20 +14,20 @@ export function SiteFooter() {
           </p>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-5 text-small font-semibold text-text-secondary sm:ml-auto">
-          <a href="#questions" className="hover:text-text">
+        <nav className="flex flex-wrap items-center gap-5 font-display text-small font-semibold text-text-secondary sm:ml-auto">
+          <a href="#questions" className="transition-colors hover:text-text">
             Why ASCENDR
           </a>
-          <a href="#journey" className="hover:text-text">
+          <a href="#journey" className="transition-colors hover:text-text">
             How it works
           </a>
-          <a href="#faq" className="hover:text-text">
+          <a href="#faq" className="transition-colors hover:text-text">
             FAQ
           </a>
-          <Link href={SIGNIN} className="hover:text-text">
+          <Link href={SIGNIN} className="transition-colors hover:text-text">
             Sign in
           </Link>
-          <Link href={SIGNUP} className="text-primary hover:opacity-80">
+          <Link href={SIGNUP} className="text-primary transition-opacity hover:opacity-80">
             Get started
           </Link>
         </nav>

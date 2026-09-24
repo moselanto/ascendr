@@ -11,9 +11,11 @@ import { ImageResponse } from "next/og";
  * Next also uses this for twitter:image when no twitter-image file exists, so
  * one file covers both.
  *
- * Deliberately no custom font: loading one requires fetching a font file on
- * every render and adds a failure mode for a decorative asset. The default
- * sans stack renders cleanly at this size.
+ * Deliberately no custom font, so this does NOT render in Manrope. Satori
+ * cannot read CSS variables or next/font output; using the brand face here
+ * would mean fetching a font binary on every render and adds a failure mode
+ * to a decorative asset. The card carries the brand through colour and
+ * layout instead.
  */
 
 export const runtime = "edge";
@@ -31,7 +33,7 @@ export default function OpengraphImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
-          background: "#0F172A",
+          background: "#10192F",
           padding: "72px 80px",
         }}
       >
@@ -41,7 +43,7 @@ export default function OpengraphImage() {
             style={{
               width: 8,
               height: 40,
-              background: "#4F46E5",
+              background: "#4000F9",
               borderRadius: 4,
               display: "flex",
             }}
@@ -49,8 +51,8 @@ export default function OpengraphImage() {
           <div
             style={{
               fontSize: 34,
-              fontWeight: 900,
-              color: "#F8FAFC",
+              fontWeight: 800,
+              color: "#F7F8FC",
               letterSpacing: "-0.02em",
               display: "flex",
             }}
@@ -64,8 +66,8 @@ export default function OpengraphImage() {
           <div
             style={{
               fontSize: 72,
-              fontWeight: 800,
-              color: "#F8FAFC",
+              fontWeight: 700,
+              color: "#F7F8FC",
               lineHeight: 1.08,
               letterSpacing: "-0.03em",
               display: "flex",
@@ -73,7 +75,9 @@ export default function OpengraphImage() {
             }}
           >
             <span>Your Network. Your Skills.</span>
-            <span style={{ color: "#818CF8" }}>Your Next Opportunity.</span>
+            {/* brand-300: the logo blue is too dark to read on the navy here,
+                so the ramp step that clears 7:1 carries the accent. */}
+            <span style={{ color: "#B69EFD" }}>Your Next Opportunity.</span>
           </div>
 
           <div
@@ -98,19 +102,19 @@ export default function OpengraphImage() {
             alignItems: "center",
             gap: 20,
             fontSize: 21,
-            color: "#64748B",
+            color: "#8293B0",
             fontWeight: 600,
           }}
         >
           <span style={{ display: "flex" }}>Goals</span>
-          <span style={{ display: "flex", color: "#334155" }}>→</span>
+          <span style={{ display: "flex", color: "#3D4C6B" }}>→</span>
           <span style={{ display: "flex" }}>Skills</span>
-          <span style={{ display: "flex", color: "#334155" }}>→</span>
+          <span style={{ display: "flex", color: "#3D4C6B" }}>→</span>
           <span style={{ display: "flex" }}>Mentors</span>
-          <span style={{ display: "flex", color: "#334155" }}>→</span>
+          <span style={{ display: "flex", color: "#3D4C6B" }}>→</span>
           <span style={{ display: "flex" }}>Opportunities</span>
-          <span style={{ display: "flex", color: "#334155" }}>→</span>
-          <span style={{ display: "flex", color: "#10B981" }}>Outcomes</span>
+          <span style={{ display: "flex", color: "#3D4C6B" }}>→</span>
+          <span style={{ display: "flex", color: "#34D399" }}>Outcomes</span>
         </div>
       </div>
     ),

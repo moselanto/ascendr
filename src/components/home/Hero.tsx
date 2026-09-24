@@ -12,14 +12,17 @@ import { SIGNUP } from "@/components/home/links";
 export function Hero() {
   return (
     <section className="relative overflow-hidden border-b border-border">
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#eef2ff] to-bg" />
+      {/* Brand tint, not saturated brand. A full-strength #4000F9 wash behind
+          text vibrates against the headline; brand-50 carries the hue without
+          competing. */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-brand-50 to-bg" />
 
       <div className="relative mx-auto max-w-4xl px-6 py-20 text-center md:py-28">
-        <span className="inline-block rounded-full bg-card px-3 py-1 text-caption font-semibold uppercase tracking-wide text-primary shadow-sm ring-1 ring-border">
+        <span className="inline-block rounded-full bg-card px-3 py-1 font-display text-caption font-semibold uppercase tracking-wide text-primary shadow-sm ring-1 ring-border">
           Career Intelligence
         </span>
 
-        <h1 className="mt-6 text-h1 font-extrabold leading-tight md:text-display">
+        <h1 className="mt-6 font-display text-h1 leading-tight md:text-display">
           Your Network. Your Skills.
           <br className="hidden sm:block" />{" "}
           <span className="text-primary">Your Next Opportunity.</span>
@@ -34,13 +37,13 @@ export function Hero() {
         <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <Link
             href={SIGNUP}
-            className="w-full rounded-sm bg-primary px-7 py-3.5 text-body font-semibold text-white hover:opacity-95 sm:w-auto"
+            className="w-full rounded-sm bg-primary px-7 py-3.5 font-display text-body font-semibold text-white transition-colors hover:bg-brand-600 sm:w-auto"
           >
             Build My Career Plan
           </Link>
           <a
             href="#journey"
-            className="w-full rounded-sm border border-border bg-card px-7 py-3.5 text-body font-semibold text-text hover:border-primary sm:w-auto"
+            className="w-full rounded-sm border border-border bg-card px-7 py-3.5 font-display text-body font-semibold text-text transition-colors hover:border-primary hover:text-primary sm:w-auto"
           >
             Explore ASCENDR
           </a>
