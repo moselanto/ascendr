@@ -14,6 +14,11 @@
 -- pgvector is already enabled by 0001; restated for standalone safety.
 create extension if not exists vector;
 
+-- pg_trgm provides the gin_trgm_ops operator class used by the skills label
+-- index below (fast fuzzy lookup of free-text skill names). It is NOT enabled
+-- by 0001, so it must be created here before that index is built.
+create extension if not exists pg_trgm;
+
 
 -- ============================================================
 -- SKILLS — canonical taxonomy (seeded from ESCO)
@@ -35,9 +40,19 @@ create table if not exists skills (
   created_at    timestamptz default now()
 );
 
-create index if not exists skills_label_trgm_idx
-  on skills using gin (preferred_label gin_trgm_ops);
 create index if not exists skills_source_idx on skills (source);
+
+-- Trigram index for fuzzy matching of free-text skill labels. Guarded so the
+-- migration still completes if pg_trgm cannot be created on the host plan:
+-- resolveSkills() falls back to exact + vector matching, which is slower on
+-- alias lookups but functionally complete.
+do $$
+begin
+  execute 'create index if not exists skills_label_trgm_idx
+             on skills using gin (preferred_label gin_trgm_ops)';
+exception when others then
+  raise notice 'pg_trgm unavailable, skipping skills_label_trgm_idx: %', sqlerrm;
+end $$;
 
 -- HNSW needs pgvector >= 0.5 (Supabase has it). Falls back cleanly if absent.
 do $$
