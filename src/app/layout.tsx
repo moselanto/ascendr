@@ -1,36 +1,29 @@
 import type { Metadata } from "next";
-import { Manrope, Source_Sans_3 } from "next/font/google";
+import { Outfit } from "next/font/google";
 import "./globals.css";
 
 /**
- * Type pairing.
+ * Typeface: Outfit.
  *
- * Manrope — brand, headings, navigation, buttons, numbers. Slightly narrow
- * with tight apertures, so it reads as considered rather than defaulted.
+ * Matched to the reference site (getro.com), whose face is a geometric sans
+ * in the Circular Std / Gilroy class — single-story 'a', circular 'o',
+ * straight-tailed 'y', slant-cut 't'. Those are commercial licences, so
+ * Outfit is the closest freely-licensable equivalent: same geometric
+ * skeleton, single-story 'a', and a taller x-height than Poppins, which
+ * keeps it legible at UI sizes.
  *
- * Source Sans 3 — body copy, descriptions, forms, dashboards. A humanist face
- * with taller x-height and more open counters, which holds up at 14–16px in
- * dense UI far better than a geometric sans does.
+ * ONE family for both headings and body, which is what the reference does.
+ * A geometric sans is lower-contrast and more uniform than a humanist one,
+ * so it depends on SIZE and LEADING for readability, not on a second face.
+ * That is why body copy here is 18px at 1.7 line-height rather than 16/1.6 —
+ * shrink it back and this face gets hard to read. See tailwind.config.ts.
  *
- * Loaded with next/font rather than a CSS @import: Next downloads the files at
- * build time and self-hosts them, so there is no request to Google at runtime,
- * no flash of unstyled text, and no layout shift. `display: swap` plus the
- * automatic size-adjust fallback keeps text visible during load.
- *
- * Both are variable fonts — one file covers every weight in the range, so
- * adding a weight below costs nothing extra to download.
+ * Loaded via next/font: self-hosted at build time, no runtime request to
+ * Google, no flash of unstyled text, no layout shift.
  */
-
-const manrope = Manrope({
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-display",
-  display: "swap",
-});
-
-const sourceSans = Source_Sans_3({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700", "800"],
   variable: "--font-sans",
   display: "swap",
 });
@@ -69,8 +62,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${manrope.variable} ${sourceSans.variable}`}>
-      <body className="font-sans">{children}</body>
+    <html lang="en" className={outfit.variable}>
+      <body className="font-sans antialiased">{children}</body>
     </html>
   );
 }

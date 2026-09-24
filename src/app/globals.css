@@ -5,41 +5,36 @@
 /**
  * ASCENDR design tokens.
  *
- * Fonts are NOT imported here. They are loaded with next/font in layout.tsx,
- * which self-hosts them and exposes --font-display and --font-sans. The old
- * @import of Inter sat below the @tailwind directives, where CSS @import is
- * invalid and browsers drop it — so it was also a render-blocking request to
- * Google for a font the page then had to wait on.
+ * Fonts load via next/font in layout.tsx (Outfit), exposed as --font-sans.
+ * Do not add an @import here: CSS @import is only valid at the top of a
+ * file, so anything below the @tailwind directives is dropped by browsers.
  *
- * Brand blue is taken from the logo (#4000F9). The ramp is a mix toward white
- * matching the lighter chevrons in the mark; keep it in sync with
- * tailwind.config.ts rather than inventing new blues in components.
+ * Brand blue #4000F9. The ramp lives in tailwind.config.ts — use its steps
+ * rather than introducing new blues in components.
  */
 
 :root {
-  /* Brand */
   --brand: #4000f9;
   --brand-600: #3700d6;
   --brand-50: #f5f2ff;
 
-  /* Semantic */
   --primary: #4000f9;
   --secondary: #3700d6;
   --accent: #0ea47a;
   --warning: #b45309;
   --danger: #dc2626;
 
-  /* Surfaces — cool greys, tinted very slightly toward the brand hue so the
-     neutrals sit with the blue instead of fighting it. */
-  --bg: #f7f8fc;
+  --bg: #ffffff;
+  --surface: #f6f7fb;
   --card: #ffffff;
-  --text: #10192f; /* logo wordmark navy, 17.5:1 on white */
-  --text-secondary: #5a6b8c; /* 5.4:1 on white — AA at body size */
-  --border: #e4e8f0;
+  --text: #10192f;
+  --text-secondary: #46587a; /* 6.5:1 on white — was #5A6B8C, too light at 16px */
+  --border: #e6e9f2;
 }
 
 html {
   font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -49,18 +44,35 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Manrope carries the brand voice at large sizes, but its default tracking is
-   loose for display type. Tighten as size increases. */
+/* Outfit is geometric, so its default tracking is loose at display sizes and
+   too tight at small ones. Correct in both directions. */
 h1,
-h2,
-h3 {
-  letter-spacing: -0.02em;
+h2 {
+  letter-spacing: -0.025em;
 }
 
-/* Tabular figures for anything numeric so columns and counters do not shift
-   as values change. */
+h3,
+h4 {
+  letter-spacing: -0.015em;
+}
+
+/* Tabular figures so counters and metrics do not shift as values change. */
 .nums {
-  font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum";
+}
+
+/* Uppercase eyebrow labels need positive tracking or a geometric sans sets
+   them as a solid block. */
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 600;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

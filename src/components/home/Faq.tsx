@@ -19,25 +19,27 @@ const FAQ = [
 
 export function Faq() {
   return (
-    <section id="faq" className="border-b border-border bg-card">
-      <div className="mx-auto max-w-3xl px-6 py-20 md:py-24">
-        <h2 className="text-h2 font-bold">Frequently asked</h2>
+    <section id="faq" className="border-y border-border bg-surface">
+      <div className="mx-auto max-w-3xl px-6 py-20 md:py-28">
+        <span className="eyebrow text-caption text-primary">FAQ</span>
+        <h2 className="mt-3 text-h2">Frequently asked</h2>
 
-        <div className="mt-10 divide-y divide-border border-y border-border">
+        <div className="mt-12 space-y-3">
           {FAQ.map((item) => (
-            <details key={item.q} className="group py-5">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-body font-semibold">
+            <details
+              key={item.q}
+              className="group rounded-md border border-border bg-white px-6 py-5 transition-colors open:border-brand-200 hover:border-brand-300"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-h4 text-text">
                 {item.q}
                 <span
                   aria-hidden
-                  className="shrink-0 text-h4 font-normal text-text-secondary transition-transform group-open:rotate-45"
+                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-border text-h4 font-normal text-text-secondary transition-transform group-open:rotate-45 group-open:border-brand-200 group-open:text-primary"
                 >
                   +
                 </span>
               </summary>
-              <p className="mt-3 max-w-2xl text-small leading-relaxed text-text-secondary">
-                {item.a}
-              </p>
+              <p className="mt-4 max-w-prose text-body text-text-secondary">{item.a}</p>
             </details>
           ))}
         </div>
