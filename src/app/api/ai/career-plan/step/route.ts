@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
 
 export const dynamic = "force-dynamic";
 
@@ -8,6 +9,12 @@ export const dynamic = "force-dynamic";
  * POST /api/ai/career-plan/step
  * Body: { plan_id: string, index: number, done: boolean }
  * Toggles a step's done flag on a career plan the caller owns. Best-effort.
+ *
+ * Note this route does NOT call OpenAI despite living under /api/ai — it is a
+ * plain database write. The quota here is not a spend ceiling; it bounds
+ * write-spam against career_plans from an authenticated session. Limits are
+ * correspondingly loose (20/150/500 per day) so normal checkbox use never
+ * touches them.
  */
 export async function POST(req: Request) {
   const supabase = createClient();
@@ -18,6 +25,13 @@ export async function POST(req: Request) {
 
   const profile = await getCurrentProfile();
   if (!profile) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const quota = await consumeQuota(
+    profile.id,
+    "ai:career-plan-step",
+    await getTier(profile.id)
+  );
+  if (!quota.allowed) return quotaExceededResponse(quota, "ai:career-plan-step");
 
   let body: { plan_id?: string; index?: number; done?: boolean };
   try {

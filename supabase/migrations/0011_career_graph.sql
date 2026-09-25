@@ -35,9 +35,15 @@ create table if not exists skills (
   created_at    timestamptz default now()
 );
 
-create index if not exists skills_label_trgm_idx
-  on skills using gin (preferred_label gin_trgm_ops);
 create index if not exists skills_source_idx on skills (source);
+
+-- NOTE: deliberately no trigram index on preferred_label.
+-- It would speed up fuzzy alias lookup in resolveSkills(), but it depends on
+-- pg_trgm and its gin_trgm_ops operator class, which is not reliably on the
+-- search_path in a hosted Supabase project (extensions commonly live in the
+-- `extensions` schema). Exact matching and pgvector similarity both work
+-- without it. If alias lookup proves slow after the ESCO seed, add it in its
+-- own migration where a failure is isolated and cannot block this one.
 
 -- HNSW needs pgvector >= 0.5 (Supabase has it). Falls back cleanly if absent.
 do $$
