@@ -4,7 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { analyzeGap, explainMatch, type GapAnalysis } from "@/lib/career/gap";
 import { trackAsync } from "@/lib/analytics";
-import { markSkillHeld, unmarkSkillHeld } from "./actions";
+import { markSkillHeld, unmarkSkillHeld, recordOutcome, deleteOutcome } from "./actions";
+import { OUTCOME_KINDS, outcomeLabel } from "@/lib/career/outcomes";
 import { findOpportunities } from "@/lib/opportunities";
 
 export const dynamic = "force-dynamic";
@@ -109,6 +110,14 @@ export default async function CareerPage() {
     .neq("id", profile!.id)
     .order("verified_expert", { ascending: false })
     .limit(3);
+
+  const { data: outcomes } = await supabase
+    .from("career_outcomes")
+    .select("id, kind, title, organization, occurred_on, verification")
+    .eq("user_id", profile?.id ?? "")
+    .order("occurred_on", { ascending: false })
+    .limit(20);
+  const today = new Date().toISOString().slice(0, 10);
 
   const noTaxonomy = analysis?.band === "unknown" && !analysis?.roleId;
 
@@ -249,6 +258,64 @@ export default async function CareerPage() {
           )}
         </section>
       </div>
+
+      {/* 6 — Outcomes */}
+      <section className="rounded-lg border border-border bg-card p-6">
+        <h2 className="font-display text-h4">Your wins</h2>
+        <p className="mt-1 text-caption text-text-secondary">
+          Interviews, offers, promotions, introductions. Recording them is how ASCENDR learns what actually moves careers. Everything here is marked as self-reported.
+        </p>
+
+        {(outcomes ?? []).length > 0 && (
+          <ul className="mt-4 divide-y divide-border">
+            {(outcomes ?? []).map((o) => (
+              <li key={o.id} className="flex items-start justify-between gap-4 py-3">
+                <div>
+                  <p className="font-semibold">{outcomeLabel(o.kind)}</p>
+                  <p className="text-caption text-text-secondary">
+                    {[o.title, o.organization].filter(Boolean).join(" · ")}
+                    {o.title || o.organization ? " · " : ""}
+                    {o.occurred_on}
+                  </p>
+                </div>
+                <form action={deleteOutcome}>
+                  <input type="hidden" name="outcome_id" value={o.id} />
+                  <button className="text-caption text-text-secondary hover:text-danger">Remove</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        <form action={recordOutcome} className="mt-5 grid gap-3 sm:grid-cols-2">
+          <input type="hidden" name="goal_id" value={goal.id} />
+          <label className="text-caption font-semibold text-text-secondary sm:col-span-2">
+            What happened?
+            <select name="kind" required className="mt-1 block w-full rounded-sm border border-border bg-white px-3 py-2 text-small text-text">
+              {OUTCOME_KINDS.map((k) => (
+                <option key={k.value} value={k.value}>{k.label}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-caption font-semibold text-text-secondary">
+            Role or detail (optional)
+            <input name="title" maxLength={200} placeholder="e.g. Associate Product Manager" className="mt-1 block w-full rounded-sm border border-border px-3 py-2 text-small text-text" />
+          </label>
+          <label className="text-caption font-semibold text-text-secondary">
+            Organisation (optional)
+            <input name="organization" maxLength={200} placeholder="e.g. Safaricom" className="mt-1 block w-full rounded-sm border border-border px-3 py-2 text-small text-text" />
+          </label>
+          <label className="text-caption font-semibold text-text-secondary">
+            When
+            <input type="date" name="occurred_on" max={today} defaultValue={today} className="mt-1 block w-full rounded-sm border border-border px-3 py-2 text-small text-text" />
+          </label>
+          <div className="flex items-end">
+            <button className="w-full rounded-sm bg-primary px-5 py-2.5 text-small font-semibold text-white hover:bg-brand-600">
+              Record win
+            </button>
+          </div>
+        </form>
+      </section>
 
       {/* 5 — Opportunities */}
       <section className="rounded-lg border border-border bg-card p-6">
