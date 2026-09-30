@@ -1,0 +1,64 @@
+name: CI
+
+# Gates every pull request and every push to main on the same checks Vercel
+# runs, but ~10x cheaper and before a deploy is attempted.
+#
+# This exists because a type error (an undeclared QuotaBucket key) reached
+# Vercel and failed a production build. `next build` compiles first and
+# typechecks second, so the failure surfaced ~10s after "Compiled
+# successfully" — exactly the kind of thing a PR gate should catch.
+
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches: [main]
+
+# A new push to the same branch cancels the previous run rather than queuing
+# behind it.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Typecheck, lint and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    env:
+      # next build evaluates modules that read these at import time. They are
+      # deliberately fake: CI must never hold real credentials, and nothing
+      # here should reach a live service. Any step that genuinely needs a real
+      # key belongs in a separate job gated on a protected environment.
+      NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder-anon-key
+      SUPABASE_SERVICE_ROLE_KEY: placeholder-service-role-key
+      OPENAI_API_KEY: placeholder-openai-key
+      NEXT_PUBLIC_APP_URL: https://ascendr-two.vercel.app
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # `npm ci` over `npm install`: installs exactly the lockfile and fails
+      # if package.json and the lock have drifted.
+      - name: Install dependencies
+        run: npm ci
+
+      # Typecheck runs on its own and first. `next build` would catch the same
+      # errors, but only after a full compile, and its output is harder to
+      # read. This step fails in seconds with a clear message.
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint --if-present
+
+      - name: Build
+        run: npm run build
