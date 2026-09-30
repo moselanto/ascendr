@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/data";
 import { analyzeGap, explainMatch, type GapAnalysis } from "@/lib/career/gap";
 import { trackAsync } from "@/lib/analytics";
 import { markSkillHeld, unmarkSkillHeld } from "./actions";
+import { findOpportunities } from "@/lib/opportunities";
 
 export const dynamic = "force-dynamic";
 
@@ -110,6 +111,12 @@ export default async function CareerPage() {
     .limit(3);
 
   const noTaxonomy = analysis?.band === "unknown" && !analysis?.roleId;
+
+  // Only search job boards once the goal resolves to a supported role —
+  // otherwise the title pattern is guesswork.
+  const opportunities = analysis?.roleId
+    ? await findOpportunities(roleTitle)
+    : { jobs: [], total: 0, companies: 0 };
 
   return (
     <div className="mx-auto max-w-4xl space-y-10 pb-16">
@@ -244,11 +251,46 @@ export default async function CareerPage() {
       </div>
 
       {/* 5 — Opportunities */}
-      <section className="rounded-lg border border-dashed border-border bg-surface p-6">
-        <h2 className="font-display text-h4">Opportunities</h2>
-        <p className="mt-2 text-small text-text-secondary">
-          Coming next: live {roleTitle} roles from public company job boards, each checked against the skills above so you can see which are within reach.
-        </p>
+      <section className="rounded-lg border border-border bg-card p-6">
+        <div className="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 className="font-display text-h4">Open {roleTitle} roles</h2>
+          {opportunities.total > 0 && (
+            <p className="text-caption text-text-secondary">
+              {opportunities.total} live across {opportunities.companies} {opportunities.companies === 1 ? "company" : "companies"}
+            </p>
+          )}
+        </div>
+        {opportunities.jobs.length === 0 ? (
+          <p className="mt-3 text-small text-text-secondary">
+            No open {roleTitle} roles on the job boards we track right now. We check again every hour.
+          </p>
+        ) : (
+          <>
+            <p className="mt-1 text-caption text-text-secondary">
+              Live from company job boards. Your fit for this role type is <span className="font-semibold">{band.label.toLowerCase()}</span>
+              {analysis?.band === "stretch" ? " — senior roles are listed last." : "."}
+            </p>
+            <ul className="mt-4 divide-y divide-border">
+              {opportunities.jobs.map((j) => (
+                <li key={j.id} className="flex items-start justify-between gap-4 py-3">
+                  <div>
+                    <a href={j.url} target="_blank" rel="noopener noreferrer" className="font-semibold hover:text-primary">
+                      {j.title}
+                    </a>
+                    <p className="text-caption text-text-secondary">
+                      {j.company}
+                      {j.location ? ` · ${j.location}` : ""}
+                      {j.remote ? " · Remote" : ""}
+                    </p>
+                  </div>
+                  {j.seniority === "senior" && (
+                    <span className="shrink-0 rounded-full border border-border px-2 py-0.5 text-caption text-text-secondary">Senior</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </section>
     </div>
   );
