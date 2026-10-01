@@ -87,6 +87,18 @@ export function chunkText(text: string, size = 1000, overlap = 150): string[] {
   return chunks;
 }
 
+/**
+ * Minimum cosine similarity for a mentor-content chunk to count as relevant.
+ *
+ * Was 0.2, which with text-embedding-3-small admits loosely related chunks;
+ * the model then cites them confidently, which reads as the mentor saying
+ * something they never said. 0.4 keeps genuine matches and makes off-topic
+ * questions fall through to the honest "ask the real mentor" reply.
+ * Tune with real questions: raise if answers cite irrelevant sources, lower
+ * if on-topic questions start getting the fallback.
+ */
+export const MENTOR_MIN_SIMILARITY = 0.4;
+
 export type Citation = { source_title: string; chunk_index: number; similarity: number };
 
 /**
@@ -133,7 +145,7 @@ export async function askMentorClone(
   }[];
 
   // No relevant content -> be honest and route to the human.
-  const relevant = chunks.filter((c) => c.similarity > 0.2);
+  const relevant = chunks.filter((c) => c.similarity >= MENTOR_MIN_SIMILARITY);
   if (relevant.length === 0) {
     return {
       answer: `I don't have anything in ${mentorName}'s uploaded content that covers this yet. You can use the "Ask the real mentor" button to reach ${mentorName} directly.`,
