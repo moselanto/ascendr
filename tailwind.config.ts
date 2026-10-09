@@ -42,14 +42,17 @@ const config: Config = {
         card: "#FFFFFF",
         text: { DEFAULT: "#10192F", secondary: "#46587A" },
         border: "#E6E9F2",
+        ink: { DEFAULT: "#0B1220", 800: "#141C2E", 700: "#1E2740" },
         dark: { bg: "#0B1120", card: "#151F38", text: "#F6F7FB" },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
         display: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "ui-serif", "Georgia", "serif"],
       },
       fontSize: {
-        display: ["60px", { lineHeight: "1.05", fontWeight: "700", letterSpacing: "-0.03em" }],
+        hero: ["76px", { lineHeight: "1.02", fontWeight: "600", letterSpacing: "-0.035em" }],
+        display: ["60px", { lineHeight: "1.05", fontWeight: "600", letterSpacing: "-0.03em" }],
         h1: ["44px", { lineHeight: "1.1", fontWeight: "700", letterSpacing: "-0.028em" }],
         h2: ["34px", { lineHeight: "1.16", fontWeight: "700", letterSpacing: "-0.024em" }],
         h3: ["24px", { lineHeight: "1.3", fontWeight: "600", letterSpacing: "-0.015em" }],

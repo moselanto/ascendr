@@ -6,81 +6,70 @@ import { SIGNUP } from "@/components/home/links";
  * Demonstrates the product rather than describing it: one person, one goal,
  * and every step the Career Graph takes between the two.
  *
- * The data is an illustrative example and is labelled as such on the page.
+ * Two columns on desktop: the story and outcome stay pinned on the left while
+ * the steps scroll on the right. The data is illustrative and labelled as such.
  * See src/lib/home/journey.ts for how to swap it for live engine output.
- *
- * Layout note: eight steps in a flat list read as a wall. The rail markers
- * now carry brand colour and the step headline is the largest thing in each
- * row, so the sequence scans vertically instead of needing to be read.
  */
 export function CareerJourney() {
   const j = DEMO_JOURNEY;
 
   return (
-    <section id="journey" className="border-b border-border bg-white">
-      <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
-        <div className="max-w-2xl">
-          <span className="eyebrow text-caption text-text-secondary">
-            Illustrative example
-          </span>
-          <h2 className="mt-3 text-h2 md:text-h1">
-            {j.personaName} wants to become a {j.goal}.
+    <section id="journey" className="bg-white">
+      <div className="mx-auto grid max-w-6xl gap-16 px-6 py-24 md:py-32 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <p className="text-[14px] font-medium text-brand-600">How it works · illustrative example</p>
+          <h2 className="mt-3 text-h1 font-semibold text-ink md:text-display">
+            {j.personaName} wants to become a <span className="accent-serif">{j.goal}.</span>
           </h2>
-          <p className="mt-5 text-lead text-text-secondary">
-            She is a {j.currentRole} today. Here is every step ASCENDR takes between those
-            two facts — and what she can act on at the end of it.
+          <p className="mt-6 max-w-md text-lead text-text-secondary">
+            She is a {j.currentRole} today. Here is every step ASCENDR takes between those two
+            facts, and what she can act on at the end of it.
           </p>
+
+          <div className="mt-10 rounded-2xl bg-ink p-8 text-white">
+            <p className="text-[13px] uppercase tracking-[0.12em] text-white/55">Outcome</p>
+            <p className="mt-2 text-[28px] font-semibold tracking-tight">{j.outcome}</p>
+            <p className="mt-3 text-[15px] leading-relaxed text-white/70">
+              Not a reading list. A set of actions with names attached: who to talk to, what to
+              learn first, and which roles are already within reach.
+            </p>
+            <Link
+              href={SIGNUP}
+              className="mt-7 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-[15px] font-medium text-ink transition-colors hover:bg-brand-50"
+            >
+              Build my career plan <span aria-hidden>→</span>
+            </Link>
+          </div>
         </div>
 
-        <ol className="mt-16 space-y-0">
+        <ol className="relative">
+          <span aria-hidden className="absolute bottom-6 left-[19px] top-6 w-px bg-ink/10" />
           {j.steps.map((step, i) => (
-            <li key={step.id} className="relative pb-11 pl-14 last:pb-0">
-              {i < j.steps.length - 1 && (
-                <span
-                  aria-hidden
-                  className="absolute left-[17px] top-9 h-full w-px bg-gradient-to-b from-brand-200 to-border"
-                />
-              )}
-              <span
-                aria-hidden
-                className="nums absolute left-0 top-0 flex h-9 w-9 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-small font-bold text-primary"
-              >
-                {i + 1}
+            <li key={step.id} className="relative flex gap-6 pb-5 last:pb-0">
+              <span className="nums relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink/10 bg-white text-[14px] font-semibold text-ink">
+                {String(i + 1).padStart(2, "0")}
               </span>
-
-              <p className="eyebrow text-caption text-text-secondary">{step.label}</p>
-              <p className="mt-2 text-h4 md:text-h3">{step.headline}</p>
-
-              {step.items && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {step.items.map((item) => (
-                    <span
-                      key={item}
-                      className="rounded-full border border-border bg-surface px-3 py-1.5 text-caption font-medium text-text-secondary"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              )}
+              <div className="flex-1 rounded-xl border border-ink/[0.08] bg-white p-5 transition-shadow hover:shadow-card">
+                <p className="text-[13px] text-text-secondary">{step.label}</p>
+                <p className="mt-1 text-[19px] font-semibold leading-snug tracking-[-0.01em] text-ink">
+                  {step.headline}
+                </p>
+                {step.items && (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {step.items.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-md bg-surface px-2.5 py-1 text-[13px] text-text-secondary"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </li>
           ))}
         </ol>
-
-        <div className="mt-6 rounded-lg border border-brand-200 bg-brand-50 p-8 md:p-10">
-          <span className="eyebrow text-caption text-primary">Outcome</span>
-          <p className="mt-3 text-h3 md:text-h2">{j.outcome}</p>
-          <p className="mt-4 max-w-prose text-body text-text-secondary">
-            Not a reading list. A set of actions with names attached — who to talk to, what
-            to learn first, and which roles are already within reach.
-          </p>
-          <Link
-            href={SIGNUP}
-            className="mt-8 inline-block rounded-sm bg-primary px-7 py-3.5 text-[17px] font-semibold text-white shadow-lift transition-colors hover:bg-brand-600"
-          >
-            Build My Career Plan
-          </Link>
-        </div>
       </div>
     </section>
   );

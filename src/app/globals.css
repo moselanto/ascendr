@@ -5,7 +5,8 @@
 /**
  * ASCENDR design tokens.
  *
- * Fonts load via next/font in layout.tsx (Outfit), exposed as --font-sans.
+ * Fonts load via next/font in layout.tsx (Instrument Sans + Instrument Serif),
+ * exposed as --font-sans and --font-serif.
  * Do not add an @import here: CSS @import is only valid at the top of a
  * file, so anything below the @tailwind directives is dropped by browsers.
  *
@@ -44,8 +45,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Outfit is geometric, so its default tracking is loose at display sizes and
-   too tight at small ones. Correct in both directions. */
+/* Tighten display sizes; keep small headings near default tracking. */
 h1,
 h2 {
   letter-spacing: -0.025em;
@@ -75,4 +75,37 @@ h4 {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Serif accent: one italic phrase per heading, slightly larger than the sans
+   so the x-heights optically match. */
+.accent-serif {
+  font-family: var(--font-serif), ui-serif, Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: 1.06em;
+}
+
+/* Quiet background textures for the marketing pages. */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgba(16, 25, 47, 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(16, 25, 47, 0.06) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+.bg-dots-light {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.mask-fade-b {
+  -webkit-mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 30%, transparent 100%);
+}
+
+.mask-radial {
+  -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }

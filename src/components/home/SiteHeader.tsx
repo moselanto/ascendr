@@ -1,45 +1,37 @@
 import Link from "next/link";
 import { SIGNIN, SIGNUP } from "@/components/home/links";
+import { Logo } from "@/components/home/Logo";
 
-/**
- * Header follows the reference pattern: wordmark left, navigation centred,
- * two actions right — a quiet outlined one and a filled primary. The previous
- * version pushed the nav hard against a small wordmark and left the right
- * side unbalanced.
- */
+const NAV = [
+  { href: "#questions", label: "Why ASCENDR" },
+  { href: "#journey", label: "How it works" },
+  { href: "#faq", label: "FAQ" },
+];
+
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-white/85 backdrop-blur-md">
-      <div className="mx-auto flex h-18 max-w-6xl items-center px-6">
-        <Link
-          href="/"
-          className="text-[22px] font-extrabold tracking-tight text-text"
-        >
-          ASCEND<span className="text-primary">R</span>
-        </Link>
+    <header className="sticky top-0 z-50 border-b border-ink/[0.06] bg-white/80 backdrop-blur-xl">
+      <div className="mx-auto flex h-16 max-w-6xl items-center px-6">
+        <Logo />
 
-        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-9 text-[15px] font-medium text-text-secondary lg:flex">
-          <a href="#questions" className="transition-colors hover:text-text">
-            Why ASCENDR
-          </a>
-          <a href="#journey" className="transition-colors hover:text-text">
-            How it works
-          </a>
-          <a href="#faq" className="transition-colors hover:text-text">
-            FAQ
-          </a>
+        <nav className="ml-12 hidden items-center gap-8 text-[15px] text-text-secondary lg:flex">
+          {NAV.map((n) => (
+            <a key={n.href} href={n.href} className="transition-colors hover:text-ink">
+              {n.label}
+            </a>
+          ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-2.5">
+        <div className="ml-auto flex items-center gap-1.5">
           <Link
             href={SIGNIN}
-            className="rounded-sm border border-border px-4 py-2 text-[15px] font-semibold text-text transition-colors hover:border-primary hover:text-primary"
+            className="rounded-full px-4 py-2 text-[15px] font-medium text-ink transition-colors hover:bg-surface"
           >
             Sign in
           </Link>
           <Link
             href={SIGNUP}
-            className="rounded-sm bg-primary px-4 py-2 text-[15px] font-semibold text-white transition-colors hover:bg-brand-600"
+            className="rounded-full bg-ink px-4 py-2 text-[15px] font-medium text-white transition-colors hover:bg-ink-700"
           >
             Get started
           </Link>

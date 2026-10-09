@@ -2,80 +2,138 @@ import Link from "next/link";
 import { SIGNUP } from "@/components/home/links";
 
 /**
- * Homepage hero — outcome-led rather than feature-led.
+ * Homepage hero. Left: the promise. Right: a product preview built in HTML
+ * (not a screenshot) showing what a member actually gets — a goal, a gap,
+ * a next action and the people who can help.
  *
- * Note on the trust strip: the previous hero carried "Trusted by learners in
- * 40+ countries" and a 40+/24/7/100% statistics bar. Both were placeholder
- * figures presented as fact on a public page, so they are gone. Nothing
- * replaces them until there are real numbers to state. The capability row at
- * the bottom describes what the product does, which is verifiable, rather
- * than claiming adoption we cannot evidence.
- *
- * Layout note: the previous hero had ~180px of empty space below the CTA
- * because the section padding and the gradient block were set independently.
- * Spacing is now driven by one rhythm.
+ * The preview reuses the illustrative "Sarah" example from the journey
+ * section and is labelled as an example. No adoption numbers or logos are
+ * shown until there are real ones to state.
  */
 
-const CAPABILITIES = [
-  "Skills gap analysis",
-  "Mentor matching",
-  "Community network",
-  "Opportunity fit",
+const GAPS = [
+  { skill: "Product discovery", have: 35 },
+  { skill: "Product analytics", have: 55 },
+  { skill: "Roadmapping", have: 20 },
 ];
+
+const MENTORS = [
+  { initials: "AK", tone: "bg-brand-100 text-brand-700" },
+  { initials: "JM", tone: "bg-emerald-100 text-emerald-800" },
+  { initials: "RO", tone: "bg-amber-100 text-amber-800" },
+];
+
+function ProductPreview() {
+  return (
+    <div className="relative">
+      <div aria-hidden className="absolute -inset-6 rounded-[32px] bg-gradient-to-br from-brand-100/70 via-white to-emerald-50 blur-2xl" />
+
+      <div className="relative rounded-2xl border border-ink/10 bg-white shadow-[0_1px_2px_rgba(11,18,32,0.04),0_24px_60px_-24px_rgba(11,18,32,0.25)]">
+        {/* window bar */}
+        <div className="flex items-center gap-1.5 border-b border-border px-4 py-3">
+          <span className="h-2.5 w-2.5 rounded-full bg-ink/10" />
+          <span className="h-2.5 w-2.5 rounded-full bg-ink/10" />
+          <span className="h-2.5 w-2.5 rounded-full bg-ink/10" />
+          <span className="ml-3 text-[12px] text-text-secondary">Career plan · example</span>
+        </div>
+
+        <div className="p-6">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-[12px] uppercase tracking-[0.12em] text-text-secondary">Goal</p>
+              <p className="mt-1 text-[20px] font-semibold tracking-tight text-ink">
+                Support Lead <span className="text-text-secondary">→</span> Product Manager
+              </p>
+            </div>
+            <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[12px] font-medium text-amber-800">
+              Partial match
+            </span>
+          </div>
+
+          <div className="mt-6 space-y-3.5">
+            {GAPS.map((g) => (
+              <div key={g.skill}>
+                <div className="flex justify-between text-[13px]">
+                  <span className="font-medium text-ink">{g.skill}</span>
+                  <span className="text-text-secondary">Gap</span>
+                </div>
+                <div className="mt-1.5 h-1.5 rounded-full bg-surface">
+                  <div className="h-1.5 rounded-full bg-ink" style={{ width: `${g.have}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-xl bg-ink p-4 text-white">
+            <p className="text-[12px] uppercase tracking-[0.12em] text-white/60">Next best action</p>
+            <p className="mt-1 text-[15px] font-medium">Book a 30-min discovery chat with a PM mentor</p>
+          </div>
+
+          <div className="mt-5 flex items-center justify-between">
+            <div className="flex items-center">
+              {MENTORS.map((m, i) => (
+                <span
+                  key={m.initials}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full border-2 border-white text-[11px] font-semibold ${m.tone} ${i ? "-ml-2" : ""}`}
+                >
+                  {m.initials}
+                </span>
+              ))}
+              <span className="ml-3 text-[13px] text-text-secondary">3 mentors matched</span>
+            </div>
+            <span className="text-[13px] font-medium text-ink">7 roles in reach</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      {/* Brand tint, not saturated brand: a full-strength wash behind text
-          vibrates against the headline. */}
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-[520px] bg-gradient-to-b from-brand-50 via-brand-50/40 to-white" />
+      <div aria-hidden className="bg-grid mask-fade-b pointer-events-none absolute inset-x-0 top-0 h-[640px]" />
 
-      <div className="relative mx-auto max-w-5xl px-6 pb-20 pt-20 text-center md:pb-24 md:pt-28">
-        <span className="eyebrow inline-block rounded-full border border-brand-200 bg-white px-3.5 py-1.5 text-caption text-primary shadow-sm">
-          Career Intelligence
-        </span>
+      <div className="relative mx-auto grid max-w-6xl items-center gap-16 px-6 pb-24 pt-16 md:pt-24 lg:grid-cols-[1.1fr_1fr] lg:pb-32">
+        <div>
+          <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-1 text-[13px] font-medium text-text-secondary">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            Career intelligence platform
+          </span>
 
-        <h1 className="mx-auto mt-7 max-w-4xl text-h1 md:text-display">
-          Your Network. Your Skills.
-          <br className="hidden sm:block" />{" "}
-          <span className="text-primary">Your Next Opportunity.</span>
-        </h1>
+          <h1 className="mt-7 text-[44px] font-semibold leading-[1.04] tracking-[-0.035em] text-ink sm:text-display lg:text-hero">
+            Your network.
+            <br />
+            Your skills.
+            <br />
+            <span className="accent-serif text-brand-600">Your next opportunity.</span>
+          </h1>
 
-        {/* Measure capped near 60 characters — the old hero ran the lead the
-            full width of the container, which is why it read as dense. */}
-        <p className="mx-auto mt-6 max-w-2xl text-lead text-text-secondary">
-          ASCENDR connects your goals, skills, mentors and professional network, then
-          turns them into a plan you can act on — so career ambition becomes measurable
-          progress.
-        </p>
+          <p className="mt-7 max-w-xl text-lead text-text-secondary">
+            ASCENDR connects your goals, skills, mentors and professional network, then turns
+            them into a plan you can act on, so career ambition becomes measurable progress.
+          </p>
 
-        <div className="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Link
-            href={SIGNUP}
-            className="w-full rounded-sm bg-primary px-7 py-3.5 text-[17px] font-semibold text-white shadow-lift transition-colors hover:bg-brand-600 sm:w-auto"
-          >
-            Build My Career Plan
-          </Link>
-          <a
-            href="#journey"
-            className="w-full rounded-sm border border-border bg-white px-7 py-3.5 text-[17px] font-semibold text-text transition-colors hover:border-primary hover:text-primary sm:w-auto"
-          >
-            See how it works
-          </a>
+          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:items-center">
+            <Link
+              href={SIGNUP}
+              className="inline-flex items-center justify-center gap-2 rounded-full bg-ink px-7 py-3.5 text-[16px] font-medium text-white transition-colors hover:bg-ink-700"
+            >
+              Build my career plan
+              <span aria-hidden>→</span>
+            </Link>
+            <a
+              href="#journey"
+              className="inline-flex items-center justify-center rounded-full border border-ink/15 bg-white px-7 py-3.5 text-[16px] font-medium text-ink transition-colors hover:border-ink/40"
+            >
+              See how it works
+            </a>
+          </div>
+
+          <p className="mt-5 text-[14px] text-text-secondary">Free to start. No credit card required.</p>
         </div>
 
-        <p className="mt-4 text-small text-text-secondary">
-          Free to start · No credit card required
-        </p>
-
-        <ul className="mx-auto mt-14 flex max-w-3xl flex-wrap items-center justify-center gap-x-7 gap-y-3 border-t border-border pt-7 text-small font-medium text-text-secondary">
-          {CAPABILITIES.map((c) => (
-            <li key={c} className="flex items-center gap-2">
-              <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-400" />
-              {c}
-            </li>
-          ))}
-        </ul>
+        <ProductPreview />
       </div>
     </section>
   );

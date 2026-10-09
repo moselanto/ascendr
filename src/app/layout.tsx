@@ -1,30 +1,34 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Instrument_Sans, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
 /**
- * Typeface: Outfit.
+ * Typography: Instrument Sans + Instrument Serif.
  *
- * Matched to the reference site (getro.com), whose face is a geometric sans
- * in the Circular Std / Gilroy class — single-story 'a', circular 'o',
- * straight-tailed 'y', slant-cut 't'. Those are commercial licences, so
- * Outfit is the closest freely-licensable equivalent: same geometric
- * skeleton, single-story 'a', and a taller x-height than Poppins, which
- * keeps it legible at UI sizes.
+ * Instrument Sans is a neo-grotesk with slightly condensed, editorial
+ * proportions. It reads like a product built by a design team rather than a
+ * template, and holds up from 13px UI labels to 72px headlines.
  *
- * ONE family for both headings and body, which is what the reference does.
- * A geometric sans is lower-contrast and more uniform than a humanist one,
- * so it depends on SIZE and LEADING for readability, not on a second face.
- * That is why body copy here is 18px at 1.7 line-height rather than 16/1.6 —
- * shrink it back and this face gets hard to read. See tailwind.config.ts.
+ * Instrument Serif is used sparingly, in italics, for one accent phrase per
+ * section (via the `font-serif` utility). That contrast is what gives the page
+ * an editorial, deliberate feel. Do not set whole paragraphs in it.
  *
- * Loaded via next/font: self-hosted at build time, no runtime request to
- * Google, no flash of unstyled text, no layout shift.
+ * Both load through next/font: self-hosted at build time, no layout shift.
+ * The CSS variable names are unchanged (--font-sans), so the rest of the app
+ * picks up the new face automatically.
  */
-const outfit = Outfit({
+const sans = Instrument_Sans({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const serif = Instrument_Serif({
+  subsets: ["latin"],
+  weight: "400",
+  style: ["normal", "italic"],
+  variable: "--font-serif",
   display: "swap",
 });
 
@@ -53,7 +57,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport = {
-  themeColor: "#4000F9",
+  themeColor: "#0B1220",
 };
 
 export default function RootLayout({
@@ -62,7 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={outfit.variable}>
+    <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body className="font-sans antialiased">{children}</body>
     </html>
   );

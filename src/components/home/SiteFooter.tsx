@@ -1,41 +1,40 @@
 import Link from "next/link";
 import { SIGNIN, SIGNUP } from "@/components/home/links";
+import { Logo } from "@/components/home/Logo";
 
 export function SiteFooter() {
   return (
     <footer className="bg-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-14 sm:flex-row sm:items-start">
-        <div className="max-w-sm">
-          <Link href="/" className="text-[20px] font-extrabold tracking-tight text-text">
-            ASCEND<span className="text-primary">R</span>
-          </Link>
-          <p className="mt-3 text-small text-text-secondary">
-            Career intelligence — from ambition to measurable outcomes.
+      <div className="mx-auto grid max-w-6xl gap-12 px-6 pb-14 pt-6 sm:grid-cols-[1.5fr_1fr_1fr]">
+        <div className="max-w-xs">
+          <Logo />
+          <p className="mt-4 text-[15px] leading-relaxed text-text-secondary">
+            Career intelligence, from ambition to measurable outcomes.
           </p>
         </div>
 
-        <nav className="flex flex-wrap items-center gap-x-7 gap-y-3 text-small font-medium text-text-secondary sm:ml-auto sm:justify-end">
-          <a href="#questions" className="transition-colors hover:text-text">
-            Why ASCENDR
-          </a>
-          <a href="#journey" className="transition-colors hover:text-text">
-            How it works
-          </a>
-          <a href="#faq" className="transition-colors hover:text-text">
-            FAQ
-          </a>
-          <Link href={SIGNIN} className="transition-colors hover:text-text">
-            Sign in
-          </Link>
-          <Link href={SIGNUP} className="font-semibold text-primary hover:opacity-80">
-            Get started
-          </Link>
-        </nav>
+        <div>
+          <p className="text-[13px] font-medium uppercase tracking-[0.12em] text-text-secondary">Product</p>
+          <ul className="mt-4 space-y-2.5 text-[15px] text-ink">
+            <li><a href="#questions" className="hover:text-brand-600">Why ASCENDR</a></li>
+            <li><a href="#journey" className="hover:text-brand-600">How it works</a></li>
+            <li><a href="#faq" className="hover:text-brand-600">FAQ</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="text-[13px] font-medium uppercase tracking-[0.12em] text-text-secondary">Account</p>
+          <ul className="mt-4 space-y-2.5 text-[15px] text-ink">
+            <li><Link href={SIGNIN} className="hover:text-brand-600">Sign in</Link></li>
+            <li><Link href={SIGNUP} className="hover:text-brand-600">Create an account</Link></li>
+          </ul>
+        </div>
       </div>
 
-      <div className="border-t border-border">
-        <div className="mx-auto max-w-6xl px-6 py-6 text-caption text-text-secondary">
-          © {new Date().getFullYear()} ASCENDR. Rise. Learn. Connect. Lead.
+      <div className="border-t border-ink/[0.06]">
+        <div className="mx-auto flex max-w-6xl flex-col justify-between gap-2 px-6 py-6 text-[13px] text-text-secondary sm:flex-row">
+          <span>© {new Date().getFullYear()} ASCENDR</span>
+          <span>Rise. Learn. Connect. Lead.</span>
         </div>
       </div>
     </footer>
