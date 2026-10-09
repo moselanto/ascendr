@@ -5,13 +5,16 @@ import { NextResponse, type NextRequest } from "next/server";
  * Refreshes the Supabase auth session on every request and guards app routes.
  * Public routes: marketing home (/), /login, /signup, /auth/*.
  * Everything under /app requires a session.
+ *
+ * Unauthenticated visits to /app/** are sent to /login?next=<path + query>
+ * so the user lands back where they were after signing in.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL\!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY\!,
     {
       cookies: {
         getAll() {
@@ -33,12 +36,14 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isProtected = path.startsWith("/app");
+  const isProtected = path === "/app" || path.startsWith("/app/");
 
-  if (isProtected && !user) {
+  if (isProtected && \!user) {
+    const original = `${path}${request.nextUrl.search}`;
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirect", path);
+    url.search = "";
+    url.searchParams.set("next", original);
     return NextResponse.redirect(url);
   }
 

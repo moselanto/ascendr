@@ -1,127 +1,169 @@
+import Link from "next/link";
+import { Logo } from "@/components/home/Logo";
 import { login, signup } from "./actions";
-import BrandSlideshow from "./BrandSlideshow";
 import PasswordField from "./PasswordField";
+import { safeNext } from "./safe-next";
+
+export const metadata = { title: "Sign in | ASCENDR" };
+
+const VALUE_POINTS = [
+  { title: "See your gap", body: "Compare your skills with the role you want, line by line." },
+  { title: "Learn from people ahead of you", body: "Mentors, communities and live sessions in one place." },
+  { title: "Get matched to real openings", body: "Opportunities ranked by how ready you are today." },
+];
 
 export default function LoginPage({
   searchParams,
 }: {
-  searchParams: { error?: string; mode?: string; redirect?: string };
+  searchParams: { error?: string; mode?: string; next?: string; redirect?: string };
 }) {
   const isSignup = searchParams.mode === "signup";
-  return (
-    <main className="min-h-screen grid md:grid-cols-2 bg-[#EEF1F6]">
-      {/* Brand panel */}
-      <div className="relative hidden md:flex flex-col justify-end overflow-hidden p-12 text-white">
-        {/* Hero photo — bg-top keeps faces/heads in frame, never cropped */}
-        <div
-          className="absolute inset-0 bg-cover bg-top"
-          style={{ backgroundImage: "url('/login-hero.png')" }}
-          aria-hidden
-        />
-        {/* Brand gradient wash for legibility + on-brand color */}
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-primary/85 to-dark-bg/95"
-          aria-hidden
-        />
 
-        <div className="relative flex h-full flex-col">
-          <div className="text-2xl font-black">
-            ASCEND<span className="text-[#a5b4fc]">R</span>
+  // `next` is the return path; `redirect` is the legacy name. Both are
+  // sanitised so only same-site relative paths survive.
+  const rawNext = searchParams.next ?? searchParams.redirect;
+  const nextValue = rawNext ? safeNext(rawNext, "") : "";
+
+  const switchParams = new URLSearchParams();
+  if (\!isSignup) switchParams.set("mode", "signup");
+  if (nextValue) switchParams.set("next", nextValue);
+  const switchQs = switchParams.toString();
+  const switchHref = switchQs ? `/login?${switchQs}` : "/login";
+
+  return (
+    <main className="grid min-h-screen bg-surface lg:grid-cols-[1fr_1fr]">
+      {/* Form column */}
+      <div className="flex flex-col px-5 py-8 sm:px-10">
+        <Logo />
+
+        <div className="flex flex-1 items-center justify-center py-10">
+          <div className="w-full max-w-[420px]">
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
+              <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">
+                {isSignup ? "Create account" : "Sign in"}
+              </p>
+              <h1 className="mt-2 text-[28px] font-semibold leading-tight tracking-tight text-ink">
+                {isSignup ? (
+                  <>
+                    Start your <span className="accent-serif">next move</span>
+                  </>
+                ) : (
+                  <>
+                    Welcome <span className="accent-serif">back</span>
+                  </>
+                )}
+              </h1>
+              <p className="mt-2 text-[14px] leading-relaxed text-text-secondary">
+                {isSignup
+                  ? "Free to join. Set your goal in under two minutes."
+                  : "Sign in to pick up where you left off."}
+              </p>
+
+              {searchParams.error && (
+                <div
+                  role="alert"
+                  className="mt-5 rounded-lg border border-danger/20 bg-danger/5 px-3 py-2.5 text-[13px] leading-relaxed text-danger"
+                >
+                  {searchParams.error}
+                </div>
+              )}
+
+              <form className="mt-6 flex flex-col gap-4">
+                {nextValue ? <input type="hidden" name="next" value={nextValue} /> : null}
+
+                {isSignup && (
+                  <div>
+                    <label htmlFor="full_name" className="mb-1.5 block text-[13px] font-medium text-ink">
+                      Full name
+                    </label>
+                    <input
+                      id="full_name"
+                      name="full_name"
+                      placeholder="Ada Okafor"
+                      required
+                      autoComplete="name"
+                      className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-text-secondary/70 focus:border-ink/40"
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="email" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    required
+                    autoComplete="email"
+                    className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-text-secondary/70 focus:border-ink/40"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-ink">
+                    Password
+                  </label>
+                  <PasswordField autoComplete={isSignup ? "new-password" : "current-password"} />
+                </div>
+
+                <button
+                  formAction={isSignup ? signup : login}
+                  className="mt-1 w-full rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-ink-700"
+                >
+                  {isSignup ? "Create account" : "Sign in"}
+                </button>
+              </form>
+
+              <p className="mt-6 text-center text-[13px] text-text-secondary">
+                {isSignup ? "Already have an account? " : "New to ASCENDR? "}
+                <Link href={switchHref} className="font-medium text-ink underline-offset-4 hover:underline">
+                  {isSignup ? "Sign in" : "Create an account"}
+                </Link>
+              </p>
+            </div>
+
+            <p className="mt-5 text-center text-[12px] text-text-secondary">
+              By continuing you agree to use ASCENDR responsibly. Your data stays yours.
+            </p>
           </div>
-          <BrandSlideshow />
         </div>
       </div>
 
-      {/* Form panel */}
-      <div className="flex flex-col bg-card md:justify-center">
-        {/* Mobile hero banner — mirrors the desktop photo above the form.
-            bg-top keeps heads/faces in frame so nobody is cropped. */}
-        <div className="relative flex h-52 flex-col justify-end overflow-hidden p-6 text-white md:hidden">
-          <div
-            className="absolute inset-0 bg-cover bg-top"
-            style={{ backgroundImage: "url('/login-hero.png')" }}
-            aria-hidden
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-dark-bg/95 via-primary/55 to-transparent" aria-hidden />
-          <div className="relative">
-            <div className="text-2xl font-black">
-              ASCEND<span className="text-[#a5b4fc]">R</span>
-            </div>
-            <p className="mt-1.5 text-small font-semibold text-[#c7d2fe]">
-              Rise. Learn. Connect. Lead.
-            </p>
-            <p className="mt-0.5 text-caption text-white/70">
-              Your global AI career growth ecosystem
-            </p>
-          </div>
-        </div>
+      {/* Brand panel (desktop only) */}
+      <div className="relative hidden overflow-hidden bg-ink text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
+        <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
 
-        <div className="flex flex-col p-8 md:p-16 md:justify-center">
-        <h2 className="text-h3 font-bold">
-          {isSignup ? "Create your account" : "Welcome back"}
-        </h2>
-        <p className="text-text-secondary text-small mt-1">
-          {isSignup ? "Join the ASCENDR community." : "Sign in to continue."}
+        <p className="relative text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">
+          Career intelligence
         </p>
 
-        {searchParams.error && (
-          <div className="mt-4 text-small text-danger bg-[#fef2f2] border border-[#fecaca] rounded-sm px-3 py-2">
-            {searchParams.error}
-          </div>
-        )}
+        <div className="relative max-w-[480px]">
+          <h2 className="text-[40px] font-semibold leading-[1.1] tracking-tight">
+            Your network. Your skills. <span className="accent-serif">Your next opportunity.</span>
+          </h2>
 
-        <form className="mt-6 flex flex-col gap-3">
-          <input
-            type="hidden"
-            name="redirect"
-            value={searchParams.redirect ?? (isSignup ? "/onboarding" : "/app")}
-          />
-          {isSignup && (
-            <input
-              name="full_name"
-              placeholder="Full name"
-              required
-              autoComplete="name"
-              className="rounded-sm border border-border px-4 py-3 text-body focus:outline-none focus:border-primary"
-            />
-          )}
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            required
-            autoComplete="email"
-            className="rounded-sm border border-border px-4 py-3 text-body focus:outline-none focus:border-primary"
-          />
-          <PasswordField
-            autoComplete={isSignup ? "new-password" : "current-password"}
-          />
-          <button
-            formAction={isSignup ? signup : login}
-            className="bg-primary text-white font-semibold rounded-sm px-4 py-3 mt-1 hover:opacity-95"
-          >
-            {isSignup ? "Create account" : "Sign in"}
-          </button>
-        </form>
-
-        <p className="text-small text-text-secondary mt-5">
-          {isSignup ? (
-            <>
-              Already have an account?{" "}
-              <a className="text-primary font-semibold" href="/login">
-                Sign in
-              </a>
-            </>
-          ) : (
-            <>
-              New to ASCENDR?{" "}
-              <a className="text-primary font-semibold" href="/login?mode=signup">
-                Create an account
-              </a>
-            </>
-          )}
-        </p>
+          <ul className="mt-10 flex flex-col gap-5">
+            {VALUE_POINTS.map((p) => (
+              <li key={p.title} className="flex gap-3.5">
+                <span
+                  aria-hidden
+                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[12px] text-white"
+                >
+                  {"\u2713"}
+                </span>
+                <span>
+                  <span className="block text-[15px] font-medium">{p.title}</span>
+                  <span className="mt-0.5 block text-[14px] leading-relaxed text-white/65">{p.body}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
+
+        <p className="relative text-[12px] text-white/50">ASCENDR</p>
       </div>
     </main>
   );

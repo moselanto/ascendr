@@ -27,7 +27,7 @@ export async function createOrganization(formData: FormData) {
   const supabase = createClient();
   const { data } = await supabase.rpc("create_organization", { p_name: name, p_kind: KINDS.has(kind) ? kind : "other" });
   revalidatePath("/app/network");
-  if (data) redirect(`/app/network?org=${data}`);
+  if (data) redirect(`/app/network?org=${data}&toast=${encodeURIComponent("Network created")}`);
 }
 
 export async function createInvite(formData: FormData) {
@@ -57,7 +57,7 @@ export async function acceptInvite(formData: FormData) {
   const { data, error } = await supabase.rpc("accept_org_invite", { p_code: code });
   if (error || data == null) redirect(`/app/network/join?code=${encodeURIComponent(code)}&error=1`);
   revalidatePath("/app/network");
-  redirect(`/app/network?org=${data}`);
+  redirect(`/app/network?org=${data}&toast=${encodeURIComponent("Welcome to the network")}`);
 }
 
 export async function addOrgRole(formData: FormData) {

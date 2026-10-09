@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
@@ -5,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import NotificationBell from "./NotificationBell";
 import { AppSidebar, AppCrumb, MobileNav } from "./AppNav";
+import Toast from "@/components/ui/Toast";
 
 
 /**
@@ -134,6 +136,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </div>
 
       <MobileNav communitiesUnread={communitiesUnread} />
+
+      <Suspense fallback={null}>
+        <Toast />
+      </Suspense>
     </div>
   );
 }

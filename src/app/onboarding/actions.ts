@@ -21,6 +21,18 @@ export async function completeOnboarding(formData: FormData) {
     .filter(Boolean)
     .slice(0, 10);
 
+  // Stepped-flow extras. current_role and skills are not persisted yet (no
+  // columns for them); they inform analytics only. horizon_months is stored
+  // on the goal row, which already has that column.
+  const currentRole = String(formData.get("current_role") || "").trim().slice(0, 120);
+  const skills = String(formData.get("skills") || "")
+    .split(",")
+    .map((x) => x.trim())
+    .filter(Boolean)
+    .slice(0, 30);
+  const horizonRaw = Number(formData.get("horizon_months") || 0);
+  const horizonMonths = [3, 6, 12, 24].includes(horizonRaw) ? horizonRaw : null;
+
   const supabase = createClient();
 
   // Keep the denormalised columns on profiles: existing UI still reads them,
@@ -59,6 +71,7 @@ export async function completeOnboarding(formData: FormData) {
         user_id: profile!.id,
         kind: goal,
         target_title: targetRoles[0] ?? null,
+        ...(horizonMonths ? { horizon_months: horizonMonths } : {}),
       });
     }
   }
@@ -72,6 +85,9 @@ export async function completeOnboarding(formData: FormData) {
       kind: goal ?? "none",
       target_role_count: targetRoles.length,
       has_target_role: targetRoles.length > 0,
+      has_current_role: currentRole.length > 0,
+      skill_count: skills.length,
+      horizon_months: horizonMonths ?? 0,
     },
   });
 

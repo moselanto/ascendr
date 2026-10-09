@@ -6,14 +6,9 @@ import Link from "next/link";
 /**
  * Route-segment error boundary for the public site.
  *
- * Before this existed, any throw in a Server Component produced an unstyled
- * Next.js failure page. Beyond the UX, the default surface can expose more
- * about the failure than it should depending on configuration.
- *
- * We deliberately show the user nothing but the digest — a short hash Next
- * generates for the error. It is safe to display, and it lets support tie a
- * report to a specific server log line without ever putting a stack trace or
- * a message on screen.
+ * We deliberately show the user nothing but the digest: a short hash Next
+ * generates for the error. It is safe to display and lets support tie a
+ * report to a server log line without putting a stack trace on screen.
  */
 export default function Error({
   error,
@@ -29,33 +24,33 @@ export default function Error({
   }, [error]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-bg px-6 text-text">
-      <div className="w-full max-w-md text-center">
-        <p className="text-caption font-semibold uppercase tracking-wide text-text-secondary">
-          Something went wrong
-        </p>
-        <h1 className="mt-3 text-h2 font-bold">This page didn&apos;t load</h1>
-        <p className="mt-3 text-body text-text-secondary">
+    <main className="flex min-h-screen items-center justify-center bg-surface px-5">
+      <div className="w-full max-w-md rounded-2xl border border-border bg-white p-8 text-center shadow-card">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Something went wrong</p>
+        <h1 className="mt-2 text-[26px] font-semibold tracking-tight text-ink">
+          This page didn&apos;t <span className="accent-serif">load</span>
+        </h1>
+        <p className="mt-3 text-[14px] leading-relaxed text-text-secondary">
           The problem is on our side, not yours. Trying again usually works.
         </p>
 
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <div className="mt-7 flex flex-col items-center justify-center gap-3 sm:flex-row">
           <button
             onClick={reset}
-            className="w-full rounded-sm bg-primary px-6 py-3 text-body font-semibold text-white hover:opacity-95 sm:w-auto"
+            className="w-full rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-ink-700 sm:w-auto"
           >
             Try again
           </button>
           <Link
             href="/"
-            className="w-full rounded-sm border border-border bg-card px-6 py-3 text-body font-semibold text-text hover:border-primary sm:w-auto"
+            className="w-full rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink transition-colors hover:border-ink/30 sm:w-auto"
           >
             Back to home
           </Link>
         </div>
 
         {error.digest && (
-          <p className="mt-8 text-caption text-text-secondary">
+          <p className="mt-7 text-[12px] text-text-secondary">
             Reference: <span className="font-mono">{error.digest}</span>
           </p>
         )}
