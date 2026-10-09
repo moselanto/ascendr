@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { track } from "@/lib/analytics";
 import { OUTCOME_VALUES } from "@/lib/career/outcomes";
+import { backWithToast } from "@/lib/toast";
 
 /**
  * Mark a required skill as one the member already has.
@@ -39,6 +40,8 @@ export async function markSkillHeld(formData: FormData) {
     await track("skill_added", { userId: profile.id, props: { source: "gap_analysis" } });
   }
   revalidatePath("/app/career");
+  revalidatePath("/app");
+  if (error == null) backWithToast("Skill added to your profile", "/app/career");
 }
 
 /** Undo a self-reported skill. */
@@ -101,6 +104,7 @@ export async function recordOutcome(formData: FormData) {
   }
   revalidatePath("/app/career");
   revalidatePath("/app/outcomes");
+  if (error == null) backWithToast("Win logged. Nice work.", "/app/outcomes");
 }
 
 /** Remove one of the member's own outcomes (e.g. entered by mistake). */
@@ -164,4 +168,5 @@ export async function togglePlanStep(formData: FormData) {
 
   revalidatePath("/app/career");
   revalidatePath("/app");
+  if (isDone === false) backWithToast("Step completed. That counts as a career action.", "/app/career");
 }

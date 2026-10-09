@@ -108,23 +108,39 @@ export default async function HomePage() {
   ]);
 
   const goal = goalRes.data;
-  const analysis = goal ? await analyzeGap(me, goal.id) : null;
+
+  // Round 2 (parallel): gap analysis, mentor candidates, tracker count.
+  const [analysis, mentorRes, savedRes] = await Promise.all([
+    goal ? analyzeGap(me, goal.id) : Promise.resolve(null),
+    supabase.from("profiles").select("id, full_name, bio, verified_expert").eq("role", "mentor").neq("id", me).limit(30),
+    supabase.from("saved_opportunities").select("id", { count: "exact", head: true }).eq("user_id", me),
+  ]);
   const roleTitle = analysis?.roleTitle ?? goal?.target_title ?? "your target role";
   const essentialGaps = (analysis?.gaps ?? []).filter((g) => g.importance === "essential");
   const essentialTotal = essentialGaps.length + (analysis?.matched.length ?? 0);
+  const mentors = (mentorRes.data ?? []) as Mentor[];
+  const gapIds = essentialGaps.map((g) => g.skillId);
+  const gapLabel = new Map(essentialGaps.map((g) => [g.skillId, g.label]));
+
+  // Round 3 (parallel): roadmap steps, mentor skill overlap, live job feeds.
+  const [stepRes, mentorSkillRes, jobRes] = await Promise.all([
+    goal && essentialGaps.length > 0
+      ? supabase.from("career_actions").select("detail").eq("user_id", me).eq("related_type", "plan_step").eq("goal_id", goal.id)
+      : Promise.resolve({ data: [] as { detail: string | null }[] }),
+    mentors.length && gapIds.length
+      ? supabase.from("user_skills").select("user_id, skill_id").in("user_id", mentors.map((m) => m.id)).in("skill_id", gapIds)
+      : Promise.resolve({ data: [] as { user_id: string; skill_id: string }[] }),
+    analysis?.roleId
+      ? findOpportunities(String(roleTitle), 3).catch(() => ({ jobs: [] as Opportunity[], total: 0, companies: 0 }))
+      : Promise.resolve({ jobs: [] as Opportunity[], total: 0, companies: 0 }),
+  ]);
 
   // This week: the next three unfinished roadmap steps.
   let weekly: (RoadmapStep & { skillId: string; skill: string })[] = [];
   let roadmapDone = 0;
   let roadmapTotal = 0;
   if (goal && essentialGaps.length > 0) {
-    const { data: stepRows } = await supabase
-      .from("career_actions")
-      .select("detail")
-      .eq("user_id", me)
-      .eq("related_type", "plan_step")
-      .eq("goal_id", goal.id);
-    const completed = new Set((stepRows ?? []).map((r: { detail: string | null }) => r.detail ?? ""));
+    const completed = new Set(((stepRes.data ?? []) as { detail: string | null }[]).map((r) => r.detail ?? ""));
     const rm = buildRoadmap(essentialGaps, completed);
     roadmapDone = rm.done;
     roadmapTotal = rm.total;
@@ -141,29 +157,13 @@ export default async function HomePage() {
     })
     .filter(Boolean) as { id: string; name: string; slug: string; member_count: number }[];
 
-  // People who can help: mentors, ranked by how many of the member's gaps they hold.
-  const { data: mentorRows } = await supabase
-    .from("profiles")
-    .select("id, full_name, bio, verified_expert")
-    .eq("role", "mentor")
-    .neq("id", me)
-    .limit(30);
-  const mentors = (mentorRows ?? []) as Mentor[];
-  const gapIds = essentialGaps.map((g) => g.skillId);
-  const gapLabel = new Map(essentialGaps.map((g) => [g.skillId, g.label]));
+  // People who can help: mentors ranked by how many of the member's gaps they hold.
   const coverBy = new Map<string, string[]>();
-  if (mentors.length && gapIds.length) {
-    const { data: ms } = await supabase
-      .from("user_skills")
-      .select("user_id, skill_id")
-      .in("user_id", mentors.map((m) => m.id))
-      .in("skill_id", gapIds);
-    (ms ?? []).forEach((r: { user_id: string; skill_id: string }) => {
-      const list = coverBy.get(r.user_id) ?? [];
-      list.push(gapLabel.get(r.skill_id) ?? "");
-      coverBy.set(r.user_id, list);
-    });
-  }
+  ((mentorSkillRes.data ?? []) as { user_id: string; skill_id: string }[]).forEach((r) => {
+    const list = coverBy.get(r.user_id) ?? [];
+    list.push(gapLabel.get(r.skill_id) ?? "");
+    coverBy.set(r.user_id, list);
+  });
   const people = mentors
     .map((m) => {
       const covers = coverBy.get(m.id) ?? [];
@@ -177,17 +177,9 @@ export default async function HomePage() {
     .sort((a, b) => b.covers - a.covers || Number(b.verified_expert) - Number(a.verified_expert))
     .slice(0, 3);
 
-  let jobs: Opportunity[] = [];
-  let jobsTotal = 0;
-  if (analysis?.roleId) {
-    try {
-      const res = await findOpportunities(String(roleTitle), 3);
-      jobs = res.jobs;
-      jobsTotal = res.total;
-    } catch {
-      jobs = [];
-    }
-  }
+  const jobs: Opportunity[] = jobRes.jobs;
+  const jobsTotal = jobRes.total;
+  const savedCount = savedRes.error ? 0 : savedRes.count ?? 0;
 
   const feed = ((feedRes.data as unknown as FeedRow[]) ?? []).slice(0, 4);
   const actionsMonth = monthRes.count ?? 0;
@@ -205,6 +197,21 @@ export default async function HomePage() {
     outcomeCount: wins,
     roleTitle: String(roleTitle),
   });
+
+
+  // Activation checklist: the seven moves that make ASCENDR useful. Each is
+  // read from real rows, and the card disappears once everything is done.
+  const checklist = [
+    { done: Boolean(goal), label: "Set your career goal", hint: "Tell us where you want to go", href: "/onboarding" },
+    { done: (analysis?.held.length ?? 0) > 0, label: "Add skills you already have", hint: "So your gaps are accurate", href: "/app/career" },
+    { done: roadmapDone > 0, label: "Complete your first roadmap step", hint: "Every step counts as a career action", href: "/app/career#roadmap" },
+    { done: communities.length > 0, label: "Join a community", hint: "Where people who made your move talk", href: "/app/communities" },
+    { done: connections > 0, label: "Connect with someone", hint: "Mentors who cover your gaps first", href: "/app/mentors" },
+    { done: savedCount > 0, label: "Save a role to your tracker", hint: "Roles matched to your goal", href: "/app/opportunities" },
+    { done: wins > 0, label: "Log your first win", hint: "Interviews, intros and offers count", href: "/app/outcomes#log" },
+  ];
+  const checklistDone = checklist.filter((c) => c.done).length;
+  const showChecklist = checklistDone < checklist.length;
 
   return (
     <div className="space-y-6">
@@ -299,6 +306,50 @@ export default async function HomePage() {
           </div>
         </Card>
       </div>
+
+      {showChecklist && (
+        <section className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-[17px] font-semibold tracking-tight text-ink">Get the most from ASCENDR</h2>
+              <p className="text-[13px] text-text-secondary">
+                {checklistDone} of {checklist.length} done. Members who finish these see their plan, people and roles come together.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 sm:w-56">
+              <div className="h-1.5 flex-1 rounded-full bg-surface">
+                <div className="h-1.5 rounded-full bg-accent" style={{ width: `${Math.round((checklistDone / checklist.length) * 100)}%` }} />
+              </div>
+              <span className="nums text-[12px] font-semibold text-ink">{Math.round((checklistDone / checklist.length) * 100)}%</span>
+            </div>
+          </div>
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-4">
+            {checklist.map((c) => (
+              <li key={c.label}>
+                <Link
+                  href={c.href}
+                  className={`flex h-full items-start gap-3 rounded-xl border px-3.5 py-3 transition-colors ${
+                    c.done ? "border-emerald-100 bg-emerald-50/50" : "border-border hover:border-ink/30 hover:bg-surface/60"
+                  }`}
+                >
+                  <span
+                    aria-hidden
+                    className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] ${
+                      c.done ? "bg-accent text-white" : "border border-border bg-white"
+                    }`}
+                  >
+                    {c.done ? "\u2713" : ""}
+                  </span>
+                  <span>
+                    <span className={`block text-[13px] font-medium ${c.done ? "text-text-secondary line-through" : "text-ink"}`}>{c.label}</span>
+                    {c.done ? null : <span className="block text-[12px] text-text-secondary">{c.hint}</span>}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">

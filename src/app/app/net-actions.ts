@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { backWithToast } from "@/lib/toast";
 
 /** Send a connection request to another profile. */
 export async function sendConnectionRequest(formData: FormData) {
@@ -32,6 +33,9 @@ export async function sendConnectionRequest(formData: FormData) {
   }
   revalidatePath("/app/networking");
   revalidatePath(`/app/members/${addresseeId}`);
+  revalidatePath("/app/members");
+  revalidatePath("/app/mentors");
+  backWithToast(existing ? "You are already connected or have a request pending" : "Connection request sent", "/app/members");
 }
 
 /** Accept or decline an incoming connection request (addressee only). */

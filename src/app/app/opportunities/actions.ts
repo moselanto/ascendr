@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { track } from "@/lib/analytics";
+import { backWithToast } from "@/lib/toast";
 
 const STAGES = new Set(["saved", "applied", "interviewing", "offer", "closed"]);
 
@@ -35,6 +36,7 @@ export async function saveOpportunity(formData: FormData) {
   );
   await track("opportunity_viewed", { userId: profile.id, props: { action: "saved" } });
   revalidatePath("/app/opportunities");
+  backWithToast("Saved to your tracker", "/app/opportunities");
 }
 
 /**
@@ -70,6 +72,7 @@ export async function moveOpportunity(formData: FormData) {
   }
   revalidatePath("/app/opportunities");
   revalidatePath("/app");
+  if (row) backWithToast(status === "applied" ? "Marked as applied. That counts as a career action." : `Moved to ${status}`, "/app/opportunities");
 }
 
 export async function removeOpportunity(formData: FormData) {
