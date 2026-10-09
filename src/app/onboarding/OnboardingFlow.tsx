@@ -40,7 +40,7 @@ export default function OnboardingFlow({ roles, firstName }: { roles: string[]; 
 
   const last = step === STEPS.length - 1;
   const s = STEPS[step];
-  const canContinue = step \!== 2 || targetRole.trim().length > 0;
+  const canContinue = step !== 2 || targetRole.trim().length > 0;
 
   return (
     <form
@@ -196,7 +196,7 @@ export default function OnboardingFlow({ roles, firstName }: { roles: string[]; 
           <button
             key={`next-${step}`}
             type="button"
-            disabled={\!canContinue}
+            disabled={!canContinue}
             onClick={() => setStep((n) => Math.min(STEPS.length - 1, n + 1))}
             className="ml-auto rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-ink-700 disabled:opacity-40"
           >

@@ -26,20 +26,20 @@ export async function GET(request: Request) {
   let ok = false;
   if (code) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    ok = \!error;
+    ok = !error;
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       type: type as any,
       token_hash: tokenHash,
     });
-    ok = \!error;
+    ok = !error;
   }
 
-  if (\!ok) {
+  if (!ok) {
     const failure = new URL("/login", url.origin);
     failure.searchParams.set("error", "Sign-in link expired or invalid. Please try again.");
-    if (rawNext && safeNext(rawNext, "") \!== "") failure.searchParams.set("next", next);
+    if (rawNext && safeNext(rawNext, "") !== "") failure.searchParams.set("next", next);
     return NextResponse.redirect(failure);
   }
 
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
       .select("id")
       .eq("auth_user_id", user.id)
       .maybeSingle();
-    if (\!existing) {
+    if (!existing) {
       await supabase.from("profiles").insert({
         auth_user_id: user.id,
         full_name: (user.user_metadata?.full_name as string) || null,

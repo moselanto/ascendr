@@ -19,7 +19,7 @@ export default function Toast() {
   const [visible, setVisible] = useState<string | null>(null);
 
   useEffect(() => {
-    if (\!message) return;
+    if (!message) return;
     setVisible(message.slice(0, 140));
     const t = setTimeout(() => {
       setVisible(null);
@@ -31,7 +31,7 @@ export default function Toast() {
     return () => clearTimeout(t);
   }, [message, params, pathname, router]);
 
-  if (\!visible) return null;
+  if (!visible) return null;
 
   return (
     <div

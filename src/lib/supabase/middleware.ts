@@ -13,8 +13,8 @@ export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL\!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY\!,
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
         getAll() {
@@ -38,7 +38,7 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const isProtected = path === "/app" || path.startsWith("/app/");
 
-  if (isProtected && \!user) {
+  if (isProtected && !user) {
     const original = `${path}${request.nextUrl.search}`;
     const url = request.nextUrl.clone();
     url.pathname = "/login";

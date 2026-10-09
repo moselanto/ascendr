@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 
 export default async function OnboardingPage() {
   const profile = await getCurrentProfile();
-  if (\!profile) redirect("/login?next=/onboarding");
+  if (!profile) redirect("/login?next=/onboarding");
 
   // Supported target roles. Falls back to free text in the flow when the
   // role catalogue has not been seeded yet.
@@ -18,7 +18,7 @@ export default async function OnboardingPage() {
     new Set(((roleRows ?? []) as { id: string; title: string }[]).map((r) => r.title).filter(Boolean))
   );
 
-  const firstName = (profile\!.full_name ?? "").trim().split(" ")[0] || null;
+  const firstName = (profile!.full_name ?? "").trim().split(" ")[0] || null;
 
   return (
     <main className="min-h-screen bg-surface">

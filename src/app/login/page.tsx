@@ -25,7 +25,7 @@ export default function LoginPage({
   const nextValue = rawNext ? safeNext(rawNext, "") : "";
 
   const switchParams = new URLSearchParams();
-  if (\!isSignup) switchParams.set("mode", "signup");
+  if (!isSignup) switchParams.set("mode", "signup");
   if (nextValue) switchParams.set("next", nextValue);
   const switchQs = switchParams.toString();
   const switchHref = switchQs ? `/login?${switchQs}` : "/login";

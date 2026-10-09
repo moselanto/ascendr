@@ -36,7 +36,7 @@ export default function PasswordField({
       />
       <button
         type="button"
-        onClick={() => setShow((s) => \!s)}
+        onClick={() => setShow((s) => !s)}
         aria-label={show ? "Hide password" : "Show password"}
         aria-pressed={show}
         className="absolute inset-y-0 right-0 flex items-center px-3 text-[12px] font-medium text-text-secondary hover:text-ink"
