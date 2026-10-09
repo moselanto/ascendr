@@ -7,6 +7,8 @@ import { trackAsync } from "@/lib/analytics";
 import { markSkillHeld, unmarkSkillHeld, recordOutcome, deleteOutcome } from "./actions";
 import { OUTCOME_KINDS, outcomeLabel } from "@/lib/career/outcomes";
 import { findOpportunities } from "@/lib/opportunities";
+import { buildRoadmap } from "@/lib/career/roadmap";
+import { Roadmap } from "@/components/app/Roadmap";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +84,15 @@ export default async function CareerPage() {
   const roleTitle = analysis?.roleTitle ?? goal.target_title ?? "your target role";
   const band = BAND_COPY[analysis?.band ?? "unknown"];
   const essentialGaps = (analysis?.gaps ?? []).filter((g) => g.importance === "essential");
-  const roadmap = essentialGaps.slice(0, 5);
+  // Completed roadmap steps for this goal (career_actions, related_type = plan_step).
+  const { data: stepRows } = await supabase
+    .from("career_actions")
+    .select("detail")
+    .eq("user_id", profile?.id ?? "")
+    .eq("related_type", "plan_step")
+    .eq("goal_id", goal.id);
+  const completedSteps = new Set((stepRows ?? []).map((r: { detail: string | null }) => r.detail ?? ""));
+  const roadmap = buildRoadmap(essentialGaps, completedSteps);
   const heldIds = new Set((analysis?.held ?? []).map((h) => h.skillId));
 
   // Communities: keyword overlap with the target role, then size. Labelled
@@ -159,39 +169,7 @@ export default async function CareerPage() {
       </section>
 
       {/* 2 — Roadmap */}
-      {roadmap.length > 0 && (
-        <section id="roadmap" className="scroll-mt-24">
-          <h2 className="font-display text-h3">Your roadmap</h2>
-          <p className="mt-1 text-small text-text-secondary">
-            The core skills for {roleTitle} you haven&apos;t told us you have, most important first. Already have one? Mark it and your plan updates.
-          </p>
-          <ol className="mt-5 space-y-3">
-            {roadmap.map((g, i) => (
-              <li key={g.skillId} className="flex items-start gap-4 rounded-md border border-border bg-card p-4">
-                <span className="nums flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-small font-bold text-primary">
-                  {i + 1}
-                </span>
-                <div className="flex-1">
-                  <p className="font-semibold">{g.label}</p>
-                  {i === 0 && <p className="mt-0.5 text-caption font-semibold text-primary">Your next best action</p>}
-                </div>
-                <form action={markSkillHeld}>
-                  <input type="hidden" name="skill_id" value={g.skillId} />
-                  <input type="hidden" name="goal_id" value={goal.id} />
-                  <button className="rounded-sm border border-border px-3 py-1.5 text-caption font-semibold hover:border-primary hover:text-primary">
-                    I have this
-                  </button>
-                </form>
-              </li>
-            ))}
-          </ol>
-          {essentialGaps.length > roadmap.length && (
-            <p className="mt-3 text-caption text-text-secondary">
-              +{essentialGaps.length - roadmap.length} more core skills after these.
-            </p>
-          )}
-        </section>
-      )}
+      {roadmap.total > 0 && <Roadmap roadmap={roadmap} goalId={goal.id} roleTitle={String(roleTitle)} />}
 
       {/* Skills you have */}
       {analysis && analysis.held.length > 0 && (

@@ -113,3 +113,53 @@ export async function deleteOutcome(formData: FormData) {
   await supabase.from("career_outcomes").delete().eq("id", id).eq("user_id", profile.id);
   revalidatePath("/app/career");
 }
+
+// ---------------------------------------------------------------------------
+// Roadmap steps — 30/60/90-day plan (lib/career/roadmap.ts)
+// ---------------------------------------------------------------------------
+
+/**
+ * Tick or untick one roadmap step. Stored as a career_actions row so it counts
+ * toward the "action within 7 days" metric. Toggling off deletes the row,
+ * which keeps the metric honest if a member clicks by mistake.
+ */
+export async function togglePlanStep(formData: FormData) {
+  const profile = await getCurrentProfile();
+  if (profile == null) return;
+
+  const stepKey = String(formData.get("step_key") ?? "").slice(0, 120);
+  const goalId = String(formData.get("goal_id") ?? "") || null;
+  const skillId = String(formData.get("skill_id") ?? "") || null;
+  const title = String(formData.get("title") ?? "").trim().slice(0, 200) || "Completed a roadmap step";
+  const isDone = String(formData.get("done") ?? "") === "1";
+  if (stepKey.length === 0) return;
+
+  const supabase = createClient();
+
+  if (isDone) {
+    await supabase
+      .from("career_actions")
+      .delete()
+      .eq("user_id", profile.id)
+      .eq("related_type", "plan_step")
+      .eq("detail", stepKey);
+  } else {
+    const { error } = await supabase.from("career_actions").insert({
+      user_id: profile.id,
+      goal_id: goalId,
+      kind: "plan_step_completed",
+      title,
+      detail: stepKey,
+      skill_id: skillId,
+      related_type: "plan_step",
+      status: "completed",
+      suggested_by: "system",
+    });
+    if (error == null) {
+      await track("plan_step_completed", { userId: profile.id, props: { step: stepKey.split(":")[1] ?? "" } });
+    }
+  }
+
+  revalidatePath("/app/career");
+  revalidatePath("/app");
+}
