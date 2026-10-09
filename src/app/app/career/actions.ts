@@ -100,6 +100,7 @@ export async function recordOutcome(formData: FormData) {
     await track("outcome_recorded", { userId: profile.id, props: { kind } });
   }
   revalidatePath("/app/career");
+  revalidatePath("/app/outcomes");
 }
 
 /** Remove one of the member's own outcomes (e.g. entered by mistake). */
@@ -112,6 +113,7 @@ export async function deleteOutcome(formData: FormData) {
   const supabase = createClient();
   await supabase.from("career_outcomes").delete().eq("id", id).eq("user_id", profile.id);
   revalidatePath("/app/career");
+  revalidatePath("/app/outcomes");
 }
 
 // ---------------------------------------------------------------------------
