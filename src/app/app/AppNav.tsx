@@ -25,6 +25,7 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Network",
     items: [
       { href: "/app/members", label: "Member directory", icon: "\u2687" },
+      { href: "/app/mentors", label: "Mentors & experts", icon: "\u2605" },
       { href: "/app/networking", label: "Professional network", icon: "\u21C4" },
       { href: "/app/communities", label: "Communities", icon: "\u25CE" },
     ],
