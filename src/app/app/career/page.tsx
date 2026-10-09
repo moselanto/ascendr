@@ -27,7 +27,7 @@ export const dynamic = "force-dynamic";
 const BAND_COPY: Record<GapAnalysis["band"], { label: string; tone: string; line: string }> = {
   strong: { label: "Strong fit", tone: "bg-emerald-50 text-emerald-800 border-emerald-200", line: "You already cover most of the core skills for this role." },
   partial: { label: "Partial fit", tone: "bg-amber-50 text-amber-800 border-amber-200", line: "You cover a meaningful share of the core skills. The gaps below are your plan." },
-  stretch: { label: "Stretch goal", tone: "bg-brand-50 text-primary border-brand-200", line: "This is a real move. Start with the first few core skills below." },
+  stretch: { label: "Stretch goal", tone: "bg-brand-50 text-brand-700 border-brand-200", line: "This is a real move. Start with the first few core skills below." },
   unknown: { label: "Not analysed yet", tone: "bg-surface text-text-secondary border-border", line: "We can't compare your skills to this role yet." },
 };
 
@@ -67,7 +67,7 @@ export default async function CareerPage() {
         <p className="mt-4 text-body text-text-secondary">
           Career Intelligence compares where you are with where you want to go. It needs a destination first.
         </p>
-        <Link href="/onboarding" className="mt-8 inline-block rounded-sm bg-primary px-6 py-3 font-semibold text-white hover:bg-brand-600">
+        <Link href="/onboarding" className="mt-8 inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-white hover:bg-ink-700">
           Set my goal
         </Link>
       </div>

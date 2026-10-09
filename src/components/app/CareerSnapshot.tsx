@@ -182,7 +182,7 @@ export async function CareerSnapshot({ profileId, communityCount }: { profileId:
                 </p>
               )}
 
-              <Link href="/app/career" className="mt-5 inline-block text-small font-semibold text-primary hover:opacity-80">
+              <Link href="/app/career" className="mt-5 inline-block text-[13px] font-medium text-ink underline-offset-2 hover:underline">
                 Open full career plan →
               </Link>
             </>
