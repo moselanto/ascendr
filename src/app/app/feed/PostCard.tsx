@@ -3,10 +3,40 @@
 import { useState, useTransition } from "react";
 import { togglePostReaction, addComment } from "../feed-actions";
 
-const EMOJIS = ["👍", "🔥", "🎉", "💡"];
+/**
+ * Reaction keys are persisted in post_reactions.emoji, so the stored values
+ * stay the same (written as escapes) while the UI shows text labels only.
+ */
+const REACTIONS: { key: string; label: string }[] = [
+  { key: "\uD83D\uDC4D", label: "Like" },
+  { key: "\uD83D\uDD25", label: "Fire" },
+  { key: "\uD83C\uDF89", label: "Celebrate" },
+  { key: "\uD83D\uDCA1", label: "Insight" },
+];
 
 type Reaction = { emoji: string; user_id: string };
 type Comment = { id: string; body: string; author_name: string };
+
+function initialsOf(name: string) {
+  const parts = (name || "Member").trim().split(/\s+/).filter(Boolean);
+  const first = parts[0]?.[0] ?? "M";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+function timeAgo(iso: string) {
+  const then = new Date(iso).getTime();
+  if (Number.isNaN(then)) return "";
+  const s = Math.max(0, Math.round((Date.now() - then) / 1000));
+  if (s < 60) return "just now";
+  const m = Math.round(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.round(m / 60);
+  if (h < 24) return `${h}h ago`;
+  const d = Math.round(h / 24);
+  if (d < 7) return `${d}d ago`;
+  return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
 
 export default function PostCard({
   post,
@@ -24,7 +54,7 @@ export default function PostCard({
   const [comment, setComment] = useState("");
   const [, startTransition] = useTransition();
 
-  const initials = (post.author_name || "M").slice(0, 1).toUpperCase();
+  const initials = initialsOf(post.author_name);
 
   function counts() {
     const map = new Map<string, { count: number; mine: boolean }>();
@@ -61,71 +91,96 @@ export default function PostCard({
   const c = counts();
 
   return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <div className="flex items-center gap-2 text-small">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold">
+    <article className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+      {/* Author row */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
           {initials}
         </div>
-        <span className="font-semibold">{post.author_name}</span>
-        <span className="text-text-secondary">· {new Date(post.created_at).toLocaleString()}</span>
+        <div className="min-w-0">
+          <div className="truncate text-[14px] font-semibold text-ink">{post.author_name}</div>
+          <time
+            dateTime={post.created_at}
+            title={new Date(post.created_at).toLocaleString()}
+            suppressHydrationWarning
+            className="text-[12px] text-text-secondary"
+          >
+            {timeAgo(post.created_at)}
+          </time>
+        </div>
       </div>
 
-      <p className="mt-2 text-body whitespace-pre-wrap">{post.body}</p>
+      <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-ink">{post.body}</p>
 
       {/* Reaction bar */}
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        {EMOJIS.map((e) => {
-          const info = c.get(e);
+      <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
+        {REACTIONS.map((r) => {
+          const info = c.get(r.key);
           return (
             <button
-              key={e}
-              onClick={() => react(e)}
-              className={`rounded-full border px-2.5 py-1 text-caption font-semibold ${
-                info?.mine ? "border-primary bg-[#eef2ff] text-primary" : "border-border text-text-secondary"
+              key={r.key}
+              type="button"
+              onClick={() => react(r.key)}
+              aria-pressed={info?.mine ? true : false}
+              className={`rounded-full border px-3 py-1.5 text-[12px] font-medium transition-colors ${
+                info?.mine
+                  ? "border-brand-200 bg-brand-50 text-brand-700"
+                  : "border-ink/15 bg-white text-ink hover:border-ink/40"
               }`}
             >
-              {e} {info?.count ? info.count : ""}
+              {r.label}
+              {info?.count ? <span className="nums ml-1.5 text-text-secondary">{info.count}</span> : null}
             </button>
           );
         })}
         <button
+          type="button"
           onClick={() => setShowComments((s) => !s)}
-          className="ml-auto text-caption font-semibold text-text-secondary hover:text-primary"
+          className="ml-auto text-[12px] font-medium text-text-secondary hover:text-ink"
         >
-          💬 {comments.length} {comments.length === 1 ? "comment" : "comments"}
+          <span className="nums">{comments.length}</span> {comments.length === 1 ? "comment" : "comments"}{" "}
+          {showComments ? "\u25B4" : "\u25BE"}
         </button>
       </div>
 
       {/* Comments */}
       {showComments && (
-        <div className="mt-3 border-t border-border pt-3">
-          {comments.length > 0 && (
-            <ul className="mb-3 space-y-2">
+        <div className="mt-4 rounded-xl bg-surface p-4">
+          {comments.length > 0 ? (
+            <ul className="mb-4 space-y-3">
               {comments.map((cm) => (
-                <li key={cm.id} className="text-small">
-                  <span className="font-semibold">{cm.author_name}</span>{" "}
-                  <span className="text-text">{cm.body}</span>
+                <li key={cm.id} className="flex gap-2.5">
+                  <div className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand-100 text-[10px] font-semibold text-brand-700">
+                    {initialsOf(cm.author_name)}
+                  </div>
+                  <div className="min-w-0 text-[13px]">
+                    <span className="font-semibold text-ink">{cm.author_name}</span>{" "}
+                    <span className="text-ink">{cm.body}</span>
+                  </div>
                 </li>
               ))}
             </ul>
+          ) : (
+            <p className="mb-4 text-[13px] text-text-secondary">No comments yet. Start the conversation.</p>
           )}
           <form onSubmit={submitComment} className="flex gap-2">
             <input
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Write a comment…"
-              className="flex-1 rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+              aria-label="Write a comment"
+              className="min-w-0 flex-1 rounded-lg border border-border bg-white px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
             />
             <button
               type="submit"
               disabled={!comment.trim()}
-              className="rounded-sm bg-primary px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
+              className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
             >
-              Post
+              Reply
             </button>
           </form>
         </div>
       )}
-    </div>
+    </article>
   );
 }

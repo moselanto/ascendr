@@ -7,11 +7,9 @@ export const dynamic = "force-dynamic";
 /**
  * Learn — courses, paths & certificates.
  *
- * Designed from the ASCENDR Stage 1 design system (there was no dedicated
- * Learn screen in the P1 prototype; the sidebar item pointed nowhere). It
- * surfaces "course" channels from the communities the member belongs to and
- * frames them as an enrollable learning catalog, matching the onboarding hint
- * "Learn a skill — courses, paths & certificates".
+ * Surfaces "course" channels from the communities the member belongs to and
+ * frames them as an enrollable learning catalog alongside curated learning
+ * paths, styled with the ASCENDR design system.
  */
 
 type CourseRow = {
@@ -28,11 +26,52 @@ type Course = {
   communityName: string;
 };
 
-const PATHS = [
-  { title: "Product Manager Track", sub: "6 courses · beginner → advanced", pct: 40, color: "from-primary to-secondary" },
-  { title: "Engineering Leadership", sub: "5 courses · intermediate", pct: 20, color: "from-accent to-[#059669]" },
-  { title: "Founder Fundamentals", sub: "4 courses · all levels", pct: 0, color: "from-warning to-danger" },
+type Path = {
+  title: string;
+  sub: string;
+  pct: number;
+  gap: string;
+  next: string;
+};
+
+const PATHS: Path[] = [
+  {
+    title: "Product Manager Track",
+    sub: "6 courses \u00b7 beginner \u2192 advanced",
+    pct: 40,
+    gap: "Product strategy",
+    next: "Course 3: Roadmapping with evidence",
+  },
+  {
+    title: "Engineering Leadership",
+    sub: "5 courses \u00b7 intermediate",
+    pct: 20,
+    gap: "People management",
+    next: "Course 2: Running effective 1:1s",
+  },
+  {
+    title: "Founder Fundamentals",
+    sub: "4 courses \u00b7 all levels",
+    pct: 0,
+    gap: "Fundraising",
+    next: "Course 1: Validating your idea",
+  },
 ];
+
+function pathStatus(pct: number) {
+  if (pct >= 100) return { label: "Completed", cls: "bg-emerald-50 text-emerald-800" };
+  if (pct > 0) return { label: "In progress", cls: "bg-amber-50 text-amber-800" };
+  return { label: "Not started", cls: "bg-surface text-text-secondary" };
+}
+
+function SectionTitle({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
+  return (
+    <div className="mb-3 flex items-end justify-between gap-3">
+      <h2 className="text-[16px] font-semibold tracking-[-0.01em] text-ink">{children}</h2>
+      {action}
+    </div>
+  );
+}
 
 export default async function LearnPage() {
   const profile = await getCurrentProfile();
@@ -67,94 +106,184 @@ export default async function LearnPage() {
     });
   }
 
+  // The path to continue: the most-advanced path that isn't finished yet.
+  const inProgress = PATHS.filter((p) => p.pct > 0 && p.pct < 100).sort((a, b) => b.pct - a.pct);
+  const current = inProgress[0] ?? PATHS[0];
+  const avgPct = Math.round(PATHS.reduce((sum, p) => sum + p.pct, 0) / PATHS.length);
+
   return (
-    <div className="max-w-5xl">
-      <div className="mb-5">
-        <h1 className="text-h3 font-bold">Learn</h1>
-        <p className="text-small text-text-secondary">
-          Courses, learning paths, and certificates to hit your career goal.
-        </p>
+    <div className="space-y-8">
+      {/* Page head */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Learn</p>
+          <h1 className="mt-1.5 text-[28px] font-semibold tracking-[-0.02em] text-ink md:text-[32px]">
+            Learning paths that <span className="accent-serif">close your gaps.</span>
+          </h1>
+          <p className="mt-1 text-[15px] text-text-secondary">
+            Courses, learning paths, and certificates to hit your career goal.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            href="/app/communities"
+            className="rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40"
+          >
+            Find courses
+          </Link>
+          <a
+            href="#paths"
+            className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+          >
+            Browse paths
+          </a>
+        </div>
       </div>
 
-      {/* Continue learning */}
-      <div className="mb-6 rounded-md border border-border bg-card p-4">
-        <div className="flex items-center justify-between">
-          <div className="text-small font-bold uppercase tracking-wide text-text-secondary">
-            Continue learning
+      {/* Continue learning + stats */}
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="relative overflow-hidden rounded-2xl bg-ink p-6 text-white">
+          <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
+          <div className="relative">
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">
+              Continue learning
+            </p>
+            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">{current.title}</h2>
+            <p className="mt-1 text-[14px] text-white/70">Next up: {current.next}</p>
+            <div className="mt-5 flex items-center gap-3">
+              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/15">
+                <div className="h-full rounded-full bg-accent" style={{ width: `${current.pct}%` }} />
+              </div>
+              <span className="nums text-[13px] font-medium text-white/80">{current.pct}%</span>
+            </div>
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <button className="rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
+                Resume lesson →
+              </button>
+              <span className="text-[13px] text-white/60">Closes your gap in {current.gap.toLowerCase()}</span>
+            </div>
           </div>
-          <span className="text-caption text-text-secondary">60% complete</span>
         </div>
-        <div className="mt-2 mb-1.5 font-bold">Leadership 101 · Lesson 4: Delegation</div>
-        <div className="h-2 overflow-hidden rounded-full bg-border">
-          <i className="block h-full bg-accent" style={{ width: "60%" }} />
+
+        <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
+          <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
+            <p className="text-[12px] font-medium text-text-secondary">Paths in progress</p>
+            <p className="nums mt-1 text-[28px] font-semibold text-ink">{inProgress.length}</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
+            <p className="text-[12px] font-medium text-text-secondary">Average progress</p>
+            <p className="nums mt-1 text-[28px] font-semibold text-ink">{avgPct}%</p>
+          </div>
+          <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
+            <p className="text-[12px] font-medium text-text-secondary">Community courses</p>
+            <p className="nums mt-1 text-[28px] font-semibold text-ink">{courses.length}</p>
+          </div>
         </div>
-        <button className="mt-3.5 rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white">
-          ▶ Resume lesson
-        </button>
       </div>
 
       {/* Learning paths */}
-      <div className="mb-2 text-small font-bold uppercase tracking-wide text-text-secondary">
-        Learning paths
-      </div>
-      <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {PATHS.map((p) => (
-          <div key={p.title} className="overflow-hidden rounded-md border border-border bg-card">
-            <div className={`h-20 bg-gradient-to-br ${p.color}`} />
-            <div className="p-4">
-              <div className="font-bold">{p.title}</div>
-              <div className="text-caption text-text-secondary">{p.sub}</div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-border">
-                <i className="block h-full bg-accent" style={{ width: `${p.pct}%` }} />
+      <section id="paths">
+        <SectionTitle>Learning paths</SectionTitle>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {PATHS.map((p) => {
+            const st = pathStatus(p.pct);
+            return (
+              <div
+                key={p.title}
+                className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card transition-shadow hover:shadow-lift md:p-6"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">
+                    Gap: {p.gap}
+                  </span>
+                  <span className={`rounded-full px-2.5 py-1 text-[12px] font-medium ${st.cls}`}>{st.label}</span>
+                </div>
+                <h3 className="mt-4 text-[16px] font-semibold text-ink">{p.title}</h3>
+                <p className="mt-0.5 text-[13px] text-text-secondary">{p.sub}</p>
+                <div className="mt-4 flex items-center gap-3">
+                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
+                    <div className="h-full rounded-full bg-accent" style={{ width: `${p.pct}%` }} />
+                  </div>
+                  <span className="nums text-[12px] font-medium text-text-secondary">{p.pct}%</span>
+                </div>
+                <p className="mt-4 text-[13px] text-text-secondary">
+                  <span className="font-medium text-ink">Next:</span> {p.next}
+                </p>
+                <div className="mt-auto pt-5">
+                  <button className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40">
+                    {p.pct > 0 ? "Continue \u2192" : "Start path \u2192"}
+                  </button>
+                </div>
               </div>
-              <div className="mt-1.5 text-caption text-text-secondary">{p.pct}% complete</div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Courses from communities + certificates */}
+      <div className="grid gap-6 lg:grid-cols-[1.4fr_1fr]">
+        <section>
+          <SectionTitle
+            action={
+              <Link href="/app/communities" className="text-[13px] font-medium text-brand-600 hover:text-brand-700">
+                All communities →
+              </Link>
+            }
+          >
+            Courses from your communities
+          </SectionTitle>
+          {courses.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+              <p className="text-[15px] font-semibold text-ink">No community courses yet</p>
+              <p className="mt-1 text-[14px] text-text-secondary">
+                Join a community with a course channel and its lessons will show up here.
+              </p>
+              <Link
+                href="/app/communities"
+                className="mt-5 inline-flex rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+              >
+                Browse communities
+              </Link>
             </div>
-          </div>
-        ))}
-      </div>
+          ) : (
+            <div className="divide-y divide-border rounded-2xl border border-border bg-white p-0 shadow-card">
+              {courses.map((c) => (
+                <Link
+                  key={c.id}
+                  href={`/app/communities/${c.communitySlug}`}
+                  className="flex items-center gap-3 px-5 py-4 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-surface"
+                >
+                  <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
+                    {(c.communityName || "C").slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="truncate text-[14px] font-medium text-ink">{c.name}</div>
+                    <div className="truncate text-[13px] text-text-secondary">{c.communityName}</div>
+                  </div>
+                  <span className="ml-auto rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink">
+                    Open →
+                  </span>
+                </Link>
+              ))}
+            </div>
+          )}
+        </section>
 
-      {/* Courses from your communities */}
-      <div className="mb-2 text-small font-bold uppercase tracking-wide text-text-secondary">
-        Courses from your communities
-      </div>
-      {courses.length === 0 ? (
-        <div className="rounded-md border border-dashed border-border bg-card p-8 text-center text-text-secondary">
-          No courses yet.{" "}
-          <Link href="/app/communities" className="font-semibold text-primary">
-            Join a community
-          </Link>{" "}
-          with a course channel to start learning.
-        </div>
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
-          {courses.map((c) => (
-            <Link
-              key={c.id}
-              href={`/app/communities/${c.communitySlug}`}
-              className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 hover:border-primary"
+        <section>
+          <SectionTitle>Certificates</SectionTitle>
+          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <p className="text-[15px] font-semibold text-ink">No certificates yet</p>
+            <p className="mt-1 text-[14px] text-text-secondary">
+              Finish a learning path to earn a shareable certificate for your profile.
+            </p>
+            <a
+              href="#paths"
+              className="mt-5 inline-flex rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40"
             >
-              <div className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-[#eef2ff] text-primary">
-                ▦
-              </div>
-              <div className="min-w-0">
-                <div className="truncate font-semibold">{c.name}</div>
-                <div className="truncate text-caption text-text-secondary">{c.communityName}</div>
-              </div>
-              <span className="ml-auto rounded-full bg-[#eef2ff] px-2.5 py-0.5 text-caption font-semibold text-primary">
-                Open
-              </span>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {/* Certificates */}
-      <div className="mb-2 mt-6 text-small font-bold uppercase tracking-wide text-text-secondary">
-        Certificates
-      </div>
-      <div className="rounded-md border border-border bg-card p-4 text-small text-text-secondary">
-        Finish a learning path to earn a shareable certificate. Nothing here yet — complete your
-        first path to unlock one.
+              Pick a path
+            </a>
+          </div>
+        </section>
       </div>
     </div>
   );
