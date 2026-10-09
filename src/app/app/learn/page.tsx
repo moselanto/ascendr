@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { analyzeGap } from "@/lib/career/gap";
+import { buildRoadmap } from "@/lib/career/roadmap";
 
 export const dynamic = "force-dynamic";
 
@@ -26,43 +28,19 @@ type Course = {
   communityName: string;
 };
 
-type Path = {
-  title: string;
-  sub: string;
-  pct: number;
-  gap: string;
-  next: string;
-};
+/**
+ * Curated paths are a catalogue only. ASCENDR does not track path or lesson
+ * progress yet, so no progress, status or "your gap" claim is shown for
+ * them. A path is marked as matching the member only when its keywords
+ * appear in their goal role title (a traceable string match).
+ */
+type Path = { title: string; sub: string; keywords: string[] };
 
 const PATHS: Path[] = [
-  {
-    title: "Product Manager Track",
-    sub: "6 courses \u00b7 beginner \u2192 advanced",
-    pct: 40,
-    gap: "Product strategy",
-    next: "Course 3: Roadmapping with evidence",
-  },
-  {
-    title: "Engineering Leadership",
-    sub: "5 courses \u00b7 intermediate",
-    pct: 20,
-    gap: "People management",
-    next: "Course 2: Running effective 1:1s",
-  },
-  {
-    title: "Founder Fundamentals",
-    sub: "4 courses \u00b7 all levels",
-    pct: 0,
-    gap: "Fundraising",
-    next: "Course 1: Validating your idea",
-  },
+  { title: "Product Manager Track", sub: "6 courses \u00b7 beginner \u2192 advanced", keywords: ["product"] },
+  { title: "Engineering Leadership", sub: "5 courses \u00b7 intermediate", keywords: ["engineer", "developer", "software"] },
+  { title: "Founder Fundamentals", sub: "4 courses \u00b7 all levels", keywords: ["founder", "startup"] },
 ];
-
-function pathStatus(pct: number) {
-  if (pct >= 100) return { label: "Completed", cls: "bg-emerald-50 text-emerald-800" };
-  if (pct > 0) return { label: "In progress", cls: "bg-amber-50 text-amber-800" };
-  return { label: "Not started", cls: "bg-surface text-text-secondary" };
-}
 
 function SectionTitle({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -106,10 +84,37 @@ export default async function LearnPage() {
     });
   }
 
-  // The path to continue: the most-advanced path that isn't finished yet.
-  const inProgress = PATHS.filter((p) => p.pct > 0 && p.pct < 100).sort((a, b) => b.pct - a.pct);
-  const current = inProgress[0] ?? PATHS[0];
-  const avgPct = Math.round(PATHS.reduce((sum, p) => sum + p.pct, 0) / PATHS.length);
+  // Real learning signal: the member's core gaps and their roadmap "learn" steps.
+  const me = profile?.id ?? "";
+  const { data: goal } = await supabase
+    .from("career_goals")
+    .select("id, target_title")
+    .eq("user_id", me)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const analysis = goal ? await analyzeGap(me, goal.id) : null;
+  const roleTitle = analysis?.roleTitle ?? goal?.target_title ?? "";
+  const essentialGaps = (analysis?.gaps ?? []).filter((g) => g.importance === "essential");
+  let learnDone = 0;
+  let nextLearn: { title: string; skill: string } | null = null;
+  if (goal && essentialGaps.length) {
+    const { data: stepRows } = await supabase
+      .from("career_actions")
+      .select("detail")
+      .eq("user_id", me)
+      .eq("related_type", "plan_step")
+      .eq("goal_id", goal.id);
+    const completed = new Set((stepRows ?? []).map((r: { detail: string | null }) => r.detail ?? ""));
+    const rm = buildRoadmap(essentialGaps, completed);
+    const learnSteps = rm.phases.flatMap((ph) => ph.skills.flatMap((sk) => sk.steps.filter((st) => st.kind === "learn").map((st) => ({ ...st, skill: sk.label }))));
+    learnDone = learnSteps.filter((st) => st.done).length;
+    const nxt = learnSteps.find((st) => st.done === false);
+    nextLearn = nxt ? { title: nxt.title, skill: nxt.skill } : null;
+  }
+  const roleLower = roleTitle.toLowerCase();
+  const matchesGoal = (p: Path) => roleLower.length > 0 && p.keywords.some((k) => roleLower.includes(k));
 
   return (
     <div className="space-y-8">
@@ -121,7 +126,7 @@ export default async function LearnPage() {
             Learning paths that <span className="accent-serif">close your gaps.</span>
           </h1>
           <p className="mt-1 text-[15px] text-text-secondary">
-            Courses, learning paths, and certificates to hit your career goal.
+            What your roadmap says to learn next, plus courses from your communities.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -132,10 +137,10 @@ export default async function LearnPage() {
             Find courses
           </Link>
           <a
-            href="#paths"
+            href="/app/career#roadmap"
             className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
           >
-            Browse paths
+            My roadmap
           </a>
         </div>
       </div>
@@ -145,34 +150,45 @@ export default async function LearnPage() {
         <div className="relative overflow-hidden rounded-2xl bg-ink p-6 text-white">
           <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
           <div className="relative">
-            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">
-              Continue learning
-            </p>
-            <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">{current.title}</h2>
-            <p className="mt-1 text-[14px] text-white/70">Next up: {current.next}</p>
-            <div className="mt-5 flex items-center gap-3">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-white/15">
-                <div className="h-full rounded-full bg-accent" style={{ width: `${current.pct}%` }} />
-              </div>
-              <span className="nums text-[13px] font-medium text-white/80">{current.pct}%</span>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <button className="rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
-                Resume lesson →
-              </button>
-              <span className="text-[13px] text-white/60">Closes your gap in {current.gap.toLowerCase()}</span>
-            </div>
+            <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">Learn next</p>
+            {nextLearn ? (
+              <>
+                <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">{nextLearn.title}</h2>
+                <p className="mt-1 text-[14px] text-white/70">
+                  From your 90-day roadmap. {nextLearn.skill} is a core skill for {roleTitle} that you don&apos;t have yet.
+                </p>
+                <Link href="/app/career#roadmap" className="mt-5 inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
+                  Open roadmap {"\u2192"}
+                </Link>
+              </>
+            ) : goal ? (
+              <>
+                <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">Nothing to learn on your roadmap right now</h2>
+                <p className="mt-1 text-[14px] text-white/70">Either your learning steps are done, or your goal isn&apos;t matched to a role yet.</p>
+                <Link href="/app/career" className="mt-5 inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
+                  Open career plan {"\u2192"}
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">Set a goal to get a learning plan</h2>
+                <p className="mt-1 text-[14px] text-white/70">ASCENDR turns the skills your target role needs into steps you can learn in order.</p>
+                <Link href="/onboarding" className="mt-5 inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
+                  Set my goal {"\u2192"}
+                </Link>
+              </>
+            )}
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
           <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
-            <p className="text-[12px] font-medium text-text-secondary">Paths in progress</p>
-            <p className="nums mt-1 text-[28px] font-semibold text-ink">{inProgress.length}</p>
+            <p className="text-[12px] font-medium text-text-secondary">Core skills to learn</p>
+            <p className="nums mt-1 text-[28px] font-semibold text-ink">{goal ? essentialGaps.length : "\u2013"}</p>
           </div>
           <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
-            <p className="text-[12px] font-medium text-text-secondary">Average progress</p>
-            <p className="nums mt-1 text-[28px] font-semibold text-ink">{avgPct}%</p>
+            <p className="text-[12px] font-medium text-text-secondary">Learning steps done</p>
+            <p className="nums mt-1 text-[28px] font-semibold text-ink">{learnDone}</p>
           </div>
           <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
             <p className="text-[12px] font-medium text-text-secondary">Community courses</p>
@@ -183,37 +199,25 @@ export default async function LearnPage() {
 
       {/* Learning paths */}
       <section id="paths">
-        <SectionTitle>Learning paths</SectionTitle>
+        <SectionTitle>Curated paths</SectionTitle>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {PATHS.map((p) => {
-            const st = pathStatus(p.pct);
+            const match = matchesGoal(p);
             return (
-              <div
-                key={p.title}
-                className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card transition-shadow hover:shadow-lift md:p-6"
-              >
+              <div key={p.title} className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
                 <div className="flex items-start justify-between gap-3">
-                  <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">
-                    Gap: {p.gap}
-                  </span>
-                  <span className={`rounded-full px-2.5 py-1 text-[12px] font-medium ${st.cls}`}>{st.label}</span>
+                  {match ? (
+                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">Matches your goal</span>
+                  ) : (
+                    <span />
+                  )}
+                  <span className="rounded-full bg-surface px-2.5 py-1 text-[12px] font-medium text-text-secondary">Coming soon</span>
                 </div>
                 <h3 className="mt-4 text-[16px] font-semibold text-ink">{p.title}</h3>
                 <p className="mt-0.5 text-[13px] text-text-secondary">{p.sub}</p>
-                <div className="mt-4 flex items-center gap-3">
-                  <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
-                    <div className="h-full rounded-full bg-accent" style={{ width: `${p.pct}%` }} />
-                  </div>
-                  <span className="nums text-[12px] font-medium text-text-secondary">{p.pct}%</span>
-                </div>
                 <p className="mt-4 text-[13px] text-text-secondary">
-                  <span className="font-medium text-ink">Next:</span> {p.next}
+                  Curated paths open soon. Until then, your roadmap and community courses are the fastest way to close your gaps.
                 </p>
-                <div className="mt-auto pt-5">
-                  <button className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40">
-                    {p.pct > 0 ? "Continue \u2192" : "Start path \u2192"}
-                  </button>
-                </div>
               </div>
             );
           })}
@@ -274,14 +278,14 @@ export default async function LearnPage() {
           <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
             <p className="text-[15px] font-semibold text-ink">No certificates yet</p>
             <p className="mt-1 text-[14px] text-text-secondary">
-              Finish a learning path to earn a shareable certificate for your profile.
+              Certificates arrive with curated paths. Log certifications you earn elsewhere as a win.
             </p>
-            <a
-              href="#paths"
+            <Link
+              href="/app/outcomes#log"
               className="mt-5 inline-flex rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40"
             >
-              Pick a path
-            </a>
+              Log a certification
+            </Link>
           </div>
         </section>
       </div>
