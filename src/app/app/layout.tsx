@@ -4,19 +4,8 @@ import { getCurrentProfile } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import NotificationBell from "./NotificationBell";
+import { AppSidebar, AppCrumb, MobileNav } from "./AppNav";
 
-const NAV = [
-  { href: "/app", label: "Home", icon: "◳" },
-  { href: "/app/career", label: "Career", icon: "↗" },
-  { href: "/app/feed", label: "Feed", icon: "▤" },
-  { href: "/app/communities", label: "Communities", icon: "◎" },
-  { href: "/app/learn", label: "Learn", icon: "▦" },
-  { href: "/app/live", label: "Live", icon: "◉" },
-  { href: "/app/members", label: "Members", icon: "⚇" },
-  { href: "/app/networking", label: "Networking", icon: "⇄" },
-  { href: "/app/ai", label: "AI Coach", icon: "✦" },
-  { href: "/app/communities/new", label: "Create", icon: "＋" },
-];
 
 /**
  * Returns true if the user has any unread channel activity across the
@@ -103,87 +92,48 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       .slice(0, 2)
       .toUpperCase() || "ME";
 
-  return (
-    <div className="grid md:grid-cols-[240px_1fr] min-h-screen">
-      <aside className="hidden md:flex flex-col gap-1 border-r border-border bg-card p-4">
-        <Link href="/app" className="text-xl font-black px-2 pb-4 pt-1">
-          ASCEND<span className="text-primary">R</span>
-        </Link>
-        {NAV.map((n) => {
-          const showDot = n.href === "/app/communities" && communitiesUnread;
-          return (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-small font-semibold text-text-secondary hover:bg-bg"
-            >
-              <span className="w-4 text-center">{n.icon}</span>
-              {n.label}
-              {showDot && (
-                <span
-                  className="ml-auto h-2 w-2 rounded-full bg-danger"
-                  aria-label="Unread activity"
-                />
-              )}
-            </Link>
-          );
-        })}
-        <div className="mt-auto flex items-center gap-2 rounded-sm bg-[#ecfdf5] px-3 py-2 text-small font-semibold text-[#047857]">
-          🔥 {streak?.current_len ?? 0}-day streak
-        </div>
-      </aside>
+  const isAdmin = profile.role === "admin";
 
-      <div className="flex flex-col">
-        <header className="flex items-center gap-3 border-b border-border bg-card px-5 py-3">
-          <Link href="/app" className="md:hidden text-lg font-black">
-            ASCEND<span className="text-primary">R</span>
+  return (
+    <div className="min-h-screen bg-surface">
+      <AppSidebar isAdmin={isAdmin} communitiesUnread={communitiesUnread} streak={streak?.current_len ?? 0} />
+
+      <div className="flex min-h-screen flex-col md:pl-[240px]">
+        <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-white/90 px-5 backdrop-blur md:px-8">
+          <Link href="/app" className="text-[15px] font-semibold tracking-[0.08em] text-ink md:hidden">
+            ASCENDR
           </Link>
+          <AppCrumb isAdmin={isAdmin} />
           <div className="ml-auto flex items-center gap-3">
-            <Link
-              href="/app/settings"
-              className="text-small text-text-secondary hidden sm:block hover:text-text"
-            >
-              {profile.full_name || "Member"}
-            </Link>
+            <form action="/app/members" className="relative hidden lg:block" role="search">
+              <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-text-secondary">{"\u2315"}</span>
+              <input
+                name="q"
+                placeholder={"Search people\u2026"}
+                aria-label="Search members"
+                className="w-56 rounded-lg border border-border bg-surface py-2 pl-8 pr-3 text-[13px] outline-none transition-colors focus:border-ink/30 focus:bg-white"
+              />
+            </form>
             <NotificationBell meId={profile.id} initial={notifs ?? []} />
-            <Link
-              href="/app/settings"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold"
-              aria-label="Account settings"
-            >
-              {initials}
+            <Link href="/app/settings" className="flex items-center gap-2.5" aria-label="Account settings">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
+                {initials}
+              </span>
+              <span className="hidden leading-tight xl:block">
+                <span className="block text-[13px] font-semibold text-ink">{profile.full_name || "Member"}</span>
+                <span className="block text-[11px] text-text-secondary">View profile</span>
+              </span>
             </Link>
             <form action={signOut}>
-              <button className="text-caption text-text-secondary hover:text-text">Sign out</button>
+              <button className="text-[12px] text-text-secondary hover:text-ink">Sign out</button>
             </form>
           </div>
         </header>
-        <main className="p-5 pr-16 md:p-6 md:pr-6">{children}</main>
-        {/* Mobile nav — vertical rail down the right edge, top to bottom */}
-        <nav
-          className="md:hidden fixed right-0 top-1/2 z-40 flex -translate-y-1/2 flex-col gap-1 rounded-l-lg border border-r-0 border-border bg-card/95 py-2 pl-1.5 pr-1 shadow-[0_4px_20px_rgba(15,23,42,.12)] backdrop-blur"
-          aria-label="Primary"
-        >
-          {NAV.map((n) => {
-            const showDot = n.href === "/app/communities" && communitiesUnread;
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                title={n.label}
-                aria-label={n.label}
-                className="relative flex h-11 w-11 flex-col items-center justify-center gap-0.5 rounded-md text-text-secondary hover:bg-bg active:bg-[#eef2ff]"
-              >
-                <span className="text-lg leading-none">{n.icon}</span>
-                <span className="text-[9px] font-semibold leading-none">{n.label}</span>
-                {showDot && (
-                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-danger" aria-label="Unread activity" />
-                )}
-              </Link>
-            );
-          })}
-        </nav>
+
+        <main className="mx-auto w-full max-w-[1400px] flex-1 px-5 pb-24 pt-7 md:px-8 md:pb-12">{children}</main>
       </div>
+
+      <MobileNav communitiesUnread={communitiesUnread} />
     </div>
   );
 }
