@@ -109,3 +109,8 @@ h4 {
   -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
   mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
 }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}

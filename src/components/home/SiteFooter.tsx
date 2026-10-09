@@ -16,9 +16,10 @@ export function SiteFooter() {
         <div>
           <p className="text-[13px] font-medium uppercase tracking-[0.12em] text-text-secondary">Product</p>
           <ul className="mt-4 space-y-2.5 text-[15px] text-ink">
-            <li><a href="#questions" className="hover:text-brand-600">Why ASCENDR</a></li>
-            <li><a href="#journey" className="hover:text-brand-600">How it works</a></li>
-            <li><a href="#faq" className="hover:text-brand-600">FAQ</a></li>
+            <li><a href="/#questions" className="hover:text-brand-600">Why ASCENDR</a></li>
+            <li><a href="/#journey" className="hover:text-brand-600">How it works</a></li>
+            <li><a href="/networks" className="hover:text-brand-600">For networks</a></li>
+            <li><a href="/#faq" className="hover:text-brand-600">FAQ</a></li>
           </ul>
         </div>
 

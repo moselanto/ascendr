@@ -3,9 +3,10 @@ import { SIGNIN, SIGNUP } from "@/components/home/links";
 import { Logo } from "@/components/home/Logo";
 
 const NAV = [
-  { href: "#questions", label: "Why ASCENDR" },
-  { href: "#journey", label: "How it works" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#questions", label: "Why ASCENDR" },
+  { href: "/#journey", label: "How it works" },
+  { href: "/networks", label: "For networks" },
+  { href: "/#faq", label: "FAQ" },
 ];
 
 export function SiteHeader() {
