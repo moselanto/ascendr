@@ -107,12 +107,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </Link>
           <AppCrumb isAdmin={isAdmin} />
           <div className="ml-auto flex items-center gap-3">
-            <form action="/app/members" className="relative hidden lg:block" role="search">
+            <form action="/app/search" className="relative hidden lg:block" role="search">
               <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-text-secondary">{"\u2315"}</span>
               <input
                 name="q"
-                placeholder={"Search people\u2026"}
-                aria-label="Search members"
+                placeholder={"Search people, communities, roles\u2026"}
+                aria-label="Search ASCENDR"
                 className="w-56 rounded-lg border border-border bg-surface py-2 pl-8 pr-3 text-[13px] outline-none transition-colors focus:border-ink/30 focus:bg-white"
               />
             </form>
