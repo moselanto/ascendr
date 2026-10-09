@@ -18,6 +18,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/app", label: "Home", icon: "\u25F3" },
       { href: "/app/career", label: "Career intelligence", icon: "\u2197" },
+      { href: "/app/opportunities", label: "Opportunities", icon: "\u25C8" },
       { href: "/app/ai", label: "AI career coach", icon: "\u2726" },
     ],
   },
