@@ -64,7 +64,7 @@ export default async function AIStudioPage({
   return (
     <div className="max-w-5xl mx-auto">
       <div className="mb-4">
-        <h1 className="text-h3 font-bold">AI Studio</h1>
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">AI Studio</h1>
         <p className="text-small text-text-secondary mt-1">Your coach, clones, and career tools.</p>
       </div>
 
@@ -85,8 +85,8 @@ export default async function AIStudioPage({
               href={`/app/ai?tab=${t.key}`}
               className={`shrink-0 border-b-2 px-4 py-3 text-small font-semibold ${
                 t.key === tab
-                  ? "border-primary text-primary"
-                  : "border-transparent text-text-secondary hover:text-text-primary"
+                  ? "border-ink text-brand-600"
+                  : "border-transparent text-text-secondary hover:text-text-brand-600"
               }`}
             >
               {t.label}

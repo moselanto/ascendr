@@ -75,7 +75,7 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
           onChange={(e) => setGoal(e.target.value)}
           rows={3}
           placeholder="e.g. Move from freelance web dev into a product manager role"
-          className="mt-1 w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+          className="mt-1 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
         />
         <label className="mt-3 block text-small font-semibold">Time horizon</label>
         <div className="mt-1 flex flex-wrap gap-1.5">
@@ -85,7 +85,7 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
               key={h}
               onClick={() => setHorizon(h)}
               className={`rounded-full border px-3 py-1 text-caption font-semibold ${
-                horizon === h ? "border-primary bg-[#eef2ff] text-primary" : "border-border text-text-secondary"
+                horizon === h ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
               }`}
             >
               {h}
@@ -95,7 +95,7 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
         <button
           type="submit"
           disabled={!goal.trim() || loading}
-          className="mt-4 w-full rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+          className="mt-4 w-full rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
         >
           {loading ? "Building your plan…" : "Generate plan"}
         </button>
@@ -121,7 +121,7 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
                   {plan.summary && <p className="mt-1 text-small text-text-secondary">{plan.summary}</p>}
                 </div>
                 {plan.horizon && (
-                  <span className="shrink-0 rounded-full bg-[#eef2ff] px-2.5 py-1 text-caption font-semibold text-primary">
+                  <span className="shrink-0 rounded-full bg-[#eef2ff] px-2.5 py-1 text-caption font-semibold text-brand-600">
                     {plan.horizon}
                   </span>
                 )}

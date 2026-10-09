@@ -99,7 +99,7 @@ export default function DmThread({
               <div
                 className={`inline-block max-w-[80%] rounded-2xl px-3 py-2 text-small ${
                   m.sender_id === meId
-                    ? "bg-primary text-white"
+                    ? "bg-ink text-white"
                     : "border border-border bg-bg text-text"
                 }`}
               >
@@ -115,12 +115,12 @@ export default function DmThread({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Write a message…"
-          className="flex-1 rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+          className="flex-1 rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
         />
         <button
           type="submit"
           disabled={!body.trim()}
-          className="rounded-sm bg-primary px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
+          className="rounded-full bg-ink px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
         >
           Send
         </button>

@@ -42,7 +42,7 @@ export default async function MentorWorkspacePage({ params }: { params: { slug: 
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-6">
-        <h1 className="text-h3 font-bold">Mentor Workspace</h1>
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">Mentor Workspace</h1>
         <p className="mt-1 text-small text-text-secondary">
           Add your knowledge — frameworks, FAQs, playbooks, transcripts. ASCENDR turns it into your
           AI clone so members get grounded answers in your voice, with citations, even when you are away.
@@ -50,7 +50,7 @@ export default async function MentorWorkspacePage({ params }: { params: { slug: 
       </div>
       <MentorWorkspace communityId={community.id} initialSources={sources ?? []} />
       <div className="mt-6">
-        <Link href={`/app/communities/${community.slug}`} className="text-small text-primary font-semibold">
+        <Link href={`/app/communities/${community.slug}`} className="text-small text-brand-600 font-semibold">
           ← Back to {community.name}
         </Link>
       </div>

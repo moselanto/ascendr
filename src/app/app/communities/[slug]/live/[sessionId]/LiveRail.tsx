@@ -319,8 +319,8 @@ export default function LiveRail({
             onClick={() => setTab(t.key)}
             className={`flex-1 border-b-2 px-2 py-2.5 text-small font-semibold ${
               tab === t.key
-                ? "border-primary text-primary"
-                : "border-transparent text-text-secondary hover:text-text-primary"
+                ? "border-ink text-brand-600"
+                : "border-transparent text-text-secondary hover:text-text-brand-600"
             }`}
           >
             {t.label}
@@ -347,8 +347,8 @@ export default function LiveRail({
               >
                 <button
                   onClick={() => vote(q)}
-                  className={`flex flex-col items-center rounded-sm border px-2 py-1 text-caption font-bold ${
-                    q.voted ? "border-primary bg-[#eef2ff] text-primary" : "border-border text-text-secondary"
+                  className={`flex flex-col items-center rounded-full border px-2 py-1 text-caption font-bold ${
+                    q.voted ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
                   }`}
                   aria-pressed={q.voted}
                 >
@@ -371,7 +371,7 @@ export default function LiveRail({
                   </div>
                   {isMod && (
                     <div className="mt-2 flex gap-3">
-                      <button onClick={() => markQuestion(q, q.status === "answered" ? "open" : "answered")} className="text-caption font-semibold text-primary">
+                      <button onClick={() => markQuestion(q, q.status === "answered" ? "open" : "answered")} className="text-caption font-semibold text-brand-600">
                         {q.status === "answered" ? "Reopen" : "Mark answered"}
                       </button>
                       <button onClick={() => markQuestion(q, q.status === "pinned" ? "open" : "pinned")} className="text-caption font-semibold text-[#92400e]">
@@ -389,7 +389,7 @@ export default function LiveRail({
               value={qBody}
               onChange={(e) => setQBody(e.target.value)}
               placeholder="Ask a question…"
-              className="w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+              className="w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
             />
             <div className="mt-2 flex items-center justify-between">
               <label className="flex items-center gap-1.5 text-caption text-text-secondary">
@@ -399,7 +399,7 @@ export default function LiveRail({
               <button
                 type="submit"
                 disabled={!qBody.trim()}
-                className="rounded-sm bg-primary px-4 py-1.5 text-small font-semibold text-white disabled:opacity-50"
+                className="rounded-full bg-ink px-4 py-1.5 text-small font-semibold text-white disabled:opacity-50"
               >
                 Submit a question
               </button>
@@ -420,7 +420,7 @@ export default function LiveRail({
               return (
                 <div key={m.id} className="group flex flex-col">
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-caption font-semibold ${mine ? "text-primary" : "text-text-primary"}`}>
+                    <span className={`text-caption font-semibold ${mine ? "text-brand-600" : "text-text-brand-600"}`}>
                       {mine ? "You" : m.author_name}
                     </span>
                     <span className="text-caption text-text-secondary">
@@ -448,12 +448,12 @@ export default function LiveRail({
               value={chatBody}
               onChange={(e) => setChatBody(e.target.value)}
               placeholder="Message the room…"
-              className="flex-1 rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+              className="flex-1 rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
             />
             <button
               type="submit"
               disabled={!chatBody.trim()}
-              className="rounded-sm bg-primary px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
+              className="rounded-full bg-ink px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
             >
               Send
             </button>
@@ -482,7 +482,7 @@ export default function LiveRail({
               <div className="mt-1 flex flex-col gap-1">
                 {raisedHands.map((p) => (
                   <span key={p.user_id} className="text-small text-[#92400e]">
-                    ✋ {p.user_id === meId ? "You" : p.full_name}
+                    {p.user_id === meId ? "You" : p.full_name} \u00b7 hand raised
                   </span>
                 ))}
               </div>
@@ -491,17 +491,17 @@ export default function LiveRail({
 
           <ul className="space-y-1">
             {participants.map((p) => (
-              <li key={p.user_id} className="flex items-center gap-2.5 rounded-sm px-1 py-1.5">
-                <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-primary text-caption font-bold text-white">
+              <li key={p.user_id} className="flex items-center gap-2.5 rounded-full px-1 py-1.5">
+                <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-ink text-caption font-bold text-white">
                   {(p.full_name || "M").slice(0, 1).toUpperCase()}
                   <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-accent" />
                 </span>
                 <span className="text-small font-semibold">
                   {p.user_id === meId ? "You" : p.full_name}
                 </span>
-                {p.hand_raised && <span title="Hand raised">✋</span>}
+                {p.hand_raised && <span title="Hand raised" className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">Hand</span>}
                 {p.role !== "viewer" && (
-                  <span className="ml-auto rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold capitalize text-primary">
+                  <span className="ml-auto rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold capitalize text-brand-600">
                     {p.role}
                   </span>
                 )}

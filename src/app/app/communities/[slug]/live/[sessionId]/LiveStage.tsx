@@ -166,7 +166,7 @@ export default function LiveStage({
         {/* Avatar fallback when no live video is showing */}
         {!broadcasting && (
           <div className="text-center">
-            <div className="mx-auto mb-2.5 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-[22px] font-bold">
+            <div className="mx-auto mb-2.5 flex h-16 w-16 items-center justify-center rounded-full bg-ink text-[22px] font-bold">
               {hostInitials}
             </div>
             <div className="font-bold">{hostName}</div>
@@ -185,7 +185,7 @@ export default function LiveStage({
           ⦿ REC
         </span>
         <span className="absolute bottom-3 left-3 rounded-full bg-white/15 px-2.5 py-1 text-caption font-semibold text-white">
-          👁 {watching} watching
+          {watching} watching
         </span>
       </div>
 
@@ -195,7 +195,7 @@ export default function LiveStage({
           {!broadcasting ? (
             <button
               onClick={startBroadcast}
-              className="rounded-sm bg-danger px-4 py-2 text-small font-semibold text-white hover:opacity-95"
+              className="rounded-full bg-danger px-4 py-2 text-small font-semibold text-white hover:opacity-95"
             >
               ● Go live from your camera
             </button>
@@ -203,27 +203,27 @@ export default function LiveStage({
             <>
               <button
                 onClick={toggleCam}
-                className="rounded-sm border border-border px-3 py-2 text-small font-semibold hover:border-primary"
+                className="rounded-full border border-border px-3 py-2 text-small font-semibold hover:border-ink/40"
               >
-                {camOn ? "📹 Camera on" : "📷 Camera off"}
+                {camOn ? "Camera on" : "Camera off"}
               </button>
               <button
                 onClick={toggleMic}
-                className="rounded-sm border border-border px-3 py-2 text-small font-semibold hover:border-primary"
+                className="rounded-full border border-border px-3 py-2 text-small font-semibold hover:border-ink/40"
               >
-                {micOn ? "🎙️ Mic on" : "🔇 Mic off"}
+                {micOn ? "Mic on" : "Mic off"}
               </button>
               {!recording ? (
                 <button
                   onClick={startRecording}
-                  className="rounded-sm border border-border px-3 py-2 text-small font-semibold hover:border-primary"
+                  className="rounded-full border border-border px-3 py-2 text-small font-semibold hover:border-ink/40"
                 >
                   ⦿ Record
                 </button>
               ) : (
                 <button
                   onClick={stopRecording}
-                  className="flex items-center gap-1.5 rounded-sm border border-danger px-3 py-2 text-small font-semibold text-danger"
+                  className="flex items-center gap-1.5 rounded-full border border-danger px-3 py-2 text-small font-semibold text-danger"
                 >
                   <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-danger" />
                   Stop recording
@@ -231,7 +231,7 @@ export default function LiveStage({
               )}
               <button
                 onClick={stopBroadcast}
-                className="ml-auto rounded-sm border border-danger px-3 py-2 text-small font-semibold text-danger hover:bg-[#fef2f2]"
+                className="ml-auto rounded-full border border-danger px-3 py-2 text-small font-semibold text-danger hover:bg-[#fef2f2]"
               >
                 Stop camera
               </button>
@@ -247,7 +247,7 @@ export default function LiveStage({
           <a
             href={recordingUrl}
             download={`ascendr-live-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.webm`}
-            className="rounded-sm bg-accent px-3 py-1.5 font-semibold text-white hover:opacity-95"
+            className="rounded-full bg-accent px-3 py-1.5 font-semibold text-white hover:opacity-95"
           >
             ⬇ Download recording
           </a>

@@ -70,7 +70,7 @@ export default async function LiveSessionRoom({
       <div className="max-w-3xl mx-auto rounded-md border border-border bg-card p-10 text-center text-text-secondary">
         Join {community.name} to join this session.
         <div className="mt-4">
-          <Link href={`/app/communities/${community.slug}`} className="text-primary font-semibold">
+          <Link href={`/app/communities/${community.slug}`} className="text-brand-600 font-semibold">
             ← Back to community
           </Link>
         </div>
@@ -132,7 +132,7 @@ export default async function LiveSessionRoom({
     session.status === "live"
       ? "bg-danger/10 text-danger"
       : session.status === "scheduled"
-      ? "bg-[#eef2ff] text-primary"
+      ? "bg-[#eef2ff] text-brand-600"
       : "bg-bg text-text-secondary";
 
   const isHost = session.host_id === profile!.id;
@@ -144,7 +144,7 @@ export default async function LiveSessionRoom({
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <Link
           href={`/app/communities/${community.slug}/live`}
-          className="text-small text-primary font-semibold"
+          className="text-small text-brand-600 font-semibold"
         >
           ← All sessions
         </Link>
@@ -163,7 +163,7 @@ export default async function LiveSessionRoom({
         )}
       </div>
 
-      <h1 className="mb-4 text-h3 font-bold">{session.title}</h1>
+      <h1 className="mb-4 text-[22px] font-semibold tracking-tight text-ink">{session.title}</h1>
 
       {/* Two-column live layout: stage + controls (left), Q&A/Chat rail (right) */}
       <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
@@ -268,7 +268,7 @@ function StatusButton({
       <input type="hidden" name="community_id" value={communityId} />
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="status" value={status} />
-      <button className="rounded-sm border border-primary px-4 py-2 text-small font-semibold text-primary hover:bg-[#eef2ff]">
+      <button className="rounded-full border border-ink px-4 py-2 text-small font-semibold text-brand-600 hover:bg-[#eef2ff]">
         {label}
       </button>
     </form>

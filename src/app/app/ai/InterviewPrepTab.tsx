@@ -101,7 +101,7 @@ export default function InterviewPrepTab() {
           value={role}
           onChange={(e) => setRole(e.target.value)}
           placeholder="e.g. Product Manager, Frontend Engineer"
-          className="mt-1 w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+          className="mt-1 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
         />
         <label className="mt-4 block text-small font-semibold">Interview type</label>
         <div className="mt-1 flex gap-1.5">
@@ -110,7 +110,7 @@ export default function InterviewPrepTab() {
               key={k.key}
               onClick={() => setKind(k.key)}
               className={`rounded-full border px-3 py-1 text-caption font-semibold ${
-                kind === k.key ? "border-primary bg-[#eef2ff] text-primary" : "border-border text-text-secondary"
+                kind === k.key ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
               }`}
             >
               {k.label}
@@ -120,7 +120,7 @@ export default function InterviewPrepTab() {
         <button
           onClick={start}
           disabled={!role.trim()}
-          className="mt-5 w-full rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+          className="mt-5 w-full rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
         >
           Begin interview
         </button>
@@ -133,7 +133,7 @@ export default function InterviewPrepTab() {
       {/* Current question + answer */}
       <div className="rounded-md border border-border bg-card p-5">
         <div className="flex items-center justify-between">
-          <span className="rounded-full bg-[#eef2ff] px-2.5 py-1 text-caption font-semibold capitalize text-primary">
+          <span className="rounded-full bg-[#eef2ff] px-2.5 py-1 text-caption font-semibold capitalize text-brand-600">
             {kind} · {role}
           </span>
           <span className="text-caption text-text-secondary">Question {turns.length + 1}</span>
@@ -148,20 +148,20 @@ export default function InterviewPrepTab() {
           onChange={(e) => setAnswer(e.target.value)}
           rows={7}
           placeholder="Type your answer as if you were speaking to the interviewer…"
-          className="mt-3 w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+          className="mt-3 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
         />
         <div className="mt-3 flex items-center gap-3">
           <button
             onClick={submitAnswer}
             disabled={!answer.trim() || loading}
-            className="rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+            className="rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
           >
             {loading ? "Scoring…" : "Submit answer"}
           </button>
           <button
             onClick={() => nextQuestion(turns)}
             disabled={loading}
-            className="text-small font-semibold text-text-secondary hover:text-primary"
+            className="text-small font-semibold text-text-secondary hover:text-ink"
           >
             Skip question
           </button>

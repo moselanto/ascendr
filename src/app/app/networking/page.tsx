@@ -95,15 +95,15 @@ export default async function NetworkingPage({
   if (dmPeer) {
     return (
       <div className="max-w-2xl mx-auto">
-        <Link href="/app/networking" className="text-small text-primary font-semibold">
+        <Link href="/app/networking" className="text-small text-brand-600 font-semibold">
           ← Back to networking
         </Link>
         <div className="mt-3 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-brand-700 font-bold">
             {initials(dmPeer.full_name)}
           </div>
           <div>
-            <Link href={`/app/members/${dmPeer.id}`} className="font-semibold hover:text-primary">
+            <Link href={`/app/members/${dmPeer.id}`} className="font-semibold hover:text-ink">
               {dmPeer.full_name || "Member"}
             </Link>
             <div className="text-caption text-text-secondary capitalize">{dmPeer.role}</div>
@@ -121,7 +121,7 @@ export default async function NetworkingPage({
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-6">
       <div>
-        <h1 className="text-h3 font-bold">Networking</h1>
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">Networking</h1>
         <p className="text-small text-text-secondary">Connect with people and message your network.</p>
       </div>
 
@@ -136,22 +136,22 @@ export default async function NetworkingPage({
               const p = profMap.get(c.requester_id);
               return (
                 <div key={c.id} className="flex items-center gap-3 rounded-md border border-border bg-card p-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-caption font-bold">
                     {initials(p?.full_name)}
                   </div>
-                  <Link href={`/app/members/${c.requester_id}`} className="font-semibold hover:text-primary">
+                  <Link href={`/app/members/${c.requester_id}`} className="font-semibold hover:text-ink">
                     {p?.full_name || "Member"}
                   </Link>
                   <div className="ml-auto flex gap-2">
                     <form action={respondToConnection}>
                       <input type="hidden" name="connection_id" value={c.id} />
                       <input type="hidden" name="decision" value="accepted" />
-                      <button className="rounded-sm bg-primary px-3 py-1.5 text-caption font-semibold text-white">Accept</button>
+                      <button className="rounded-full bg-ink px-3 py-1.5 text-caption font-semibold text-white">Accept</button>
                     </form>
                     <form action={respondToConnection}>
                       <input type="hidden" name="connection_id" value={c.id} />
                       <input type="hidden" name="decision" value="declined" />
-                      <button className="rounded-sm border border-border px-3 py-1.5 text-caption font-semibold text-text-secondary">Decline</button>
+                      <button className="rounded-full border border-border px-3 py-1.5 text-caption font-semibold text-text-secondary">Decline</button>
                     </form>
                   </div>
                 </div>
@@ -175,18 +175,18 @@ export default async function NetworkingPage({
               const p = profMap.get(otherId);
               return (
                 <div key={c.id} className="flex items-center gap-3 rounded-md border border-border bg-card p-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-caption font-bold">
                     {initials(p?.full_name)}
                   </div>
                   <div className="min-w-0">
-                    <Link href={`/app/members/${otherId}`} className="font-semibold hover:text-primary block truncate">
+                    <Link href={`/app/members/${otherId}`} className="font-semibold hover:text-ink block truncate">
                       {p?.full_name || "Member"}
                     </Link>
                     <div className="text-caption text-text-secondary capitalize truncate">{p?.role}</div>
                   </div>
                   <Link
                     href={`/app/networking?dm=${otherId}`}
-                    className="ml-auto rounded-sm border border-primary px-3 py-1.5 text-caption font-semibold text-primary"
+                    className="ml-auto rounded-full border border-ink px-3 py-1.5 text-caption font-semibold text-brand-600"
                   >
                     Message
                   </Link>
@@ -208,16 +208,16 @@ export default async function NetworkingPage({
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {discover.map((p) => (
               <div key={p.id} className="rounded-md border border-border bg-card p-4 text-center">
-                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white font-bold">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-100 text-brand-700 font-bold">
                   {initials(p.full_name)}
                 </div>
-                <Link href={`/app/members/${p.id}`} className="mt-2 block font-semibold hover:text-primary">
+                <Link href={`/app/members/${p.id}`} className="mt-2 block font-semibold hover:text-ink">
                   {p.full_name || "Member"}
                 </Link>
                 <div className="text-caption text-text-secondary capitalize">{p.role}</div>
                 <form action={sendConnectionRequest} className="mt-3">
                   <input type="hidden" name="addressee_id" value={p.id} />
-                  <button className="w-full rounded-sm bg-primary px-3 py-2 text-caption font-semibold text-white">
+                  <button className="w-full rounded-full bg-ink px-3 py-2 text-caption font-semibold text-white">
                     + Connect
                   </button>
                 </form>

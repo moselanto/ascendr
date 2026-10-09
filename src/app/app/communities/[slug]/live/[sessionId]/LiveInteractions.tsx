@@ -103,23 +103,23 @@ export default function LiveInteractions({
         type="button"
         onClick={toggleHand}
         aria-pressed={handRaised}
-        className={`rounded-sm border px-4 py-2 text-small font-semibold transition ${
+        className={`rounded-full border px-4 py-2 text-small font-semibold transition ${
           handRaised
-            ? "border-primary bg-[#eef2ff] text-primary"
-            : "border-border bg-card text-text hover:border-primary"
+            ? "border-ink bg-[#eef2ff] text-brand-600"
+            : "border-border bg-card text-text hover:border-ink/40"
         }`}
       >
-        ✋ {handRaised ? "Hand raised" : "Raise hand"}
+        {handRaised ? "Hand raised" : "Raise hand"}
         {handCount > 0 && (
-          <span className="ml-1.5 rounded-full bg-primary px-1.5 text-caption font-bold text-white">
+          <span className="ml-1.5 rounded-full bg-ink px-1.5 text-caption font-bold text-white">
             {handCount}
           </span>
         )}
       </button>
 
       <details className="group relative">
-        <summary className="flex cursor-pointer list-none items-center rounded-sm border border-border bg-card px-4 py-2 text-small font-semibold text-text hover:border-primary">
-          👍 React
+        <summary className="flex cursor-pointer list-none items-center rounded-full border border-border bg-card px-4 py-2 text-small font-semibold text-text hover:border-ink/40">
+          React
         </summary>
         <div className="absolute z-20 mt-2 flex gap-1 rounded-md border border-border bg-card p-2 shadow-[0_10px_30px_rgba(15,23,42,.12)]">
           {REACTIONS.map((emoji) => (
@@ -130,7 +130,7 @@ export default function LiveInteractions({
                 react(emoji);
                 (e.currentTarget.closest("details") as HTMLDetailsElement)?.removeAttribute("open");
               }}
-              className="rounded-sm px-2 py-1 text-xl hover:bg-bg"
+              className="rounded-full px-2 py-1 text-xl hover:bg-bg"
             >
               {emoji}
             </button>

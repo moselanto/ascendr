@@ -126,7 +126,7 @@ export default function PollPanel({
           <button
             type="button"
             onClick={() => setShowCreate((s) => !s)}
-            className="rounded-sm border border-border px-2.5 py-1 text-caption font-semibold text-primary hover:border-primary"
+            className="rounded-full border border-border px-2.5 py-1 text-caption font-semibold text-brand-600 hover:border-ink/40"
           >
             {showCreate ? "Cancel" : "＋ New poll"}
           </button>
@@ -141,7 +141,7 @@ export default function PollPanel({
             name="question"
             required
             placeholder="Poll question"
-            className="w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+            className="w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
           />
           <div className="mt-2 flex flex-col gap-1.5">
             {[0, 1, 2, 3].map((i) => (
@@ -150,14 +150,14 @@ export default function PollPanel({
                 name={`option_${i}`}
                 placeholder={`Option ${i + 1}${i < 2 ? " (required)" : " (optional)"}`}
                 required={i < 2}
-                className="w-full rounded-sm border border-border px-3 py-1.5 text-small outline-none focus:border-primary"
+                className="w-full rounded-full border border-border px-3 py-1.5 text-small outline-none focus:border-ink/30"
               />
             ))}
           </div>
           <button
             type="submit"
             disabled={pending}
-            className="mt-2 w-full rounded-sm bg-primary px-3 py-2 text-small font-semibold text-white disabled:opacity-60"
+            className="mt-2 w-full rounded-full bg-ink px-3 py-2 text-small font-semibold text-white disabled:opacity-60"
           >
             {pending ? "Creating…" : "Launch poll"}
           </button>
@@ -197,8 +197,8 @@ export default function PollPanel({
                       type="button"
                       disabled={closed || pending}
                       onClick={() => handleVote(poll.id, i)}
-                      className={`relative overflow-hidden rounded-sm border px-3 py-1.5 text-left text-small transition ${
-                        mine ? "border-primary" : "border-border hover:border-primary"
+                      className={`relative overflow-hidden rounded-full border px-3 py-1.5 text-left text-small transition ${
+                        mine ? "border-ink" : "border-border hover:border-ink/40"
                       } ${closed ? "cursor-default" : ""}`}
                     >
                       <span
@@ -207,7 +207,7 @@ export default function PollPanel({
                         aria-hidden
                       />
                       <span className="relative flex items-center justify-between gap-2">
-                        <span className={mine ? "font-semibold text-primary" : ""}>
+                        <span className={mine ? "font-semibold text-brand-600" : ""}>
                           {mine ? "✓ " : ""}
                           {opt}
                         </span>

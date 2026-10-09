@@ -99,7 +99,7 @@ export default function AICoachesTab() {
             key={c.id}
             onClick={() => switchCoach(c)}
             className={`flex items-center gap-3 rounded-md border p-3 text-left ${
-              active.id === c.id ? "border-primary bg-[#eef2ff]" : "border-border bg-card hover:border-primary"
+              active.id === c.id ? "border-ink bg-[#eef2ff]" : "border-border bg-card hover:border-ink/40"
             }`}
           >
             <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br ${c.accent} text-white text-caption font-bold`}>
@@ -113,7 +113,7 @@ export default function AICoachesTab() {
         ))}
 
         <div className="mt-2 rounded-md border border-dashed border-border bg-card p-3 text-caption text-text-secondary">
-          <span className="font-semibold text-text-primary">Mentor Clones</span> live inside each
+          <span className="font-semibold text-text-brand-600">Mentor Clones</span> live inside each
           community — a mentor trains an AI on their own content, and it answers members with cited
           sources. Open a community&apos;s Mentor Workspace to build one.
         </div>
@@ -128,7 +128,7 @@ export default function AICoachesTab() {
           <div>
             <div className="font-semibold text-small">
               {active.name}
-              <span className="ml-1 rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">AI</span>
+              <span className="ml-1 rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-brand-600">AI</span>
             </div>
             <div className="text-caption text-text-secondary">{active.tagline}</div>
           </div>
@@ -140,7 +140,7 @@ export default function AICoachesTab() {
               key={i}
               className={
                 m.role === "user"
-                  ? "self-end max-w-[80%] rounded-[14px_14px_4px_14px] bg-primary px-4 py-2.5 text-small text-white whitespace-pre-wrap"
+                  ? "self-end max-w-[80%] rounded-[14px_14px_4px_14px] bg-ink px-4 py-2.5 text-small text-white whitespace-pre-wrap"
                   : "self-start max-w-[85%] rounded-[14px_14px_14px_4px] bg-bg border border-border px-4 py-2.5 text-small whitespace-pre-wrap"
               }
             >
@@ -166,11 +166,11 @@ export default function AICoachesTab() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Ask ${active.name}…`}
-            className="flex-1 rounded-sm border border-border px-4 py-2.5 text-body outline-none focus:border-primary"
+            className="flex-1 rounded-full border border-border px-4 py-2.5 text-body outline-none focus:border-ink/30"
           />
           <button
             disabled={loading}
-            className="rounded-sm bg-primary px-5 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+            className="rounded-full bg-ink px-5 py-2.5 text-small font-semibold text-white disabled:opacity-50"
           >
             Send
           </button>

@@ -26,7 +26,7 @@ function fmt(dt: string | null) {
 
 const STATUS_STYLE: Record<string, string> = {
   live: "bg-danger/10 text-danger",
-  scheduled: "bg-[#eef2ff] text-primary",
+  scheduled: "bg-[#eef2ff] text-brand-600",
   ended: "bg-bg text-text-secondary",
 };
 
@@ -61,7 +61,7 @@ export default async function LiveSessionsPage({
       <div className="max-w-3xl mx-auto rounded-md border border-border bg-card p-10 text-center text-text-secondary">
         Join {community.name} to see its live sessions.
         <div className="mt-4">
-          <Link href={`/app/communities/${community.slug}`} className="text-primary font-semibold">
+          <Link href={`/app/communities/${community.slug}`} className="text-brand-600 font-semibold">
             ← Back to community
           </Link>
         </div>
@@ -86,19 +86,19 @@ export default async function LiveSessionsPage({
     <div className="max-w-3xl mx-auto">
       <div className="flex items-center gap-3 flex-wrap">
         <div>
-          <h1 className="text-h3 font-bold">Live Sessions</h1>
+          <h1 className="text-[22px] font-semibold tracking-tight text-ink">Live Sessions</h1>
           <p className="text-small text-text-secondary">{community.name}</p>
         </div>
         <Link
           href={`/app/communities/${community.slug}`}
-          className="ml-auto text-small text-primary font-semibold"
+          className="ml-auto text-small text-brand-600 font-semibold"
         >
           ← Community
         </Link>
       </div>
 
       {searchParams.error && (
-        <div className="mt-4 rounded-sm border border-danger/30 bg-danger/10 px-4 py-2 text-small text-danger">
+        <div className="mt-4 rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-small text-danger">
           {searchParams.error}
         </div>
       )}
@@ -116,7 +116,7 @@ export default async function LiveSessionsPage({
               name="title"
               required
               placeholder="e.g. Live AMA: breaking into product"
-              className="mt-1 w-full rounded-sm border border-border px-3 py-2 text-small"
+              className="mt-1 w-full rounded-full border border-border px-3 py-2 text-small"
             />
           </div>
           <div>
@@ -125,10 +125,10 @@ export default async function LiveSessionsPage({
               type="datetime-local"
               name="scheduled_at"
               required
-              className="mt-1 rounded-sm border border-border px-3 py-2 text-small"
+              className="mt-1 rounded-full border border-border px-3 py-2 text-small"
             />
           </div>
-          <button className="rounded-sm bg-primary px-4 py-2 text-small font-semibold text-white">
+          <button className="rounded-full bg-ink px-4 py-2 text-small font-semibold text-white">
             Schedule (+20 XP)
           </button>
         </form>
@@ -162,7 +162,7 @@ function Section({
             <li key={s.id}>
               <Link
                 href={`/app/communities/${slug}/live/${s.id}`}
-                className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 hover:border-primary"
+                className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 hover:border-ink/40"
               >
                 <div>
                   <div className="font-semibold">{s.title}</div>

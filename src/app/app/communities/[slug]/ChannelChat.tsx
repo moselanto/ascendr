@@ -146,7 +146,7 @@ export default function ChannelChat({
             const mine = new Set((m.reactions ?? []).filter((r) => r.user_id === meId).map((r) => r.emoji));
             return (
               <div key={m.id} className="group flex gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-secondary text-white text-caption font-bold">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-caption font-bold">
                   {(m.profiles?.full_name || "M").slice(0, 1).toUpperCase()}
                 </div>
                 <div className="min-w-0">
@@ -161,7 +161,7 @@ export default function ChannelChat({
                         key={emoji}
                         onClick={() => toggleReaction(m.id, emoji, communityId, slug)}
                         className={`rounded-full border px-2 py-0.5 text-caption ${
-                          mine.has(emoji) ? "border-primary bg-[#eef2ff] text-primary" : "border-border text-text-secondary"
+                          mine.has(emoji) ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
                         }`}
                       >
                         {emoji} {n}
@@ -185,7 +185,7 @@ export default function ChannelChat({
             );
           })
         ) : (
-          <p className="text-center text-text-secondary py-6">No messages yet — say hello 👋</p>
+          <p className="text-center text-text-secondary py-6">No messages yet. Say hello and start the conversation.</p>
         )}
         <div ref={bottomRef} />
       </div>
@@ -202,9 +202,9 @@ export default function ChannelChat({
           autoComplete="off"
           onChange={handleTyping}
           placeholder={`Message #${channelName}…`}
-          className="flex-1 rounded-sm border border-border px-4 py-2.5 text-body"
+          className="flex-1 rounded-full border border-border px-4 py-2.5 text-body"
         />
-        <button className="rounded-sm bg-primary px-5 py-2.5 text-small font-semibold text-white">Send</button>
+        <button className="rounded-full bg-ink px-5 py-2.5 text-small font-semibold text-white">Send</button>
       </form>
     </>
   );

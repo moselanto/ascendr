@@ -60,7 +60,7 @@ export default function CoachChat() {
         </div>
         <div>
           <div className="font-semibold text-small">
-            AI Career Coach <span className="ml-1 rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">AI</span>
+            AI Career Coach <span className="ml-1 rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-brand-600">AI</span>
           </div>
           <div className="text-caption text-text-secondary">Practical, encouraging, specific.</div>
         </div>
@@ -72,7 +72,7 @@ export default function CoachChat() {
             key={i}
             className={
               m.role === "user"
-                ? "self-end max-w-[80%] rounded-[14px_14px_4px_14px] bg-primary px-4 py-2.5 text-small text-white whitespace-pre-wrap"
+                ? "self-end max-w-[80%] rounded-[14px_14px_4px_14px] bg-ink px-4 py-2.5 text-small text-white whitespace-pre-wrap"
                 : "self-start max-w-[85%] rounded-[14px_14px_14px_4px] bg-bg border border-border px-4 py-2.5 text-small whitespace-pre-wrap"
             }
           >
@@ -90,7 +90,7 @@ export default function CoachChat() {
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="rounded-full border border-border px-3 py-1.5 text-caption text-text-secondary hover:border-primary hover:text-primary"
+                className="rounded-full border border-border px-3 py-1.5 text-caption text-text-secondary hover:border-ink/40 hover:text-ink"
               >
                 {s}
               </button>
@@ -111,11 +111,11 @@ export default function CoachChat() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask your coach anything…"
-          className="flex-1 rounded-sm border border-border px-4 py-2.5 text-body"
+          className="flex-1 rounded-full border border-border px-4 py-2.5 text-body"
         />
         <button
           disabled={loading}
-          className="rounded-sm bg-primary px-5 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+          className="rounded-full bg-ink px-5 py-2.5 text-small font-semibold text-white disabled:opacity-50"
         >
           Send
         </button>

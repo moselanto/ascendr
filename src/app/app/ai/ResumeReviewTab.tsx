@@ -72,8 +72,8 @@ export default function ResumeReviewTab({ latest }: { latest: Review | null }) {
         </div>
 
         <form onSubmit={review_} className="mt-3">
-          <label className="flex cursor-pointer items-center gap-2 rounded-sm border border-border px-3 py-2.5 text-small text-text-secondary hover:border-primary">
-            <span aria-hidden>📎</span>
+          <label className="flex cursor-pointer items-center gap-2 rounded-full border border-border px-3 py-2.5 text-small text-text-secondary hover:border-ink/40">
+            <span aria-hidden>{"\u2398"}</span>
             <span className="flex-1 truncate">
               {fileName ? `${fileName} selected` : "Upload a .txt/.md file or paste below"}
             </span>
@@ -84,7 +84,7 @@ export default function ResumeReviewTab({ latest }: { latest: Review | null }) {
             value={targetRole}
             onChange={(e) => setTargetRole(e.target.value)}
             placeholder="Target role (e.g. Product Manager)"
-            className="mt-3 w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+            className="mt-3 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
           />
 
           <textarea
@@ -92,13 +92,13 @@ export default function ResumeReviewTab({ latest }: { latest: Review | null }) {
             onChange={(e) => setResumeText(e.target.value)}
             rows={9}
             placeholder="Paste your resume text here…"
-            className="mt-3 w-full rounded-sm border border-border px-3 py-2 text-small outline-none focus:border-primary"
+            className="mt-3 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
           />
 
           <button
             type="submit"
             disabled={resumeText.trim().length < 40 || loading}
-            className="mt-3 w-full rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+            className="mt-3 w-full rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
           >
             {loading ? "Reviewing…" : "Review my resume"}
           </button>
@@ -160,7 +160,7 @@ export default function ResumeReviewTab({ latest }: { latest: Review | null }) {
 
             {review.rewrite && (
               <div className="mt-3 rounded-md border border-border bg-bg px-4 py-3">
-                <span className="text-caption font-bold text-text-primary">Rewrite: </span>
+                <span className="text-caption font-bold text-text-brand-600">Rewrite: </span>
                 <span className="text-small text-text-secondary">&ldquo;{review.rewrite}&rdquo;</span>
               </div>
             )}

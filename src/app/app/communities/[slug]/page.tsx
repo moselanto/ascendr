@@ -13,13 +13,13 @@ type Channel = { id: string; name: string; kind: string; position: number };
 
 // Top-level tabs shown on every community. `discussion` is the default view.
 const TABS: { key: string; label: string; icon: string }[] = [
-  { key: "discussion", label: "Discussion", icon: "💬" },
-  { key: "courses", label: "Courses", icon: "🎓" },
+  { key: "discussion", label: "Discussion", icon: "\u25A4" },
+  { key: "courses", label: "Courses", icon: "\u25A6" },
   { key: "live", label: "Live", icon: "◉" },
-  { key: "members", label: "Members", icon: "👥" },
-  { key: "leaderboard", label: "Leaderboard", icon: "🏆" },
-  { key: "events", label: "Events", icon: "📅" },
-  { key: "resources", label: "Resources", icon: "📎" },
+  { key: "members", label: "Members", icon: "\u2687" },
+  { key: "leaderboard", label: "Leaderboard", icon: "\u2605" },
+  { key: "events", label: "Events", icon: "\u25F7" },
+  { key: "resources", label: "Resources", icon: "\u2398" },
 ];
 
 export default async function CommunityHome({
@@ -152,17 +152,17 @@ export default async function CommunityHome({
     <div className="max-w-5xl mx-auto">
       {/* Header */}
       <div className="rounded-md border border-border bg-card overflow-hidden">
-        <div className="h-24 bg-gradient-to-br from-primary to-accent" />
+        <div className="h-24 bg-ink" />
         <div className="p-5 flex items-center gap-4 flex-wrap">
           <div>
-            <h1 className="text-h3 font-bold">{c.name}</h1>
+            <h1 className="text-[22px] font-semibold tracking-tight text-ink">{c.name}</h1>
             <p className="text-small text-text-secondary">{c.member_count} members</p>
           </div>
           {!isMember ? (
             <form action={joinCommunity} className="ml-auto">
               <input type="hidden" name="community_id" value={c.id} />
               <input type="hidden" name="slug" value={c.slug} />
-              <button className="rounded-sm bg-primary px-5 py-2.5 text-small font-semibold text-white">
+              <button className="rounded-full bg-ink px-5 py-2.5 text-small font-semibold text-white">
                 Join community (+15 XP)
               </button>
             </form>
@@ -186,8 +186,8 @@ export default async function CommunityHome({
                   href={href}
                   className={`flex shrink-0 items-center gap-1.5 border-b-2 px-3 py-3 text-small font-semibold ${
                     activeTab
-                      ? "border-primary text-primary"
-                      : "border-transparent text-text-secondary hover:text-text-primary"
+                      ? "border-ink text-brand-600"
+                      : "border-transparent text-text-secondary hover:text-text-brand-600"
                   }`}
                 >
                   <span aria-hidden>{t.icon}</span>
@@ -219,8 +219,8 @@ export default async function CommunityHome({
                 {channels.map((ch) => (
                   <div
                     key={ch.id}
-                    className={`group flex items-center gap-2 rounded-sm px-2 py-2 text-small font-semibold ${
-                      ch.id === active.id ? "bg-[#eef2ff] text-primary" : "text-text-secondary hover:bg-bg"
+                    className={`group flex items-center gap-2 rounded-full px-2 py-2 text-small font-semibold ${
+                      ch.id === active.id ? "bg-[#eef2ff] text-brand-600" : "text-text-secondary hover:bg-bg"
                     }`}
                   >
                     <Link href={`/app/communities/${c.slug}?channel=${ch.id}`} className="flex-1">
@@ -254,9 +254,9 @@ export default async function CommunityHome({
                     name="name"
                     required
                     placeholder="new-channel"
-                    className="w-full rounded-sm border border-border px-2 py-1.5 text-caption"
+                    className="w-full rounded-full border border-border px-2 py-1.5 text-caption"
                   />
-                  <button className="mt-2 w-full rounded-sm bg-primary px-2 py-1.5 text-caption font-semibold text-white">
+                  <button className="mt-2 w-full rounded-full bg-ink px-2 py-1.5 text-caption font-semibold text-white">
                     + Add channel
                   </button>
                 </form>
@@ -265,7 +265,7 @@ export default async function CommunityHome({
               {isMod && (
                 <Link
                   href={`/app/communities/${c.slug}/mentor`}
-                  className="mt-3 flex items-center justify-center gap-1 rounded-sm border border-accent bg-[#ecfdf5] px-2 py-2 text-caption font-semibold text-[#047857] hover:bg-[#d1fae5]"
+                  className="mt-3 flex items-center justify-center gap-1 rounded-full border border-accent bg-[#ecfdf5] px-2 py-2 text-caption font-semibold text-[#047857] hover:bg-[#d1fae5]"
                 >
                   ✦ Mentor Workspace
                 </Link>
@@ -309,7 +309,7 @@ export default async function CommunityHome({
                 </span>
                 <span className="font-semibold">{m.full_name}</span>
                 {m.role !== "member" && (
-                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
+                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-brand-600">
                     {m.role}
                   </span>
                 )}
@@ -327,7 +327,7 @@ export default async function CommunityHome({
           <ul className="divide-y divide-border">
             {members.map((m) => (
               <li key={m.id} className="flex items-center gap-3 px-5 py-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-small font-bold text-white">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-small font-bold text-white">
                   {m.full_name.slice(0, 1).toUpperCase()}
                 </div>
                 <div>
@@ -335,7 +335,7 @@ export default async function CommunityHome({
                   {m.handle && <div className="text-caption text-text-secondary">@{m.handle}</div>}
                 </div>
                 {m.role !== "member" && (
-                  <span className="ml-auto rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-primary">
+                  <span className="ml-auto rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-brand-600">
                     {m.role}
                   </span>
                 )}
@@ -366,7 +366,7 @@ export default async function CommunityHome({
       )}
 
       <div className="mt-4">
-        <Link href="/app/communities" className="text-small text-primary font-semibold">
+        <Link href="/app/communities" className="text-small text-brand-600 font-semibold">
           ← All communities
         </Link>
       </div>

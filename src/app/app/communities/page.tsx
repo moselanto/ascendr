@@ -82,8 +82,8 @@ export default async function CommunitiesPage() {
   return (
     <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between">
-        <h1 className="text-h3 font-bold">Communities</h1>
-        <Link href="/app/communities/new" className="rounded-sm bg-primary px-4 py-2.5 text-small font-semibold text-white">
+        <h1 className="text-[22px] font-semibold tracking-tight text-ink">Communities</h1>
+        <Link href="/app/communities/new" className="rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white">
           + Create community
         </Link>
       </div>
@@ -101,7 +101,7 @@ export default async function CommunitiesPage() {
                   ● New
                 </span>
               )}
-              <div className="h-20 -mx-5 -mt-5 mb-4 rounded-t-md bg-gradient-to-br from-primary to-accent" />
+              <div className="h-20 -mx-5 -mt-5 mb-4 rounded-t-md bg-ink" />
               <div className="font-bold text-h4">{c.name}</div>
               <p className="text-small text-text-secondary mt-1 line-clamp-2">
                 {c.description || "A community on ASCENDR."}
@@ -111,7 +111,7 @@ export default async function CommunitiesPage() {
                 {joined.has(c.id) ? (
                   <span className="rounded-full bg-[#ecfdf5] px-2 py-0.5 font-semibold text-[#047857]">Joined</span>
                 ) : (
-                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 font-semibold text-primary">Open</span>
+                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 font-semibold text-brand-600">Open</span>
                 )}
               </div>
             </Link>
@@ -119,7 +119,7 @@ export default async function CommunitiesPage() {
         ) : (
           <div className="sm:col-span-2 rounded-md border border-dashed border-border bg-card p-10 text-center text-text-secondary">
             No communities yet.{" "}
-            <Link href="/app/communities/new" className="text-primary font-semibold">Create the first one</Link>.
+            <Link href="/app/communities/new" className="text-brand-600 font-semibold">Create the first one</Link>.
           </div>
         )}
       </div>
