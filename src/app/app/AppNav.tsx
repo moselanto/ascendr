@@ -30,6 +30,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/app/mentors", label: "Mentors & experts", icon: "\u2605" },
       { href: "/app/networking", label: "Professional network", icon: "\u21C4" },
       { href: "/app/communities", label: "Communities", icon: "\u25CE" },
+      { href: "/app/network", label: "Network intelligence", icon: "\u25A3" },
     ],
   },
   {
@@ -45,7 +46,7 @@ export const NAV_GROUPS: NavGroup[] = [
 
 export const ADMIN_GROUP: NavGroup = {
   label: "Admin",
-  items: [{ href: "/app/admin/metrics", label: "Network intelligence", icon: "\u25A3" }],
+  items: [{ href: "/app/admin/metrics", label: "Platform metrics", icon: "\u25A4" }],
 };
 
 export function isActive(pathname: string, href: string) {
