@@ -160,7 +160,7 @@ export default async function CareerPage() {
 
       {/* 2 — Roadmap */}
       {roadmap.length > 0 && (
-        <section>
+        <section id="roadmap" className="scroll-mt-24">
           <h2 className="font-display text-h3">Your roadmap</h2>
           <p className="mt-1 text-small text-text-secondary">
             The core skills for {roleTitle} you haven&apos;t told us you have, most important first. Already have one? Mark it and your plan updates.

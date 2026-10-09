@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCurrentProfile } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
+import { CareerSnapshot } from "@/components/app/CareerSnapshot";
 
 export const dynamic = "force-dynamic";
 
@@ -101,26 +102,13 @@ export default async function HomePage() {
 
   return (
     <div className="max-w-4xl mx-auto flex flex-col gap-5">
-      {/* Greeting + level/XP header */}
-      <div className="flex items-center gap-4 rounded-md bg-gradient-to-r from-primary to-secondary p-5 text-white">
-        <div className="text-3xl">🔥</div>
-        <div className="flex-1">
-          <div className="font-extrabold text-h4">Welcome back, {firstName}</div>
-          <div className="text-small opacity-90">
-            {streak?.current_len ?? 0}-day streak · Level {level}
-          </div>
-          <div className="mt-2 h-2 w-full max-w-xs overflow-hidden rounded-full bg-white/25">
-            <div className="h-full bg-white" style={{ width: `${pctToNext}%` }} />
-          </div>
-          <div className="mt-1 text-caption opacity-90">
-            {1000 - xpIntoLevel} XP to Level {level + 1}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="text-h3 font-black">{totalXp}</div>
-          <div className="text-caption opacity-90">total XP</div>
-        </div>
+      {/* Greeting — career first, gamification second (PRD §1). */}
+      <div>
+        <h1 className="text-h3 font-semibold text-text">Welcome back, {firstName}</h1>
+        <p className="mt-1 text-small text-text-secondary">Here is where your career plan stands today.</p>
       </div>
+
+      <CareerSnapshot profileId={profile!.id} communityCount={myCommunities.length} />
 
       <div className="grid gap-5 md:grid-cols-[1fr_300px]">
         {/* Main column */}
@@ -212,6 +200,25 @@ export default async function HomePage() {
 
         {/* Right rail */}
         <div className="flex flex-col gap-4">
+          {/* Momentum — XP and streak kept, but secondary. */}
+          <div className="rounded-md border border-border bg-card p-4">
+            <div className="text-small font-bold uppercase tracking-wide text-text-secondary">
+              Momentum
+            </div>
+            <div className="mt-2 flex items-baseline justify-between text-small">
+              <span>
+                <span className="nums font-semibold text-text">{streak?.current_len ?? 0}</span>-day streak
+              </span>
+              <span className="text-text-secondary">Level {level}</span>
+            </div>
+            <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-surface">
+              <div className="h-full bg-ink" style={{ width: `${pctToNext}%` }} />
+            </div>
+            <div className="mt-1 text-caption text-text-secondary">
+              {1000 - xpIntoLevel} XP to Level {level + 1} · {totalXp} total
+            </div>
+          </div>
+
           {/* My communities */}
           <div className="rounded-md border border-border bg-card p-4">
             <div className="text-small font-bold uppercase tracking-wide text-text-secondary">
