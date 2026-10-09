@@ -25,9 +25,9 @@ const BAND: Record<Band, { label: string; tone: string }> = {
   unknown: { label: "Not analysed yet", tone: "border-border bg-surface text-text-secondary" },
 };
 
-type NextAction = { title: string; why: string; href: string; cta: string };
+export type NextAction = { title: string; why: string; href: string; cta: string };
 
-function pickNextAction(input: {
+export function pickNextAction(input: {
   hasGoal: boolean;
   analysis: GapAnalysis | null;
   firstGap: string | null;
