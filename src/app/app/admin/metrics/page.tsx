@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { Card, EmptyState, PageHead } from "../_components/ui";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,8 @@ export const dynamic = "force-dynamic";
  * here and the numbers in a deck come from the same SQL and cannot drift.
  *
  * Admin only. Returns 404 rather than 403 to everyone else so the route's
- * existence is not advertised.
+ * existence is not advertised. (The /app/admin layout gates too; this check
+ * is kept as defence in depth.)
  */
 
 type Metrics = {
@@ -44,35 +46,37 @@ export default async function MetricsPage() {
     : [];
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 pb-16">
-      <header>
-        <p className="eyebrow text-caption text-primary">Admin</p>
-        <h1 className="mt-2 font-display text-h2">Activation metrics</h1>
-        <p className="mt-2 text-small text-text-secondary">
-          The milestones from the strategy memo, computed live from the database. Outcomes are self-reported.
-        </p>
-      </header>
+    <div className="space-y-8">
+      <PageHead
+        title="Activation metrics"
+        description="The milestones from the strategy memo, computed live from the database. Outcomes are self-reported."
+      />
 
       {error || m === null ? (
-        <p className="rounded-md border border-border bg-surface p-4 text-small text-text-secondary">
-          Could not load metrics{error ? `: ${error.message}` : "."} Check that SUPABASE_SERVICE_ROLE_KEY is set in Vercel.
-        </p>
+        <EmptyState
+          title="Could not load metrics"
+          body={`${error ? `${error.message}. ` : ""}Check that SUPABASE_SERVICE_ROLE_KEY is set in Vercel.`}
+        />
       ) : (
         <>
-          <p className="text-small text-text-secondary">
-            Base: <span className="nums font-semibold text-text">{m.total_members}</span> members
-            {m.total_members < 30 ? " — too few for the percentages to mean much yet. Quote counts, not rates." : "."}
-          </p>
+          <Card>
+            <p className="text-[13px] text-text-secondary">Base cohort</p>
+            <p className="nums mt-2 text-[28px] font-semibold leading-none text-ink">{m.total_members}</p>
+            <p className="mt-2 text-[13px] text-text-secondary">
+              members
+              {m.total_members < 30 ? " — too few for the percentages to mean much yet. Quote counts, not rates." : "."}
+            </p>
+          </Card>
           <div className="grid gap-4 sm:grid-cols-2">
             {rows.map((r) => (
-              <div key={r.label} className="rounded-lg border border-border bg-card p-6 shadow-card">
-                <p className="text-caption font-semibold text-text-secondary">{r.label}</p>
-                <p className="nums mt-2 font-display text-h1">{pct(r.n, m.total_members)}</p>
-                <p className="nums text-small text-text-secondary">
+              <Card key={r.label}>
+                <p className="text-[13px] text-text-secondary">{r.label}</p>
+                <p className="nums mt-2 text-[28px] font-semibold leading-none text-ink">{pct(r.n, m.total_members)}</p>
+                <p className="nums mt-1.5 text-[13px] text-text-secondary">
                   {r.n} of {m.total_members}
                 </p>
-                <p className="mt-3 text-caption text-text-secondary">{r.detail}</p>
-              </div>
+                <p className="mt-3 border-t border-border pt-3 text-[12px] text-text-secondary">{r.detail}</p>
+              </Card>
             ))}
           </div>
         </>
