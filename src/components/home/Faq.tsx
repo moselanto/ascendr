@@ -20,18 +20,18 @@ const FAQ = [
 export function Faq() {
   return (
     <section id="faq" className="border-t border-ink/[0.06] bg-surface">
-      <div className="mx-auto grid max-w-6xl gap-12 px-6 py-24 md:py-32 lg:grid-cols-[0.8fr_1.2fr]">
+      <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 md:py-20 lg:grid-cols-[0.8fr_1.2fr]">
         <div>
           <p className="text-[14px] font-medium text-brand-600">FAQ</p>
-          <h2 className="mt-3 text-h1 font-semibold text-ink">
+          <h2 className="mt-3 text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[44px]">
             Questions, <span className="accent-serif">answered.</span>
           </h2>
         </div>
 
         <div className="divide-y divide-ink/10 border-y border-ink/10">
           {FAQ.map((item) => (
-            <details key={item.q} className="group py-6">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-[19px] font-medium text-ink [&::-webkit-details-marker]:hidden">
+            <details key={item.q} className="group py-5">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-[18px] font-medium text-ink [&::-webkit-details-marker]:hidden">
                 {item.q}
                 <span
                   aria-hidden

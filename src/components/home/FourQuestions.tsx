@@ -59,12 +59,12 @@ const QUESTIONS: Q[] = [
 export function FourQuestions() {
   return (
     <section id="questions" className="bg-surface">
-      <div className="mx-auto max-w-6xl px-6 py-24 md:py-32">
+      <div className="mx-auto max-w-6xl px-6 py-16 md:py-20">
         <div className="grid gap-8 lg:grid-cols-[1fr_1fr] lg:items-end">
           <div>
             <p className="text-[14px] font-medium text-brand-600">Why ASCENDR</p>
-            <h2 className="mt-3 text-h1 font-semibold text-ink md:text-display">
-              Your career has <span className="accent-serif">four questions.</span>
+            <h2 className="mt-3 text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[44px]">
+              Your career has <br className="hidden sm:block" /><span className="accent-serif">four questions.</span>
             </h2>
           </div>
           <p className="max-w-md text-lead text-text-secondary lg:justify-self-end">
@@ -73,12 +73,12 @@ export function FourQuestions() {
           </p>
         </div>
 
-        <div className="mt-16 grid gap-px overflow-hidden rounded-2xl border border-ink/10 bg-ink/10 sm:grid-cols-2">
+        <div className="mt-12 grid gap-px overflow-hidden rounded-2xl border border-ink/10 bg-ink/10 sm:grid-cols-2">
           {QUESTIONS.map((q) => (
             <Link
               key={q.n}
               href={SIGNUP}
-              className="group flex flex-col bg-white p-8 transition-colors hover:bg-brand-50/40 md:p-10"
+              className="group flex flex-col bg-white p-7 transition-colors hover:bg-brand-50/40 md:p-8"
             >
               <div className="flex items-center justify-between">
                 <span className="flex h-10 w-10 items-center justify-center rounded-xl border border-ink/10 text-ink transition-colors group-hover:border-brand-300 group-hover:text-brand-600">
@@ -87,15 +87,15 @@ export function FourQuestions() {
                 <span className="nums text-[13px] text-text-secondary">{q.n}</span>
               </div>
 
-              <p className="mt-10 text-[13px] font-medium uppercase tracking-[0.12em] text-text-secondary">
+              <p className="mt-8 text-[13px] font-medium uppercase tracking-[0.12em] text-text-secondary">
                 {q.answer}
               </p>
-              <h3 className="mt-2 text-[26px] font-semibold leading-tight tracking-[-0.02em] text-ink">
+              <h3 className="mt-2 text-[23px] font-semibold leading-tight tracking-[-0.02em] text-ink">
                 {q.question}
               </h3>
               <p className="mt-4 max-w-md text-[16px] leading-relaxed text-text-secondary">{q.body}</p>
 
-              <span className="mt-8 inline-flex items-center gap-1.5 text-[15px] font-medium text-ink">
+              <span className="mt-6 inline-flex items-center gap-1.5 text-[15px] font-medium text-ink">
                 Start here
                 <span aria-hidden className="transition-transform group-hover:translate-x-1">→</span>
               </span>

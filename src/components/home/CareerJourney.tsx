@@ -15,10 +15,10 @@ export function CareerJourney() {
 
   return (
     <section id="journey" className="bg-white">
-      <div className="mx-auto grid max-w-6xl gap-16 px-6 py-24 md:py-32 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:py-20 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <p className="text-[14px] font-medium text-brand-600">How it works · illustrative example</p>
-          <h2 className="mt-3 text-h1 font-semibold text-ink md:text-display">
+          <h2 className="mt-3 text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[44px]">
             {j.personaName} wants to become a <span className="accent-serif">{j.goal}.</span>
           </h2>
           <p className="mt-6 max-w-md text-lead text-text-secondary">
@@ -26,9 +26,9 @@ export function CareerJourney() {
             facts, and what she can act on at the end of it.
           </p>
 
-          <div className="mt-10 rounded-2xl bg-ink p-8 text-white">
+          <div className="mt-8 rounded-2xl bg-ink p-7 text-white">
             <p className="text-[13px] uppercase tracking-[0.12em] text-white/55">Outcome</p>
-            <p className="mt-2 text-[28px] font-semibold tracking-tight">{j.outcome}</p>
+            <p className="mt-2 text-[24px] font-semibold tracking-tight">{j.outcome}</p>
             <p className="mt-3 text-[15px] leading-relaxed text-white/70">
               Not a reading list. A set of actions with names attached: who to talk to, what to
               learn first, and which roles are already within reach.
@@ -45,13 +45,13 @@ export function CareerJourney() {
         <ol className="relative">
           <span aria-hidden className="absolute bottom-6 left-[19px] top-6 w-px bg-ink/10" />
           {j.steps.map((step, i) => (
-            <li key={step.id} className="relative flex gap-6 pb-5 last:pb-0">
+            <li key={step.id} className="relative flex gap-6 pb-4 last:pb-0">
               <span className="nums relative z-10 flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-ink/10 bg-white text-[14px] font-semibold text-ink">
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <div className="flex-1 rounded-xl border border-ink/[0.08] bg-white p-5 transition-shadow hover:shadow-card">
+              <div className="flex-1 rounded-xl border border-ink/[0.08] bg-white px-5 py-4 transition-shadow hover:shadow-card">
                 <p className="text-[13px] text-text-secondary">{step.label}</p>
-                <p className="mt-1 text-[19px] font-semibold leading-snug tracking-[-0.01em] text-ink">
+                <p className="mt-1 text-[17px] font-semibold leading-snug tracking-[-0.01em] text-ink">
                   {step.headline}
                 </p>
                 {step.items && (
