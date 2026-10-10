@@ -11,20 +11,24 @@ const SUGGESTIONS = [
   "Draft a 30-day plan to land my first tech job",
 ];
 
+const NOT_CONFIGURED_PREFIX = "The AI isn't switched on yet";
+
 export default function CoachChat() {
   const [messages, setMessages] = useState<Msg[]>([
     {
       role: "assistant",
       content:
-        "Hi! I'm your ASCENDR AI Career Coach. Tell me your goal — a role you're targeting, an interview coming up, or a skill you want to build — and I'll map out your next steps.",
+        "Hi, I'm your ASCENDR AI Career Coach. Tell me your goal (a role you're targeting, an interview coming up, or a skill you want to build) and I'll map out your next steps.",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const [notConfigured, setNotConfigured] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages.length, loading]);
 
   async function send(text: string) {
@@ -41,7 +45,10 @@ export default function CoachChat() {
         body: JSON.stringify({ messages: next }),
       });
       const data = await res.json();
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply || "…" }]);
+      if (typeof data.reply === "string" && data.reply.startsWith(NOT_CONFIGURED_PREFIX)) {
+        setNotConfigured(true);
+      }
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply || data.error || "…" }]);
     } catch {
       setMessages((prev) => [
         ...prev,
@@ -53,51 +60,56 @@ export default function CoachChat() {
   }
 
   return (
-    <div className="rounded-md border border-border bg-card flex flex-col h-[70vh]">
-      <div className="flex items-center gap-2 border-b border-border px-5 py-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-accent to-[#059669] text-white text-caption font-bold">
-          ✦
-        </div>
+    <div className="flex h-[70vh] min-h-[480px] flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-card">
+      <div className="flex items-center gap-3 border-b border-border bg-white px-5 py-4">
+        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
+          CC
+        </span>
         <div>
-          <div className="font-semibold text-small">
-            AI Career Coach <span className="ml-1 rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold text-brand-600">AI</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[15px] font-semibold text-ink">AI Career Coach</span>
+            <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">AI</span>
           </div>
-          <div className="text-caption text-text-secondary">Practical, encouraging, specific.</div>
+          <div className="text-[12px] text-text-secondary">Practical, encouraging, specific.</div>
         </div>
+        {notConfigured && (
+          <span className="ml-auto rounded-full bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-800">
+            Not configured
+          </span>
+        )}
       </div>
 
-      <div className="flex-1 overflow-auto p-5 flex flex-col gap-4">
+      <div ref={scrollRef} className="flex flex-1 flex-col gap-4 overflow-y-auto p-5">
         {messages.map((m, i) => (
           <div
             key={i}
             className={
               m.role === "user"
-                ? "self-end max-w-[80%] rounded-[14px_14px_4px_14px] bg-ink px-4 py-2.5 text-small text-white whitespace-pre-wrap"
-                : "self-start max-w-[85%] rounded-[14px_14px_14px_4px] bg-bg border border-border px-4 py-2.5 text-small whitespace-pre-wrap"
+                ? "max-w-[80%] self-end whitespace-pre-wrap rounded-2xl rounded-br-md bg-ink px-4 py-2.5 text-[14px] text-white"
+                : "max-w-[85%] self-start whitespace-pre-wrap rounded-2xl rounded-tl-md border border-border bg-white px-4 py-3 text-[14px] leading-relaxed text-ink shadow-card"
             }
           >
             {m.content}
           </div>
         ))}
         {loading && (
-          <div className="self-start rounded-[14px_14px_14px_4px] bg-bg border border-border px-4 py-2.5 text-small text-text-secondary italic">
-            Coach is thinking…
+          <div className="self-start rounded-2xl rounded-tl-md border border-border bg-white px-4 py-3 text-[14px] text-text-secondary shadow-card">
+            <span className="animate-pulse">Thinking…</span>
           </div>
         )}
         {messages.length <= 1 && (
-          <div className="flex flex-wrap gap-2 mt-2">
+          <div className="mt-1 flex flex-wrap gap-2">
             {SUGGESTIONS.map((s) => (
               <button
                 key={s}
                 onClick={() => send(s)}
-                className="rounded-full border border-border px-3 py-1.5 text-caption text-text-secondary hover:border-ink/40 hover:text-ink"
+                className="rounded-full border border-border bg-white px-3 py-1.5 text-[13px] text-ink hover:border-ink/40"
               >
                 {s}
               </button>
             ))}
           </div>
         )}
-        <div ref={bottomRef} />
       </div>
 
       <form
@@ -105,19 +117,20 @@ export default function CoachChat() {
           e.preventDefault();
           send(input);
         }}
-        className="flex gap-2 border-t border-border p-4"
+        className="flex items-center gap-2 border-t border-border bg-white p-3"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Ask your coach anything…"
-          className="flex-1 rounded-full border border-border px-4 py-2.5 text-body"
+          className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
         <button
-          disabled={loading}
-          className="rounded-full bg-ink px-5 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+          type="submit"
+          disabled={loading || !input.trim()}
+          className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
         >
-          Send
+          Send →
         </button>
       </form>
     </div>

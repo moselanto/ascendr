@@ -1,5 +1,4 @@
 // ASCENDR AI Studio — coach, mentor clones, and career tools.
-// (redeploy marker: force production onto latest main)
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
@@ -12,10 +11,10 @@ import InterviewPrepTab from "./InterviewPrepTab";
 export const dynamic = "force-dynamic";
 
 const TABS = [
-  { key: "coaches", label: "AI Coaches & Clone" },
-  { key: "plan", label: "Career Plan" },
-  { key: "resume", label: "Resume Review" },
-  { key: "interview", label: "Interview Prep" },
+  { key: "coaches", label: "Coach" },
+  { key: "plan", label: "Career plan" },
+  { key: "resume", label: "Resume review" },
+  { key: "interview", label: "Interview prep" },
 ] as const;
 
 type TabKey = (typeof TABS)[number]["key"];
@@ -31,6 +30,20 @@ export default async function AIStudioPage({
 
   const supabase = createClient();
   const profile = await getCurrentProfile();
+
+  // Active career goal (used to tailor the coach's suggested prompts).
+  let goalTitle: string | null = null;
+  if (profile && tab === "coaches") {
+    const { data: goal } = await supabase
+      .from("career_goals")
+      .select("target_title")
+      .eq("user_id", profile.id)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    goalTitle = (goal?.target_title as string | null | undefined) ?? null;
+  }
 
   // Load saved artifacts for the active tab (cheap, per-user).
   let plans: any[] = [];
@@ -62,42 +75,52 @@ export default async function AIStudioPage({
   }
 
   return (
-    <div className="max-w-5xl mx-auto">
-      <div className="mb-4">
-        <h1 className="text-[22px] font-semibold tracking-tight text-ink">AI Studio</h1>
-        <p className="text-small text-text-secondary mt-1">Your coach, clones, and career tools.</p>
+    <div className="mx-auto max-w-5xl">
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">AI Studio</p>
+          <h1 className="mt-1.5 text-[28px] font-semibold tracking-[-0.02em] text-ink md:text-[32px]">
+            Your career, <span className="accent-serif">coached</span>
+          </h1>
+          <p className="mt-1 text-[15px] text-text-secondary">
+            Talk to your coach, build a plan, sharpen your resume and rehearse interviews.
+          </p>
+        </div>
+        <Link
+          href="/app/career"
+          className="self-start rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40 md:self-auto"
+        >
+          Career intelligence →
+        </Link>
       </div>
 
       {!AI_CONFIGURED && (
-        <div className="mb-4 rounded-md border border-[#fde68a] bg-[#fffbeb] px-4 py-3 text-small text-[#92400e]">
-          The AI features are in demo mode. Add an <code>OPENAI_API_KEY</code> to your Vercel
-          environment variables to switch on live, grounded responses. Everything still works and
-          saves — you&apos;ll just see scaffolded output until the key is set.
+        <div className="mt-5 rounded-2xl border border-border bg-amber-50 px-5 py-4 text-[14px] text-amber-800">
+          <span className="font-semibold">AI is not configured yet.</span> Add an{" "}
+          <code className="rounded bg-white/70 px-1 py-0.5 text-[13px]">OPENAI_API_KEY</code> to your
+          environment variables to switch on live, grounded responses. Everything still saves; you&apos;ll
+          see scaffolded output until the key is set.
         </div>
       )}
 
       {/* Tabs */}
-      <div className="rounded-md border border-border bg-card">
-        <nav className="flex gap-1 overflow-x-auto px-3">
-          {TABS.map((t) => (
-            <Link
-              key={t.key}
-              href={`/app/ai?tab=${t.key}`}
-              className={`shrink-0 border-b-2 px-4 py-3 text-small font-semibold ${
-                t.key === tab
-                  ? "border-ink text-brand-600"
-                  : "border-transparent text-text-secondary hover:text-text-brand-600"
-              }`}
-            >
-              {t.label}
-            </Link>
-          ))}
-        </nav>
-      </div>
+      <nav className="mt-6 flex gap-1 overflow-x-auto rounded-full border border-border bg-white p-1 shadow-card md:w-fit">
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={`/app/ai?tab=${t.key}`}
+            className={`shrink-0 rounded-full px-4 py-2 text-[13px] font-medium ${
+              t.key === tab ? "bg-ink text-white" : "text-text-secondary hover:text-ink"
+            }`}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </nav>
 
       {/* Active tab content */}
       <div className="mt-5">
-        {tab === "coaches" && <AICoachesTab />}
+        {tab === "coaches" && <AICoachesTab goalTitle={goalTitle} configured={AI_CONFIGURED} />}
         {tab === "plan" && <CareerPlanTab initialPlans={plans} />}
         {tab === "resume" && <ResumeReviewTab latest={latestReview} />}
         {tab === "interview" && <InterviewPrepTab />}

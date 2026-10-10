@@ -13,8 +13,8 @@ const KINDS: { key: Kind; label: string }[] = [
 
 function Stars({ n }: { n: number }) {
   return (
-    <span className="text-caption" aria-label={`${n} out of 5`}>
-      <span className="text-[#f59e0b]">{"★".repeat(n)}</span>
+    <span className="text-[12px] tracking-[0.05em]" aria-label={`${n} out of 5`}>
+      <span className="text-ink">{"★".repeat(Math.max(0, Math.min(5, n)))}</span>
       <span className="text-border">{"★".repeat(Math.max(0, 5 - n))}</span>
     </span>
   );
@@ -91,26 +91,33 @@ export default function InterviewPrepTab() {
 
   if (!started) {
     return (
-      <div className="mx-auto max-w-lg rounded-md border border-border bg-card p-6">
-        <h3 className="font-semibold">Start a mock interview</h3>
-        <p className="mt-1 text-small text-text-secondary">
-          Pick a role and type. I&apos;ll ask one question at a time and give specific feedback after each answer.
+      <div className="mx-auto max-w-lg rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Mock interview</p>
+        <h2 className="mt-1 text-[18px] font-semibold text-ink">Rehearse with instant feedback</h2>
+        <p className="mt-1 text-[14px] text-text-secondary">
+          Pick a role and type. You&apos;ll get one question at a time and specific feedback after each answer.
         </p>
-        <label className="mt-4 block text-small font-semibold">Role you&apos;re practicing for</label>
+        <label htmlFor="iv-role" className="mt-5 block text-[12px] font-medium text-text-secondary">
+          Role you&apos;re practicing for
+        </label>
         <input
+          id="iv-role"
           value={role}
           onChange={(e) => setRole(e.target.value)}
           placeholder="e.g. Product Manager, Frontend Engineer"
-          className="mt-1 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+          className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
-        <label className="mt-4 block text-small font-semibold">Interview type</label>
-        <div className="mt-1 flex gap-1.5">
+        <p className="mt-4 text-[12px] font-medium text-text-secondary">Interview type</p>
+        <div className="mt-1.5 flex gap-1.5">
           {KINDS.map((k) => (
             <button
               key={k.key}
+              type="button"
               onClick={() => setKind(k.key)}
-              className={`rounded-full border px-3 py-1 text-caption font-semibold ${
-                kind === k.key ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
+              className={`rounded-full border px-3 py-1.5 text-[12px] font-medium ${
+                kind === k.key
+                  ? "border-ink bg-ink text-white"
+                  : "border-border bg-white text-text-secondary hover:border-ink/40"
               }`}
             >
               {k.label}
@@ -120,89 +127,93 @@ export default function InterviewPrepTab() {
         <button
           onClick={start}
           disabled={!role.trim()}
-          className="mt-5 w-full rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+          className="mt-6 w-full rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
         >
-          Begin interview
+          Begin interview →
         </button>
       </div>
     );
   }
 
   return (
-    <div className="grid gap-4 lg:grid-cols-[1fr_320px]">
+    <div className="grid gap-5 lg:grid-cols-[1fr_320px]">
       {/* Current question + answer */}
-      <div className="rounded-md border border-border bg-card p-5">
-        <div className="flex items-center justify-between">
-          <span className="rounded-full bg-[#eef2ff] px-2.5 py-1 text-caption font-semibold capitalize text-brand-600">
+      <div className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+        <div className="flex items-center justify-between gap-3">
+          <span className="truncate rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-semibold capitalize text-brand-700">
             {kind} · {role}
           </span>
-          <span className="text-caption text-text-secondary">Question {turns.length + 1}</span>
+          <span className="shrink-0 text-[12px] text-text-secondary">Question {turns.length + 1}</span>
         </div>
 
-        <div className="mt-4 rounded-md bg-bg px-4 py-3 text-body font-semibold">
-          {loading && !question ? "Thinking of a good question…" : question}
+        <div className="mt-4 rounded-xl bg-surface px-4 py-4 text-[16px] font-medium text-ink">
+          {loading && !question ? (
+            <span className="animate-pulse text-text-secondary">Thinking of a good question…</span>
+          ) : (
+            question
+          )}
         </div>
 
+        <label htmlFor="iv-answer" className="mt-4 block text-[12px] font-medium text-text-secondary">
+          Your answer
+        </label>
         <textarea
+          id="iv-answer"
           value={answer}
           onChange={(e) => setAnswer(e.target.value)}
           rows={7}
           placeholder="Type your answer as if you were speaking to the interviewer…"
-          className="mt-3 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+          className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
-        <div className="mt-3 flex items-center gap-3">
+        <div className="mt-4 flex flex-wrap items-center gap-2">
           <button
             onClick={submitAnswer}
             disabled={!answer.trim() || loading}
-            className="rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+            className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
           >
             {loading ? "Scoring…" : "Submit answer"}
           </button>
           <button
             onClick={() => nextQuestion(turns)}
             disabled={loading}
-            className="text-small font-semibold text-text-secondary hover:text-ink"
+            className="rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40 disabled:opacity-50"
           >
             Skip question
           </button>
           <button
             onClick={() => setStarted(false)}
-            className="ml-auto text-small font-semibold text-text-secondary hover:text-danger"
+            className="ml-auto text-[13px] font-medium text-text-secondary hover:text-danger"
           >
-            End
+            End session
           </button>
         </div>
-        {error && <p className="mt-2 text-caption text-danger">{error}</p>}
+        {error && <p className="mt-2 text-[13px] text-danger">{error}</p>}
       </div>
 
       {/* Feedback history */}
-      <div className="rounded-md border border-border bg-card p-5">
-        <div className="flex items-center justify-between">
-          <span className="text-caption font-bold uppercase tracking-wide text-text-secondary">
-            Feedback
-          </span>
+      <div className="h-fit rounded-2xl border border-border bg-white p-0 shadow-card">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-secondary">Feedback</span>
           {turns.length > 0 && (
-            <span className="text-caption text-text-secondary">
+            <span className="flex items-center gap-1.5 text-[12px] text-text-secondary">
               Avg <Stars n={Math.round(avg)} /> {avg}
             </span>
           )}
         </div>
         {turns.length === 0 ? (
-          <p className="mt-3 text-small text-text-secondary">
+          <p className="px-5 py-4 text-[14px] text-text-secondary">
             Answer the question and your feedback will appear here.
           </p>
         ) : (
-          <ul className="mt-3 space-y-3">
+          <ul className="divide-y divide-border">
             {[...turns].reverse().map((t, i) => (
-              <li key={i} className="rounded-md border border-border bg-bg px-3 py-2.5">
+              <li key={i} className="px-5 py-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-caption font-semibold text-text-secondary">
-                    Q{turns.length - i}
-                  </span>
+                  <span className="text-[12px] font-semibold text-text-secondary">Q{turns.length - i}</span>
                   <Stars n={t.rating} />
                 </div>
-                <p className="mt-1 text-caption text-text-secondary line-clamp-2">{t.question}</p>
-                <p className="mt-1.5 text-small">{t.feedback}</p>
+                <p className="mt-1 line-clamp-2 text-[12px] text-text-secondary">{t.question}</p>
+                <p className="mt-1.5 text-[14px] text-ink">{t.feedback}</p>
               </li>
             ))}
           </ul>

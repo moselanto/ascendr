@@ -6,22 +6,34 @@ import { sendDirectMessage, markDmRead } from "../net-actions";
 
 type Msg = { id: string; sender_id: string; body: string; created_at: string };
 
+function formatTime(iso: string) {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
 export default function DmThread({
   meId,
   peerId,
   initialMessages,
+  peerName,
 }: {
   meId: string;
   peerId: string;
   initialMessages: Msg[];
+  peerName?: string | null;
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [body, setBody] = useState("");
   const [, startTransition] = useTransition();
-  const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   function scrollToEnd() {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Defer so newly appended messages are in the DOM.
+    requestAnimationFrame(() => {
+      const el = scrollRef.current;
+      if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
   }
 
   // Mark incoming as read on open.
@@ -88,41 +100,54 @@ export default function DmThread({
     startTransition(() => sendDirectMessage(fd));
   }
 
+  const firstName = (peerName || "").split(" ")[0] || "them";
+
   return (
-    <div className="mt-4 flex flex-col rounded-md border border-border bg-card" style={{ minHeight: 420 }}>
-      <div className="flex-1 space-y-3 overflow-y-auto p-4" style={{ maxHeight: 460 }}>
+    <div className="flex min-h-[460px] flex-1 flex-col bg-surface">
+      <div ref={scrollRef} className="flex max-h-[60vh] flex-1 flex-col gap-3 overflow-y-auto p-5">
         {messages.length === 0 ? (
-          <p className="text-small text-text-secondary">No messages yet. Say hello.</p>
+          <div className="m-auto max-w-sm rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <p className="text-[15px] font-semibold text-ink">No messages yet</p>
+            <p className="mt-1 text-[14px] text-text-secondary">
+              Say hello to {firstName}. A short note about what you&apos;re working on goes a long way.
+            </p>
+          </div>
         ) : (
-          messages.map((m) => (
-            <div key={m.id} className={m.sender_id === meId ? "text-right" : "text-left"}>
-              <div
-                className={`inline-block max-w-[80%] rounded-2xl px-3 py-2 text-small ${
-                  m.sender_id === meId
-                    ? "bg-ink text-white"
-                    : "border border-border bg-bg text-text"
-                }`}
-              >
-                <p className="whitespace-pre-wrap">{m.body}</p>
+          messages.map((m) => {
+            const mine = m.sender_id === meId;
+            return (
+              <div key={m.id} className={`flex flex-col ${mine ? "items-end" : "items-start"}`}>
+                <div
+                  className={`max-w-[80%] whitespace-pre-wrap rounded-2xl px-4 py-2.5 text-[14px] ${
+                    mine
+                      ? "rounded-br-md bg-ink text-white"
+                      : "rounded-bl-md border border-border bg-white text-ink shadow-card"
+                  }`}
+                >
+                  {m.body}
+                </div>
+                <span className="mt-1 px-1 text-[11px] text-text-secondary">
+                  {m.id.startsWith("tmp-") ? "Sending…" : formatTime(m.created_at)}
+                </span>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
-        <div ref={endRef} />
       </div>
-      <form onSubmit={submit} className="flex gap-2 border-t border-border p-3">
+      <form onSubmit={submit} className="flex items-center gap-2 border-t border-border bg-white p-3">
         <input
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="Write a message…"
-          className="flex-1 rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+          aria-label="Message"
+          className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
         <button
           type="submit"
           disabled={!body.trim()}
-          className="rounded-full bg-ink px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
+          className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
         >
-          Send
+          Send →
         </button>
       </form>
     </div>

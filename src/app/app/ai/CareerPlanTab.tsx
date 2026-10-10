@@ -63,29 +63,33 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-[320px_1fr]">
+    <div className="grid gap-5 md:grid-cols-[320px_1fr]">
       {/* New plan */}
-      <form onSubmit={generate} className="h-fit rounded-md border border-border bg-card p-4">
-        <div className="text-caption font-bold uppercase tracking-wide text-text-secondary">
-          Build a plan
-        </div>
-        <label className="mt-3 block text-small font-semibold">Your goal</label>
+      <form onSubmit={generate} className="h-fit rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Build a plan</p>
+        <h2 className="mt-1 text-[17px] font-semibold text-ink">Where do you want to go?</h2>
+        <label htmlFor="plan-goal" className="mt-4 block text-[12px] font-medium text-text-secondary">
+          Your goal
+        </label>
         <textarea
+          id="plan-goal"
           value={goal}
           onChange={(e) => setGoal(e.target.value)}
           rows={3}
           placeholder="e.g. Move from freelance web dev into a product manager role"
-          className="mt-1 w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+          className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
-        <label className="mt-3 block text-small font-semibold">Time horizon</label>
-        <div className="mt-1 flex flex-wrap gap-1.5">
+        <p className="mt-4 text-[12px] font-medium text-text-secondary">Time horizon</p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
           {HORIZONS.map((h) => (
             <button
               type="button"
               key={h}
               onClick={() => setHorizon(h)}
-              className={`rounded-full border px-3 py-1 text-caption font-semibold ${
-                horizon === h ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
+              className={`rounded-full border px-3 py-1.5 text-[12px] font-medium ${
+                horizon === h
+                  ? "border-ink bg-ink text-white"
+                  : "border-border bg-white text-text-secondary hover:border-ink/40"
               }`}
             >
               {h}
@@ -95,18 +99,28 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
         <button
           type="submit"
           disabled={!goal.trim() || loading}
-          className="mt-4 w-full rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white disabled:opacity-50"
+          className="mt-5 w-full rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
         >
-          {loading ? "Building your plan…" : "Generate plan"}
+          {loading ? "Building your plan…" : "Generate plan →"}
         </button>
-        {error && <p className="mt-2 text-caption text-danger">{error}</p>}
+        {error && <p className="mt-2 text-[13px] text-danger">{error}</p>}
       </form>
 
       {/* Saved plans */}
       <div className="flex flex-col gap-4">
         {plans.length === 0 && (
-          <div className="rounded-md border border-dashed border-border bg-card p-10 text-center text-text-secondary">
-            No plans yet. Set a goal and generate your first career plan.
+          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <p className="text-[15px] font-semibold text-ink">No plans yet</p>
+            <p className="mt-1 text-[14px] text-text-secondary">
+              Describe a goal and pick a horizon. Your coach will turn it into concrete, checkable steps.
+            </p>
+            <button
+              type="button"
+              onClick={() => document.getElementById("plan-goal")?.focus()}
+              className="mt-4 rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+            >
+              Write my goal
+            </button>
           </div>
         )}
         {plans.map((plan) => {
@@ -114,41 +128,48 @@ export default function CareerPlanTab({ initialPlans }: { initialPlans: Plan[] }
           const done = marks.filter(Boolean).length;
           const pct = plan.steps.length ? Math.round((done / plan.steps.length) * 100) : 0;
           return (
-            <div key={plan.id} className="rounded-md border border-border bg-card p-5">
+            <div key={plan.id} className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <h3 className="font-semibold">{plan.goal}</h3>
-                  {plan.summary && <p className="mt-1 text-small text-text-secondary">{plan.summary}</p>}
+                  <h3 className="text-[16px] font-semibold text-ink">{plan.goal}</h3>
+                  {plan.summary && <p className="mt-1 text-[14px] text-text-secondary">{plan.summary}</p>}
                 </div>
                 {plan.horizon && (
-                  <span className="shrink-0 rounded-full bg-[#eef2ff] px-2.5 py-1 text-caption font-semibold text-brand-600">
+                  <span className="shrink-0 rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-semibold text-brand-700">
                     {plan.horizon}
                   </span>
                 )}
               </div>
 
               {/* Progress bar */}
-              <div className="mt-3 flex items-center gap-2">
-                <div className="h-2 flex-1 overflow-hidden rounded-full bg-bg">
+              <div className="mt-4 flex items-center gap-3">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface">
                   <div className="h-full rounded-full bg-accent" style={{ width: `${pct}%` }} />
                 </div>
-                <span className="text-caption font-semibold text-text-secondary">{pct}%</span>
+                <span className="text-[12px] font-medium text-text-secondary">
+                  {done}/{plan.steps.length} · {pct}%
+                </span>
               </div>
 
-              <ol className="mt-4 space-y-2">
+              <ol className="mt-4 divide-y divide-border rounded-xl border border-border">
                 {plan.steps.map((s, i) => (
-                  <li key={i} className="flex gap-3">
+                  <li key={i} className="flex gap-3 px-4 py-3">
                     <input
                       type="checkbox"
                       checked={!!marks[i]}
                       onChange={() => toggleStep(plan.id, i)}
-                      className="mt-1 h-4 w-4 shrink-0 accent-[#10B981]"
+                      className="mt-0.5 h-4 w-4 shrink-0 accent-[#10B981]"
+                      aria-label={`Mark "${s.title}" done`}
                     />
                     <div>
-                      <div className={`text-small font-semibold ${marks[i] ? "text-text-secondary line-through" : ""}`}>
+                      <div
+                        className={`text-[14px] font-medium ${
+                          marks[i] ? "text-text-secondary line-through" : "text-ink"
+                        }`}
+                      >
                         {s.title}
                       </div>
-                      {s.detail && <div className="text-caption text-text-secondary">{s.detail}</div>}
+                      {s.detail && <div className="mt-0.5 text-[13px] text-text-secondary">{s.detail}</div>}
                     </div>
                   </li>
                 ))}
