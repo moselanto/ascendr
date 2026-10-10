@@ -32,7 +32,7 @@ const PLANS: Plan[] = [
     key: "free",
     name: "Free",
     tagline: "Start your career plan.",
-    price: "$0",
+    price: "KES 0",
     intro: "Includes, with daily limits:",
     features: [
       "Skills gap analysis for 1 target role",
@@ -142,8 +142,8 @@ export default async function PlansPage() {
             )}
             <p className="text-[16px] font-semibold text-ink">{p.name}</p>
             <p className="mt-1 min-h-[40px] text-[13px] leading-snug text-text-secondary">{p.tagline}</p>
-            <p className="mt-4 flex items-baseline gap-1">
-              <span className={`${p.price.length > 6 ? "text-[28px]" : "text-[36px]"} font-semibold tracking-tight text-ink`}>{p.price}</span>
+            <p className="mt-4 flex flex-wrap items-baseline gap-x-1">
+              <span className={`${p.price.length > 6 ? "text-[26px]" : "text-[36px]"} whitespace-nowrap font-semibold tracking-tight text-ink`}>{p.price}</span>
               {p.per && <span className="text-[14px] text-text-secondary">{p.per}</span>}
             </p>
             <p className="mt-1 text-[12px] text-text-secondary">

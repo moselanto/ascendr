@@ -65,6 +65,9 @@ export function titleFor(pathname: string, groups: NavGroup[]) {
   );
   if (best) return (best as NavItem).label;
   if (pathname.startsWith("/app/settings")) return "My profile";
+  if (pathname.startsWith("/app/plans")) return "Plans";
+  if (pathname.startsWith("/app/billing")) return "Billing";
+  if (pathname.startsWith("/app/notifications")) return "Notifications";
   return "Home";
 }
 

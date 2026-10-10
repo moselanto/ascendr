@@ -155,7 +155,7 @@ export default async function HomePage() {
       const raw = (m as unknown as { communities?: unknown }).communities;
       return (Array.isArray(raw) ? raw[0] : raw) as { id: string; name: string; slug: string; member_count: number } | null;
     })
-    .filter(Boolean) as { id: string; name: string; slug: string; member_count: number }[];
+    .filter((c, i, all): c is { id: string; name: string; slug: string; member_count: number } => c != null && all.findIndex((x) => x?.id === c.id) === i);
 
   // People who can help: mentors ranked by how many of the member's gaps they hold.
   const coverBy = new Map<string, string[]>();
@@ -211,7 +211,9 @@ export default async function HomePage() {
     { done: wins > 0, label: "Log your first win", hint: "Interviews, intros and offers count", href: "/app/outcomes#log" },
   ];
   const checklistDone = checklist.filter((c) => c.done).length;
-  const showChecklist = checklistDone < checklist.length;
+  const showStartHere = checklistDone < 3;
+  // While "Start here" is on screen it carries the first steps, so the longer checklist waits.
+  const showChecklist = showStartHere === false && checklistDone < checklist.length;
 
   return (
     <div className="space-y-6">
@@ -225,9 +227,11 @@ export default async function HomePage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Link href="/onboarding" className="rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40">
-            {goal ? "Update goal" : "Set my goal"}
-          </Link>
+          {goal || showStartHere === false ? (
+            <Link href="/onboarding" className="rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40">
+              {goal ? "Update goal" : "Set my goal"}
+            </Link>
+          ) : null}
           {goal && (
             <Link href="/app/career" className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">
               Open career plan
@@ -237,7 +241,7 @@ export default async function HomePage() {
       </div>
 
       {/* First visit: three clear steps until the basics are in place */}
-      {checklistDone < 3 && (
+      {showStartHere && (
         <section aria-label="Get started" className="relative overflow-hidden rounded-2xl border border-brand-100 bg-brand-50/60 p-5 md:p-6">
           <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Start here</p>
           <h2 className="mt-1.5 text-[20px] font-semibold tracking-tight text-ink">Three steps to your personal career plan</h2>
@@ -535,7 +539,7 @@ export default async function HomePage() {
                         {initials(c.name)}
                       </span>
                       <span className="flex-1 truncate text-[14px] font-medium text-ink">{c.name}</span>
-                      <span className="nums text-[12px] text-text-secondary">{c.member_count ?? 0} members</span>
+                      <span className="nums text-[12px] text-text-secondary">{c.member_count ?? 0} {(c.member_count ?? 0) === 1 ? "member" : "members"}</span>
                     </Link>
                   </li>
                 ))}

@@ -112,7 +112,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <span aria-hidden className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[15px] text-text-secondary">{"⌕"}</span>
               <input
                 name="q"
-                placeholder={"Search people, communities, roles…"}
+                placeholder={"Search…"}
                 aria-label="Search ASCENDR"
                 className="w-56 rounded-lg border border-border bg-surface py-2 pl-8 pr-3 text-[13px] outline-none transition-colors focus:border-ink/30 focus:bg-white"
               />
