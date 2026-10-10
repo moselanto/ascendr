@@ -9,8 +9,11 @@ export const SIGNUP = "/login?mode=signup";
 export const SIGNIN = "/login";
 
 /**
- * Where "Run a pilot" / "Become a design partner" on /networks goes.
- * Swap for a booking link (Calendly, Cal.com) or a team inbox when ready.
+ * Where "Run a pilot" / "Become a design partner" / "Talk to us" go.
+ * A page rather than a bare mailto: link, which silently does nothing when
+ * the visitor has no mail app set up. Swap PILOT_EMAIL for a team inbox, or
+ * PILOT_CONTACT for a booking link (Calendly, Cal.com), when ready.
  */
-export const PILOT_CONTACT =
-  "mailto:mosesnura043@gmail.com?subject=ASCENDR%20Networks%20pilot";
+export const PILOT_EMAIL = "mosesnura043@gmail.com";
+export const PILOT_SUBJECT = "ASCENDR Networks pilot";
+export const PILOT_CONTACT = "/networks/pilot";
