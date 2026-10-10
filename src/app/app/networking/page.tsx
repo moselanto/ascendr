@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
-import { sendConnectionRequest, respondToConnection } from "../net-actions";
+import { sendConnectionRequest, respondToConnection, cancelConnectionRequest } from "../net-actions";
 import DmThread, { type DmMessage } from "./DmThread";
 
 export const dynamic = "force-dynamic";
@@ -318,6 +318,15 @@ export default async function NetworkingPage(
                       <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-[12px] font-semibold text-amber-800">
                         Pending
                       </span>
+                      <form action={cancelConnectionRequest}>
+                        <input type="hidden" name="connection_id" value={c.id} />
+                        <button
+                          type="submit"
+                          className="shrink-0 rounded-full border border-ink/15 bg-white px-3 py-1 text-[12px] font-medium text-ink hover:border-ink/40"
+                        >
+                          Cancel
+                        </button>
+                      </form>
                     </li>
                   );
                 })}

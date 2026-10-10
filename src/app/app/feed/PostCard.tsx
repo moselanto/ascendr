@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { togglePostReaction, addComment } from "../feed-actions";
+import { togglePostReaction, addComment, deletePost, deleteComment } from "../feed-actions";
 
 /**
  * Reaction keys are persisted in post_reactions.emoji, so the stored values
@@ -15,7 +15,7 @@ const REACTIONS: { key: string; label: string }[] = [
 ];
 
 type Reaction = { emoji: string; user_id: string };
-type Comment = { id: string; body: string; author_name: string };
+type Comment = { id: string; body: string; author_name: string; author_id: string };
 
 function initialsOf(name: string) {
   const parts = (name || "Member").trim().split(/\s+/).filter(Boolean);
@@ -44,12 +44,30 @@ export default function PostCard({
   reactions,
   comments,
 }: {
-  post: { id: string; body: string; created_at: string; author_name: string };
+  post: { id: string; body: string; created_at: string; author_name: string; author_id: string };
   meId: string;
   reactions: Reaction[];
   comments: Comment[];
 }) {
   const [rx, setRx] = useState<Reaction[]>(reactions);
+  const [list, setList] = useState<Comment[]>(comments);
+  const [removed, setRemoved] = useState(false);
+  const isMine = post.author_id === meId;
+
+  async function removePost() {
+    if (!window.confirm("Delete this post? Its comments and reactions are removed too.")) return;
+    setRemoved(true);
+    const res = await deletePost(post.id);
+    if (!res.ok) setRemoved(false);
+  }
+
+  async function removeComment(id: string) {
+    if (!window.confirm("Delete this comment?")) return;
+    const prev = list;
+    setList((l) => l.filter((c) => c.id !== id));
+    const res = await deleteComment(id);
+    if (!res.ok) setList(prev);
+  }
   const [showComments, setShowComments] = useState(false);
   const [comment, setComment] = useState("");
   const [, startTransition] = useTransition();
@@ -90,6 +108,8 @@ export default function PostCard({
 
   const c = counts();
 
+  if (removed) return null;
+
   return (
     <article className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
       {/* Author row */}
@@ -108,6 +128,15 @@ export default function PostCard({
             {timeAgo(post.created_at)}
           </time>
         </div>
+        {isMine && (
+          <button
+            type="button"
+            onClick={removePost}
+            className="ml-auto rounded-full px-3 py-1 text-[12px] font-medium text-text-secondary hover:bg-surface hover:text-red-700"
+          >
+            Delete
+          </button>
+        )}
       </div>
 
       <p className="mt-4 whitespace-pre-wrap text-[15px] leading-relaxed text-ink">{post.body}</p>
@@ -138,7 +167,7 @@ export default function PostCard({
           onClick={() => setShowComments((s) => !s)}
           className="ml-auto text-[12px] font-medium text-text-secondary hover:text-ink"
         >
-          <span className="nums">{comments.length}</span> {comments.length === 1 ? "comment" : "comments"}{" "}
+          <span className="nums">{list.length}</span> {list.length === 1 ? "comment" : "comments"}{" "}
           {showComments ? "▴" : "▾"}
         </button>
       </div>
@@ -146,9 +175,9 @@ export default function PostCard({
       {/* Comments */}
       {showComments && (
         <div className="mt-4 rounded-xl bg-surface p-4">
-          {comments.length > 0 ? (
+          {list.length > 0 ? (
             <ul className="mb-4 space-y-3">
-              {comments.map((cm) => (
+              {list.map((cm) => (
                 <li key={cm.id} className="flex gap-2.5">
                   <div className="flex h-7 w-7 flex-none items-center justify-center rounded-full bg-brand-100 text-[10px] font-semibold text-brand-700">
                     {initialsOf(cm.author_name)}
@@ -156,6 +185,15 @@ export default function PostCard({
                   <div className="min-w-0 text-[13px]">
                     <span className="font-semibold text-ink">{cm.author_name}</span>{" "}
                     <span className="text-ink">{cm.body}</span>
+                    {cm.author_id === meId && (
+                      <button
+                        type="button"
+                        onClick={() => removeComment(cm.id)}
+                        className="ml-2 text-[12px] font-medium text-text-secondary hover:text-red-700"
+                      >
+                        Delete
+                      </button>
+                    )}
                   </div>
                 </li>
               ))}

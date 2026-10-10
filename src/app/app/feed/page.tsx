@@ -140,6 +140,7 @@ export default async function FeedPage() {
                       id: p.id,
                       body: p.body,
                       created_at: p.created_at,
+                      author_id: p.author_id,
                       // @ts-expect-error supabase join shape
                       author_name: p.profiles?.full_name ?? "Member",
                     }}
@@ -148,6 +149,7 @@ export default async function FeedPage() {
                     comments={postComments.map((c) => ({
                       id: c.id,
                       body: c.body,
+                      author_id: c.author_id,
                       author_name: c.profiles?.full_name ?? "Member",
                     }))}
                   />

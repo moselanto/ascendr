@@ -171,3 +171,35 @@ export async function toggleDmReaction(messageId: string, emoji: string) {
     await supabase.from("dm_reactions").insert({ message_id: messageId, user_id: profile.id, emoji });
   }
 }
+
+/** Delete a direct message I sent (RLS: dm_delete_own, migration 0030). */
+export async function deleteDirectMessage(messageId: string): Promise<{ ok: boolean }> {
+  const profile = await getCurrentProfile();
+  if (!profile || !messageId) return { ok: false };
+  const supabase = await createClient();
+  const { error, count } = await supabase
+    .from("direct_messages")
+    .delete({ count: "exact" })
+    .eq("id", messageId)
+    .eq("sender_id", profile.id);
+  revalidatePath("/app/networking");
+  return { ok: error == null && (count ?? 0) > 0 };
+}
+
+/** Cancel a connection request I sent that is still pending. */
+export async function cancelConnectionRequest(formData: FormData) {
+  const connectionId = String(formData.get("connection_id") || "");
+  const profile = await getCurrentProfile();
+  if (!profile) redirect("/login");
+  if (connectionId) {
+    const supabase = await createClient();
+    await supabase
+      .from("connections")
+      .delete()
+      .eq("id", connectionId)
+      .eq("requester_id", profile.id)
+      .eq("status", "pending");
+  }
+  revalidatePath("/app/networking");
+  revalidatePath("/app/members");
+}

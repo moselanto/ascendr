@@ -49,7 +49,9 @@ export async function POST(req: Request) {
           "Respond ONLY with strict JSON: " +
           '{"score": number (0-100), "verdict": string (short), "strengths": string[] (2-4), ' +
           '"fixes": [{"severity": "ok"|"warn", "text": string}] (3-5), "rewrite": string (one improved bullet or summary)}. ' +
-          "Be specific and example-driven. No markdown outside the JSON.",
+          "Be specific and example-driven. No markdown outside the JSON. " +
+          "Use only facts that appear in the resume: never invent projects, employers, numbers or results. " +
+          "Where a stronger bullet needs a figure the resume does not give, use a clear placeholder such as [X%] or [number] for the candidate to fill in.",
       },
       {
         role: "user",

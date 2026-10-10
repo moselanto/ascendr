@@ -29,25 +29,48 @@ export async function runChat(messages: ChatMessage[]): Promise<string> {
   if (!AI_CONFIGURED) {
     return "The AI isn't switched on yet. Add an OPENAI_API_KEY in your environment variables to enable grounded, real-time answers. (Everything else in ASCENDR works without it.)";
   }
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({ model: MODEL, messages, temperature: 0.5, max_tokens: 700 }),
-    });
-    if (!res.ok) {
-      console.error("OpenAI chat error", res.status, await res.text());
-      return "I hit a problem reaching the AI service just now. Please try again in a moment.";
+  // One automatic retry when OpenAI is busy (429) or briefly down (5xx).
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify({ model: MODEL, messages, temperature: 0.5, max_tokens: 700 }),
+        signal: AbortSignal.timeout(45000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return data?.choices?.[0]?.message?.content?.trim() || "I didn't catch that. Could you rephrase?";
+      }
+      const detail = await res.text();
+      console.error("OpenAI chat error", res.status, detail.slice(0, 500));
+      const retryable = res.status === 429 || res.status >= 500;
+      if (retryable && attempt === 0) {
+        await new Promise((r) => setTimeout(r, 1500));
+        continue;
+      }
+      if (res.status === 401 || res.status === 403) {
+        return "The AI service rejected our key. An admin needs to check the OpenAI API key in the app settings.";
+      }
+      if (res.status === 429) {
+        return /insufficient_quota/.test(detail)
+          ? "The AI service is out of credit right now. An admin needs to top up the OpenAI account."
+          : "The AI service is busy right now. Please try again in a minute.";
+      }
+      if (res.status === 404 || res.status === 400) {
+        return "The AI service could not handle this request. An admin should check the OpenAI model setting.";
+      }
+      return "The AI service is having trouble right now. Please try again in a minute.";
+    } catch (err) {
+      console.error("runChat failed", err);
+      if (attempt === 0) continue;
+      return "I couldn't reach the AI service. Please try again shortly.";
     }
-    const data = await res.json();
-    return data?.choices?.[0]?.message?.content?.trim() || "I didn't catch that — could you rephrase?";
-  } catch (err) {
-    console.error("runChat failed", err);
-    return "I couldn't reach the AI service. Please try again shortly.";
   }
+  return "The AI service is busy right now. Please try again in a minute.";
 }
 
 /** Embed an array of texts. Returns one 1536-dim vector per input (or [] on failure). */

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, useTransition } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { sendDirectMessage, markDmRead, toggleDmReaction } from "../net-actions";
+import { sendDirectMessage, markDmRead, toggleDmReaction, deleteDirectMessage } from "../net-actions";
 import { toggleLocal, type Attachment, type Reaction } from "@/lib/chat";
 import Composer from "@/components/chat/Composer";
 import MessageToolbar from "@/components/chat/MessageToolbar";
@@ -100,6 +100,14 @@ export default function DmThread({
     toggleDmReaction(messageId, emoji);
   }
 
+  async function remove(messageId: string) {
+    if (!window.confirm("Delete this message? It is removed for both of you.")) return;
+    const prev = messages;
+    setMessages((list) => list.filter((m) => m.id !== messageId));
+    const res = await deleteDirectMessage(messageId);
+    if (!res.ok) setMessages(prev);
+  }
+
   async function send(body: string, attachments: Attachment[]) {
     const tmp: DmMessage = { id: `tmp-${Date.now()}`, sender_id: meId, body, attachments, created_at: new Date().toISOString(), reactions: [] };
     setMessages((prev) => [...prev, tmp]);
@@ -147,7 +155,18 @@ export default function DmThread({
                   )}
                   <MessageAttachments items={m.attachments} />
                   <ReactionRow reactions={m.reactions ?? []} meId={meId} onToggle={(e) => react(m.id, e)} />
-                  <span className="mt-1 px-1 text-[11px] text-text-secondary">{pending ? "Sending…" : timeLabel(m.created_at)}</span>
+                  <span className="mt-1 px-1 text-[11px] text-text-secondary">
+                    {pending ? "Sending…" : timeLabel(m.created_at)}
+                    {mine && pending === false && (
+                      <button
+                        type="button"
+                        onClick={() => remove(m.id)}
+                        className="ml-2 font-medium opacity-0 transition-opacity hover:text-red-700 focus:opacity-100 group-hover:opacity-100"
+                      >
+                        Delete
+                      </button>
+                    )}
+                  </span>
                 </div>
               </div>
             );

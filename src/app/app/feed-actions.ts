@@ -90,3 +90,24 @@ export async function addComment(formData: FormData) {
   await awardXp(profile.id, "feed_comment", 3);
   revalidatePath("/app/feed");
 }
+
+/** Delete one of my own posts (RLS: feed_delete_own). Comments and reactions cascade. */
+export async function deletePost(postId: string): Promise<{ ok: boolean }> {
+  const profile = await getCurrentProfile();
+  if (!profile || !postId) return { ok: false };
+  const supabase = await createClient();
+  const { error } = await supabase.from("feed_posts").delete().eq("id", postId).eq("author_id", profile.id);
+  revalidatePath("/app/feed");
+  revalidatePath("/app");
+  return { ok: error == null };
+}
+
+/** Delete one of my own comments (RLS: post_comments_delete_own). */
+export async function deleteComment(commentId: string): Promise<{ ok: boolean }> {
+  const profile = await getCurrentProfile();
+  if (!profile || !commentId) return { ok: false };
+  const supabase = await createClient();
+  const { error } = await supabase.from("post_comments").delete().eq("id", commentId).eq("author_id", profile.id);
+  revalidatePath("/app/feed");
+  return { ok: error == null };
+}
