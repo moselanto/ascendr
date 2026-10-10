@@ -138,7 +138,7 @@ create policy "<t>_write_own" on <t>
 
 ### 3.3 Migrations
 
-- Sequential, zero-padded, never edited once merged. The next file is `0020_<topic>.sql`
+- Sequential, zero-padded, never edited once merged. The next file is `0021_<topic>.sql`
 - Idempotent (`if not exists`, `on conflict do nothing`) — they are applied by
   hand in the Supabase SQL editor and get re-run
 - Additive by default. A destructive change needs its own PR and a stated
