@@ -362,6 +362,12 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
         {switcher}
       </div>
 
+      <div className="flex justify-end">
+        <Link href={`/app/network/report?org=${current.id}`} className="rounded-full border border-ink/15 bg-white px-4 py-2 text-[13px] font-medium text-ink hover:border-ink/40">
+          Impact report
+        </Link>
+      </div>
+
       {usage ? (
         <div className={`flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border px-5 py-3 text-[13px] ${usage.membersFull || usage.rolesFull ? "border-amber-200 bg-amber-50 text-amber-900" : "border-border bg-white text-text-secondary"}`}>
           <span className="font-semibold text-ink">{NETWORK_PLAN_LABEL[usage.plan]} plan</span>
