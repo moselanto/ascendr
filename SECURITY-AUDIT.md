@@ -204,6 +204,8 @@ provides the substrate.
 
 ### M-3 — No rate limiting on authentication
 
+**Status:** Resolved in 0026 at the application layer: sign-in is limited to 20 attempts per IP and 8 per email per 15 minutes, sign-up to 5 per IP per hour (hashed keys, fails open). Still verify Supabase Auth rate limits in the dashboard.
+
 `/login` Server Actions have no throttling beyond Supabase's own defaults.
 Credential stuffing and user enumeration are unmitigated at the application
 layer.
@@ -336,7 +338,7 @@ fundraising push.
 | 1 | ~~H-1 async ingestion~~ Done in 0025 | High | Done |
 | 2 | M-2 Sentry and alerting | Medium | ~1 day |
 | 3 | ~~M-4 ingestion validation~~ Done | Medium | Done |
-| 4 | M-3 auth throttling | Medium | ~1 day |
+| 4 | ~~M-3 auth throttling~~ Done in 0026 | Medium | Done |
 | 5 | ~~Snapshot purge when a member stops sharing~~ Done in 0020 | Medium | Done |
 | 6 | ~~Webhook replay protection (event-id de-duplication)~~ Done in 0021 | Low | Done |
 | 7 | ~~CSP from report-only to enforcing~~ Enforcing since 10 Oct 2026 (nonces still a later hardening step) | Medium | Done |

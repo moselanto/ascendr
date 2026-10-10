@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { safeNext } from "./safe-next";
+import { allowLogin, allowSignup, THROTTLE_MESSAGE } from "@/lib/auth-throttle";
 
 /** Builds /login?... preserving mode and the return path on errors. */
 function loginUrl(opts: { signup?: boolean; error?: string; next?: string | null }) {
@@ -28,6 +29,8 @@ export async function login(formData: FormData) {
   const password = String(formData.get("password"));
   const next = nextFrom(formData);
 
+  if ((await allowLogin(email)) === false) redirect(loginUrl({ error: THROTTLE_MESSAGE, next }));
+
   const supabase = createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
@@ -42,6 +45,8 @@ export async function signup(formData: FormData) {
   const password = String(formData.get("password"));
   const fullName = String(formData.get("full_name") || "");
   const next = nextFrom(formData);
+
+  if ((await allowSignup()) === false) redirect(loginUrl({ signup: true, error: THROTTLE_MESSAGE, next }));
 
   // If email confirmation is on, send the confirmation link through
   // /auth/callback carrying the return path. When the origin is unknown we
