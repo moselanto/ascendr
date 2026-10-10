@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { getTier, LIMITS } from "@/lib/usage";
-import { PLAN_LABEL, PLAN_PRICE_USD, isPaidPlan } from "@/lib/billing";
+import { PLAN_LABEL, PLAN_PRICE_KES, formatKes, isPaidPlan } from "@/lib/billing";
 import { manageSubscription, cancelSubscription } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +55,7 @@ export default async function BillingPage() {
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">Current plan</p>
             <p className="mt-2 text-[30px] font-semibold tracking-tight">
               {paid && isPaidPlan(tier) ? PLAN_LABEL[tier] : "Free"}
-              {paid && isPaidPlan(tier) && <span className="ml-2 text-[16px] font-normal text-white/60">${PLAN_PRICE_USD[tier]}/month</span>}
+              {paid && isPaidPlan(tier) && <span className="ml-2 text-[16px] font-normal text-white/60">{formatKes(PLAN_PRICE_KES[tier])}/month</span>}
             </p>
             {sub && st && (
               <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ${st.tone}`}>{st.label}</span>

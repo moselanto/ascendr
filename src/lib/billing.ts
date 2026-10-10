@@ -5,15 +5,19 @@ import { createAdminClient } from "@/lib/supabase/admin";
  *
  * Env:
  *   PAYSTACK_SECRET_KEY      sk_test_... / sk_live_...
- *   PAYSTACK_PLAN_STARTER    plan code for Starter ($99/month)
- *   PAYSTACK_PLAN_PRO        plan code for Pro ($199/month)
+ *   PAYSTACK_PLAN_STARTER    plan code for Starter (KES 13,000/month)
+ *   PAYSTACK_PLAN_PRO        plan code for Pro (KES 26,000/month)
  *   NEXT_PUBLIC_APP_URL      e.g. https://ascendr-two.vercel.app
  */
 
 export type PaidPlan = "starter" | "pro";
 
 export const PLAN_LABEL: Record<PaidPlan, string> = { starter: "Starter", pro: "Pro" };
-export const PLAN_PRICE_USD: Record<PaidPlan, number> = { starter: 99, pro: 199 };
+export const PLAN_PRICE_KES: Record<PaidPlan, number> = { starter: 13000, pro: 26000 };
+export const BILLING_CURRENCY = "KES";
+export function formatKes(n: number) {
+  return `KES ${n.toLocaleString("en-US")}`;
+}
 
 export function isPaidPlan(v: unknown): v is PaidPlan {
   return v === "starter" || v === "pro";

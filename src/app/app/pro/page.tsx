@@ -48,7 +48,7 @@ const PLANS: Plan[] = [
     key: "starter",
     name: "Starter",
     tagline: "For small networks and serious job seekers.",
-    price: "$99",
+    price: "KES 13,000",
     per: "/month",
     intro: "Everything in Free, plus:",
     features: [
@@ -65,7 +65,7 @@ const PLANS: Plan[] = [
     key: "pro",
     name: "Pro",
     tagline: "For funds and accelerators running a talent program.",
-    price: "$199",
+    price: "KES 26,000",
     per: "/month",
     highlight: true,
     intro: "Everything in Starter, plus:",
@@ -142,11 +142,11 @@ export default async function PlansPage() {
             <p className="text-[16px] font-semibold text-ink">{p.name}</p>
             <p className="mt-1 min-h-[40px] text-[13px] leading-snug text-text-secondary">{p.tagline}</p>
             <p className="mt-4 flex items-baseline gap-1">
-              <span className="text-[36px] font-semibold tracking-tight text-ink">{p.price}</span>
+              <span className={`${p.price.length > 6 ? "text-[28px]" : "text-[36px]"} font-semibold tracking-tight text-ink`}>{p.price}</span>
               {p.per && <span className="text-[14px] text-text-secondary">{p.per}</span>}
             </p>
             <p className="mt-1 text-[12px] text-text-secondary">
-              {p.key === "custom" ? "Tailored to your institution" : p.key === "free" ? "Free forever" : "Billed monthly in USD. Cancel anytime"}
+              {p.key === "custom" ? "Tailored to your institution" : p.key === "free" ? "Free forever" : "Billed monthly in KES. Cancel anytime"}
             </p>
 
             {p.key === tier || (p.key === "free" && tier === "premium") ? (

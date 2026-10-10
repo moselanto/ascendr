@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { track } from "@/lib/analytics";
 import { backWithToast } from "@/lib/toast";
-import { appUrl, billingConfigured, isPaidPlan, paystack, planCode, PLAN_PRICE_USD, upsertSubscription } from "@/lib/billing";
+import { appUrl, billingConfigured, isPaidPlan, paystack, planCode, PLAN_PRICE_KES, BILLING_CURRENCY, upsertSubscription } from "@/lib/billing";
 
 /** Start a Paystack checkout for Starter or Pro. Falls back to early-access interest if billing isn't configured. */
 export async function startCheckout(formData: FormData) {
@@ -30,8 +30,8 @@ export async function startCheckout(formData: FormData) {
     method: "POST",
     body: {
       email,
-      amount: PLAN_PRICE_USD[plan] * 100,
-      currency: "USD",
+      amount: PLAN_PRICE_KES[plan] * 100,
+      currency: BILLING_CURRENCY,
       plan: planCode(plan),
       callback_url: `${appUrl(origin)}/app/billing/callback`,
       metadata: { profile_id: profile.id, plan },

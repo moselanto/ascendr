@@ -142,7 +142,7 @@ export function AppSidebar({
               <li>{"\u2713"} Run your own talent network</li>
             </ul>
             <p className="mt-2.5 text-[12px] text-white/60">
-              From <span className="font-semibold text-white">$99</span>/month
+              From <span className="font-semibold text-white">KES 13,000</span>/month
             </p>
             <Link
               href="/app/pro"
