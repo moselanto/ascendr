@@ -87,11 +87,10 @@ const nextConfig = {
   // advertise the framework and version to a scanner.
   poweredByHeader: false,
 
-  // Turns off Next's image optimisation endpoint (/_next/image). Next 14 has
-  // open advisories in it, including a critical remote-code-execution issue
-  // with AVIF files, fixed only in Next 15.5.24+. Images (profile photos) are
-  // small and served from Supabase storage, so they load directly instead.
-  // Remove this once Next is upgraded.
+  // Next's image optimisation endpoint (/_next/image) stays off. Nothing in
+  // the app uses next/image (avatars and uploads are plain <img> from
+  // Supabase Storage), so keeping it disabled removes an attack surface that
+  // has had repeated advisories, at no cost.
   images: { unoptimized: true },
 
   async headers() {
