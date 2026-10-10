@@ -62,14 +62,17 @@ export default async function CareerPage() {
 
   if (!goal) {
     return (
-      <div className="mx-auto max-w-2xl py-16 text-center">
-        <h1 className="font-display text-[28px] font-semibold tracking-tight">Set a career goal to start</h1>
-        <p className="mt-4 text-body text-text-secondary">
-          Career Intelligence compares where you are with where you want to go. It needs a destination first.
-        </p>
-        <Link href="/onboarding" className="mt-8 inline-flex rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-white hover:bg-ink-700">
-          Set my goal
-        </Link>
+      <div className="mx-auto max-w-2xl py-10">
+        <section className="rounded-2xl border border-border bg-white p-8 text-center shadow-card">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Career intelligence</p>
+          <h1 className="mt-1.5 text-[28px] font-semibold tracking-[-0.02em] text-ink">Set a career goal to start</h1>
+          <p className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed text-text-secondary">
+            Career intelligence compares where you are with where you want to go. Choose the role you want next and your skills gap appears straight away.
+          </p>
+          <Link href="/onboarding" className="mt-6 inline-flex items-center gap-1.5 rounded-full bg-ink px-6 py-3 text-[14px] font-medium text-white hover:bg-ink-700">
+            Choose my target role <span aria-hidden>{"→"}</span>
+          </Link>
+        </section>
       </div>
     );
   }
@@ -198,7 +201,7 @@ export default async function CareerPage() {
       <div className="grid gap-4 lg:grid-cols-[1fr_1.45fr]">
         <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
           <div className="flex items-center justify-between">
-            <h2 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-text-secondary">Readiness</h2>
+            <h2 className="text-[16px] font-semibold text-ink">Readiness</h2>
             <span className={`rounded-full border px-2.5 py-0.5 text-[12px] font-semibold ${BAND_CHIP[bandKey]}`}>{band.label}</span>
           </div>
 
@@ -237,7 +240,7 @@ export default async function CareerPage() {
         </section>
 
         <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
-          <h2 className="text-[13px] font-semibold uppercase tracking-[0.14em] text-text-secondary">Skill gap analysis</h2>
+          <h2 className="text-[16px] font-semibold text-ink">Skill gap analysis</h2>
           <div className="mt-4 grid gap-6 sm:grid-cols-2">
             <div>
               <p className="text-[14px] font-semibold text-ink">You have</p>
