@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
+import { requireAdminMfa } from "@/lib/mfa";
 import AdminTabs from "./_components/AdminTabs";
 
 export const dynamic = "force-dynamic";
@@ -13,6 +14,8 @@ export const dynamic = "force-dynamic";
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const profile = await getCurrentProfile();
   if (profile?.role !== "admin") notFound();
+  // Admins must pass two-factor sign-in (aal2) to use the console.
+  await requireAdminMfa();
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 pb-16">
