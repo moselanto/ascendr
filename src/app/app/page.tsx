@@ -236,6 +236,38 @@ export default async function HomePage() {
         </div>
       </div>
 
+      {/* First visit: three clear steps until the basics are in place */}
+      {checklistDone < 3 && (
+        <section aria-label="Get started" className="relative overflow-hidden rounded-2xl border border-brand-100 bg-brand-50/60 p-5 md:p-6">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Start here</p>
+          <h2 className="mt-1.5 text-[20px] font-semibold tracking-tight text-ink">Three steps to your personal career plan</h2>
+          <ol className="mt-4 grid gap-3 md:grid-cols-3">
+            {[
+              { n: 1, done: Boolean(goal), title: "Choose your target role", body: "We compare you against what that role really requires.", href: "/onboarding", cta: goal ? "Change role" : "Choose role" },
+              { n: 2, done: (analysis?.held.length ?? 0) > 0, title: "Tick the skills you already have", body: "Your gap and readiness update instantly.", href: "/app/career", cta: "Add skills" },
+              { n: 3, done: roadmapDone > 0, title: "Do your first roadmap step", body: "One small action this week builds your streak.", href: "/app/career#roadmap", cta: "Open roadmap" },
+            ].map((st) => (
+              <li key={st.n} className={`flex flex-col rounded-xl border bg-white p-4 ${st.done ? "border-emerald-100" : "border-border"}`}>
+                <span
+                  className={`flex h-7 w-7 items-center justify-center rounded-full text-[13px] font-semibold ${
+                    st.done ? "bg-accent text-white" : "bg-ink text-white"
+                  }`}
+                >
+                  {st.done ? "✓" : st.n}
+                </span>
+                <p className={`mt-3 text-[15px] font-semibold ${st.done ? "text-text-secondary line-through" : "text-ink"}`}>{st.title}</p>
+                <p className="mt-1 flex-1 text-[13px] leading-relaxed text-text-secondary">{st.body}</p>
+                {st.done === false && (
+                  <Link href={st.href} className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-ink px-3.5 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700">
+                    {st.cta} <span aria-hidden>→</span>
+                  </Link>
+                )}
+              </li>
+            ))}
+          </ol>
+        </section>
+      )}
+
       {/* Goal hero + next action */}
       <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr]">
         <div className="relative overflow-hidden rounded-2xl bg-ink p-6 text-white md:p-8">

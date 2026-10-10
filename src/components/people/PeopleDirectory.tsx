@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
-import { getViewerContext, enrichPeople, initials, type PersonCard } from "@/lib/people";
+import { getViewerContext, enrichPeople, type PersonCard } from "@/lib/people";
 import { sendConnectionRequest, respondToConnection } from "@/app/app/net-actions";
+import { Avatar } from "@/components/ui/Avatar";
 
 /**
  * People directory used by /app/members (everyone) and /app/mentors
@@ -44,7 +45,7 @@ export async function PeopleDirectory({ q, mode }: { q: string; mode: "all" | "m
 
   let query = supabase
     .from("profiles")
-    .select("id, full_name, handle, role, bio, verified_expert")
+    .select("id, full_name, handle, role, bio, verified_expert, avatar_url")
     .order("created_at", { ascending: false })
     .limit(80);
   if (mode === "mentors") query = query.or("role.eq.mentor,verified_expert.eq.true");
@@ -94,7 +95,7 @@ export async function PeopleDirectory({ q, mode }: { q: string; mode: "all" | "m
             {top.map((p) => (
               <div key={p.id} className="flex flex-col rounded-2xl bg-ink p-5 text-white">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-[13px] font-semibold">{initials(p.full_name)}</span>
+                  <Avatar name={p.full_name} url={p.avatar_url} size={44} className="ring-2 ring-white/20" />
                   <div className="min-w-0">
                     <p className="truncate text-[15px] font-semibold">{p.full_name || "Member"}</p>
                     <p className="text-[12px] text-white/60">{ROLE_LABEL[p.role] ?? p.role}</p>
@@ -136,9 +137,7 @@ export async function PeopleDirectory({ q, mode }: { q: string; mode: "all" | "m
             {people.map((p) => (
               <div key={p.id} className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card transition-shadow hover:shadow-lift">
                 <Link href={`/app/members/${p.id}`} className="flex items-center gap-3">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[13px] font-semibold text-brand-700">
-                    {initials(p.full_name)}
-                  </span>
+<Avatar name={p.full_name} url={p.avatar_url} size={44} />
                   <div className="min-w-0">
                     <p className="flex items-center gap-1.5 truncate text-[15px] font-semibold text-ink">
                       {p.full_name || "Member"}

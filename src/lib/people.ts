@@ -18,6 +18,7 @@ export type ConnectionState = "none" | "pending_out" | "pending_in" | "connected
 export type PersonCard = {
   id: string;
   full_name: string | null;
+  avatar_url?: string | null;
   handle: string | null;
   role: string;
   bio: string | null;
@@ -65,6 +66,7 @@ export async function getViewerContext(me: string): Promise<ViewerContext> {
 type RawProfile = {
   id: string;
   full_name: string | null;
+  avatar_url?: string | null;
   handle: string | null;
   role: string;
   bio: string | null;
@@ -135,6 +137,7 @@ export async function enrichPeople(ctx: ViewerContext, profiles: RawProfile[]): 
       return {
         id: p.id,
         full_name: p.full_name,
+        avatar_url: p.avatar_url ?? null,
         handle: p.handle,
         role: p.role,
         bio: p.bio,
