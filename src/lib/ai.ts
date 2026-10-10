@@ -6,9 +6,21 @@ import { createClient } from "@/lib/supabase/server";
 
 export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
 
-export const AI_CONFIGURED = !!process.env.OPENAI_API_KEY;
+// Chat provider: Groq (free tier, OpenAI-compatible) when GROQ_API_KEY is set,
+// otherwise OpenAI. Embeddings always use OpenAI (Groq has no embeddings API).
+const USE_GROQ = !!process.env.GROQ_API_KEY;
+const CHAT_URL = USE_GROQ
+  ? "https://api.groq.com/openai/v1/chat/completions"
+  : "https://api.openai.com/v1/chat/completions";
+const CHAT_KEY = USE_GROQ ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+export const AI_PROVIDER = USE_GROQ ? "groq" : "openai";
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+export const AI_CONFIGURED = !!CHAT_KEY;
+const EMBED_CONFIGURED = !!process.env.OPENAI_API_KEY;
+
+const MODEL = USE_GROQ
+  ? process.env.GROQ_MODEL || "llama-3.3-70b-versatile"
+  : process.env.OPENAI_MODEL || "gpt-4o-mini";
 const EMBED_MODEL = process.env.OPENAI_EMBED_MODEL || "text-embedding-3-small"; // 1536 dims
 
 export const COACH_SYSTEM_PROMPT = `You are ASCENDR's AI Career Coach — part of "The Global AI Career Growth Ecosystem."
@@ -25,20 +37,29 @@ Principles:
 - Keep responses focused; use short paragraphs or tight bullet lists.`;
 
 /** Run a chat completion. Returns assistant text, or a friendly fallback. */
-export async function runChat(messages: ChatMessage[]): Promise<string> {
+export async function runChat(
+  messages: ChatMessage[],
+  opts: { maxTokens?: number; temperature?: number; json?: boolean } = {}
+): Promise<string> {
   if (!AI_CONFIGURED) {
-    return "The AI isn't switched on yet. Add an OPENAI_API_KEY in your environment variables to enable grounded, real-time answers. (Everything else in ASCENDR works without it.)";
+    return "The AI isn't switched on yet. Add a GROQ_API_KEY (free) or OPENAI_API_KEY in your environment variables to enable grounded, real-time answers. (Everything else in ASCENDR works without it.)";
   }
   // One automatic retry when OpenAI is busy (429) or briefly down (5xx).
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      const res = await fetch(CHAT_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+          Authorization: `Bearer ${CHAT_KEY}`,
         },
-        body: JSON.stringify({ model: MODEL, messages, temperature: 0.5, max_tokens: 700 }),
+        body: JSON.stringify({
+          model: MODEL,
+          messages,
+          temperature: opts.temperature ?? 0.5,
+          max_tokens: opts.maxTokens ?? 700,
+          ...(opts.json ? { response_format: { type: "json_object" } } : {}),
+        }),
         signal: AbortSignal.timeout(45000),
       });
       if (res.ok) {
@@ -46,22 +67,22 @@ export async function runChat(messages: ChatMessage[]): Promise<string> {
         return data?.choices?.[0]?.message?.content?.trim() || "I didn't catch that. Could you rephrase?";
       }
       const detail = await res.text();
-      console.error("OpenAI chat error", res.status, detail.slice(0, 500));
+      console.error(`${AI_PROVIDER} chat error`, res.status, detail.slice(0, 500));
       const retryable = res.status === 429 || res.status >= 500;
       if (retryable && attempt === 0) {
         await new Promise((r) => setTimeout(r, 1500));
         continue;
       }
       if (res.status === 401 || res.status === 403) {
-        return "The AI service rejected our key. An admin needs to check the OpenAI API key in the app settings.";
+        return "The AI service rejected our key. An admin needs to check the AI API key in the app settings.";
       }
       if (res.status === 429) {
         return /insufficient_quota/.test(detail)
-          ? "The AI service is out of credit right now. An admin needs to top up the OpenAI account."
+          ? "The AI service is out of credit right now. An admin needs to top up the AI account."
           : "The AI service is busy right now. Please try again in a minute.";
       }
       if (res.status === 404 || res.status === 400) {
-        return "The AI service could not handle this request. An admin should check the OpenAI model setting.";
+        return "The AI service could not handle this request. An admin should check the AI model setting.";
       }
       return "The AI service is having trouble right now. Please try again in a minute.";
     } catch (err) {
@@ -75,7 +96,7 @@ export async function runChat(messages: ChatMessage[]): Promise<string> {
 
 /** Embed an array of texts. Returns one 1536-dim vector per input (or [] on failure). */
 export async function embed(texts: string[]): Promise<number[][]> {
-  if (!AI_CONFIGURED || texts.length === 0) return [];
+  if (!EMBED_CONFIGURED || texts.length === 0) return [];
   try {
     const res = await fetch("https://api.openai.com/v1/embeddings", {
       method: "POST",

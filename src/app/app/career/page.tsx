@@ -197,6 +197,9 @@ export default async function CareerPage() {
         <Link href="/onboarding" className="w-fit rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40">
           Update goal
         </Link>
+        <Link href="/app/career/import" className="w-fit rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40">
+          Import CV or LinkedIn
+        </Link>
       </div>
 
       {/* Readiness + skill gap analysis */}

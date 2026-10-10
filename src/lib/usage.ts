@@ -22,7 +22,8 @@ export type QuotaBucket =
   | "ai:interview"
   | "ai:resume-review"
   | "ai:mentor-ask"
-  | "ai:mentor-ingest";
+  | "ai:mentor-ingest"
+  | "ai:cv-import";
 
 export type Tier = "free" | "plus" | "starter" | "pro" | "premium";
 
@@ -42,6 +43,7 @@ export const LIMITS: Record<QuotaBucket, Record<Tier, number>> = {
   "ai:mentor-ask":        { free: 20, plus: 40, starter: 75, pro: 150, premium: 500 },
   // Ingestion is the expensive one: embeddings scale with document size.
   "ai:mentor-ingest":     { free: 2, plus: 4, starter: 8,  pro: 20,  premium: 60 },
+  "ai:cv-import":         { free: 3, plus: 6, starter: 10, pro: 20,  premium: 60 },
 };
 
 const WINDOW_SECS = 86_400; // 24h fixed window
