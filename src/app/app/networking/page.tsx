@@ -17,9 +17,13 @@ function initials(name: string | null | undefined) {
   );
 }
 
-type Prof = { id: string; full_name: string | null; role: string; bio: string | null };
+type Prof = { id: string; full_name: string | null; role: string; bio: string | null; avatar_url?: string | null };
 
-function Avatar({ name }: { name: string | null | undefined }) {
+function Avatar({ name, url }: { name: string | null | undefined; url?: string | null }) {
+  if (url) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={url} alt={name || "Member"} className="h-10 w-10 shrink-0 rounded-full bg-surface object-cover" />;
+  }
   return (
     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
       {initials(name)}
@@ -66,7 +70,7 @@ export default async function NetworkingPage({
   if (involvedIds.length) {
     const { data: ps } = await supabase
       .from("profiles")
-      .select("id, full_name, role, bio")
+      .select("id, full_name, role, bio, avatar_url")
       .in("id", involvedIds);
     (ps as Prof[] | null)?.forEach((p) => profMap.set(p.id, p));
   }
@@ -86,7 +90,7 @@ export default async function NetworkingPage({
   // Discover: recent profiles that aren't me and aren't already connected/pending.
   const { data: discoverRows } = await supabase
     .from("profiles")
-    .select("id, full_name, role, bio")
+    .select("id, full_name, role, bio, avatar_url")
     .neq("id", myId)
     .order("created_at", { ascending: false })
     .limit(24);
@@ -101,7 +105,7 @@ export default async function NetworkingPage({
   if (dmId) {
     const { data: peer } = await supabase
       .from("profiles")
-      .select("id, full_name, role, bio")
+      .select("id, full_name, role, bio, avatar_url")
       .eq("id", dmId)
       .maybeSingle();
     dmPeer = (peer as Prof) ?? null;
@@ -174,7 +178,7 @@ export default async function NetworkingPage({
                   href={`/app/networking?dm=${c.id}`}
                   className={`flex items-center gap-3 px-5 py-4 ${active ? "bg-surface" : "hover:bg-surface"}`}
                 >
-                  <Avatar name={c.profile?.full_name} />
+                  <Avatar name={c.profile?.full_name} url={c.profile?.avatar_url} />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[14px] font-medium text-ink">
                       {c.profile?.full_name || "Member"}
@@ -206,7 +210,7 @@ export default async function NetworkingPage({
           <div className="order-2 md:order-1">{conversations}</div>
           <div className="order-1 flex min-w-0 flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-card md:order-2">
             <div className="flex items-center gap-3 border-b border-border px-5 py-4">
-              <Avatar name={dmPeer.full_name} />
+              <Avatar name={dmPeer.full_name} url={dmPeer.avatar_url} />
               <div className="min-w-0">
                 <Link
                   href={`/app/members/${dmPeer.id}`}
@@ -250,7 +254,7 @@ export default async function NetworkingPage({
                   const p = profMap.get(c.requester_id);
                   return (
                     <li key={c.id} className="flex flex-wrap items-center gap-3 px-5 py-4">
-                      <Avatar name={p?.full_name} />
+                      <Avatar name={p?.full_name} url={p?.avatar_url} />
                       <div className="min-w-0 flex-1">
                         <Link
                           href={`/app/members/${c.requester_id}`}
@@ -292,7 +296,7 @@ export default async function NetworkingPage({
                   const p = profMap.get(c.addressee_id);
                   return (
                     <li key={c.id} className="flex items-center gap-3 px-5 py-4">
-                      <Avatar name={p?.full_name} />
+                      <Avatar name={p?.full_name} url={p?.avatar_url} />
                       <div className="min-w-0 flex-1">
                         <Link
                           href={`/app/members/${c.addressee_id}`}
@@ -334,7 +338,7 @@ export default async function NetworkingPage({
               <ul className="divide-y divide-border rounded-2xl border border-border bg-white p-0 shadow-card">
                 {contacts.map((c) => (
                   <li key={c.connectionId} className="flex items-center gap-3 px-5 py-4">
-                    <Avatar name={c.profile?.full_name} />
+                    <Avatar name={c.profile?.full_name} url={c.profile?.avatar_url} />
                     <div className="min-w-0 flex-1">
                       <Link
                         href={`/app/members/${c.id}`}
@@ -376,7 +380,7 @@ export default async function NetworkingPage({
                 {discover.map((p) => (
                   <div key={p.id} className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card">
                     <div className="flex items-center gap-3">
-                      <Avatar name={p.full_name} />
+                      <Avatar name={p.full_name} url={p.avatar_url} />
                       <div className="min-w-0">
                         <Link
                           href={`/app/members/${p.id}`}

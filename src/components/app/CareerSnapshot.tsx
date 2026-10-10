@@ -136,14 +136,14 @@ export async function CareerSnapshot({ profileId, communityCount }: { profileId:
   });
 
   return (
-    <section className="rounded-2xl border border-border bg-card shadow-card">
+    <section className="rounded-2xl border border-border bg-white shadow-card">
       <div className="grid gap-0 md:grid-cols-[1.25fr_1fr]">
         {/* Goal + gaps */}
         <div className="p-6 md:p-7">
           <div className="flex flex-wrap items-center gap-2">
-            <p className="text-caption font-medium uppercase tracking-[0.12em] text-text-secondary">Your goal</p>
+            <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-text-secondary">Your goal</p>
             {goal && (
-              <span className={`rounded-full border px-2.5 py-0.5 text-caption font-medium ${band.tone}`}>
+              <span className={`rounded-full border px-2.5 py-0.5 text-[12px] font-medium ${band.tone}`}>
                 {band.label}
               </span>
             )}
@@ -151,21 +151,21 @@ export async function CareerSnapshot({ profileId, communityCount }: { profileId:
 
           {goal ? (
             <>
-              <h2 className="mt-2 text-h3 font-semibold text-text">{roleTitle}</h2>
+              <h2 className="mt-2 text-[20px] font-semibold tracking-tight text-text">{roleTitle}</h2>
               {goal.horizon_months && (
-                <p className="mt-1 text-small text-text-secondary">Within {goal.horizon_months} months</p>
+                <p className="mt-1 text-[14px] text-text-secondary">Within {goal.horizon_months} months</p>
               )}
 
               {topGaps.length > 0 ? (
                 <div className="mt-5">
-                  <p className="text-small text-text-secondary">
+                  <p className="text-[14px] text-text-secondary">
                     {essentialGaps.length === 1
                       ? "1 core skill to close"
                       : `${essentialGaps.length} core skills to close, starting with:`}
                   </p>
                   <ul className="mt-2 divide-y divide-border border-y border-border">
                     {topGaps.map((g, i) => (
-                      <li key={g.skillId} className="flex items-center gap-3 py-2.5 text-small">
+                      <li key={g.skillId} className="flex items-center gap-3 py-2.5 text-[14px]">
                         <span className="nums w-5 text-text-secondary">{i + 1}</span>
                         <span className="font-medium text-text">{g.label}</span>
                       </li>
@@ -173,11 +173,11 @@ export async function CareerSnapshot({ profileId, communityCount }: { profileId:
                   </ul>
                 </div>
               ) : analysis?.roleId ? (
-                <p className="mt-5 text-small text-text-secondary">
+                <p className="mt-5 text-[14px] text-text-secondary">
                   You cover the core skills we know about for this role.
                 </p>
               ) : (
-                <p className="mt-5 text-small text-text-secondary">
+                <p className="mt-5 text-[14px] text-text-secondary">
                   Your gaps will show here once your goal is matched to a role.
                 </p>
               )}
@@ -196,15 +196,15 @@ export async function CareerSnapshot({ profileId, communityCount }: { profileId:
         {/* Next best action + momentum */}
         <div className="flex flex-col justify-between gap-6 border-t border-border bg-surface/60 p-6 md:border-l md:border-t-0 md:p-7 md:rounded-r-2xl">
           <div>
-            <p className="text-caption font-medium uppercase tracking-[0.12em] text-text-secondary">Do this next</p>
-            <p className="mt-2 text-h4 font-semibold text-text">{next.title}</p>
-            <p className="mt-2 text-small text-text-secondary">
+            <p className="text-[12px] font-medium uppercase tracking-[0.12em] text-text-secondary">Do this next</p>
+            <p className="mt-2 text-[17px] font-semibold text-text">{next.title}</p>
+            <p className="mt-2 text-[14px] text-text-secondary">
               <span className="font-medium text-text">Why: </span>
               {next.why}
             </p>
             <Link
               href={next.href}
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-small font-medium text-white transition-colors hover:bg-ink-700"
+              className="mt-5 inline-flex items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-ink-700"
             >
               {next.cta} <span aria-hidden>→</span>
             </Link>
@@ -212,12 +212,12 @@ export async function CareerSnapshot({ profileId, communityCount }: { profileId:
 
           <div className="flex gap-6 border-t border-border pt-4">
             <div>
-              <p className="nums text-h4 font-semibold text-text">{actionsThisWeek}</p>
-              <p className="text-caption text-text-secondary">actions this week</p>
+              <p className="nums text-[17px] font-semibold text-text">{actionsThisWeek}</p>
+              <p className="text-[12px] text-text-secondary">actions this week</p>
             </div>
             <div>
-              <p className="nums text-h4 font-semibold text-text">{outcomeCount}</p>
-              <p className="text-caption text-text-secondary">{outcomeCount === 1 ? "win logged" : "wins logged"}</p>
+              <p className="nums text-[17px] font-semibold text-text">{outcomeCount}</p>
+              <p className="text-[12px] text-text-secondary">{outcomeCount === 1 ? "win logged" : "wins logged"}</p>
             </div>
           </div>
         </div>

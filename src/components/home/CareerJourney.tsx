@@ -59,7 +59,7 @@ export function CareerJourney() {
                     {step.items.map((item) => (
                       <span
                         key={item}
-                        className="rounded-md bg-surface px-2.5 py-1 text-[13px] text-text-secondary"
+                        className="rounded-xl bg-surface px-2.5 py-1 text-[13px] text-text-secondary"
                       >
                         {item}
                       </span>

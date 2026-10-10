@@ -129,7 +129,7 @@ export default async function OutcomesPage({ searchParams }: { searchParams: { k
             <p className="text-[13px] text-text-secondary">Career actions completed and wins logged, last six months.</p>
           </div>
           <div className="flex gap-4 text-[12px] text-text-secondary">
-            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-sm bg-ink/20" />Career actions</span>
+            <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-lg bg-ink/20" />Career actions</span>
             <span className="flex items-center gap-1.5"><span className="h-2.5 w-2.5 rounded-full bg-accent" />Wins</span>
           </div>
         </div>

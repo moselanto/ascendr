@@ -63,7 +63,7 @@ export default async function CareerPage() {
   if (!goal) {
     return (
       <div className="mx-auto max-w-2xl py-16 text-center">
-        <h1 className="font-display text-h2">Set a career goal to start</h1>
+        <h1 className="font-display text-[28px] font-semibold tracking-tight">Set a career goal to start</h1>
         <p className="mt-4 text-body text-text-secondary">
           Career Intelligence compares where you are with where you want to go. It needs a destination first.
         </p>

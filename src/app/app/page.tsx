@@ -376,7 +376,7 @@ export default async function HomePage() {
                       <input type="hidden" name="done" value="0" />
                       <button
                         aria-label={`Mark done: ${s.title}`}
-                        className="mt-0.5 h-5 w-5 shrink-0 rounded-md border border-border bg-white transition-colors hover:border-ink"
+                        className="mt-0.5 h-5 w-5 shrink-0 rounded-xl border border-border bg-white transition-colors hover:border-ink"
                       />
                       <div className="flex-1">
                         <p className="text-[15px] font-medium text-ink">{s.title}</p>

@@ -67,10 +67,10 @@ export default async function LiveSessionRoom({
 
   if (!isMember) {
     return (
-      <div className="max-w-3xl mx-auto rounded-md border border-border bg-card p-10 text-center text-text-secondary">
+      <div className="max-w-3xl mx-auto rounded-xl border border-border bg-white p-10 text-center text-text-secondary">
         Join {community.name} to join this session.
         <div className="mt-4">
-          <Link href={`/app/communities/${community.slug}`} className="text-primary font-semibold">
+          <Link href={`/app/communities/${community.slug}`} className="text-brand-600 font-semibold">
             ← Back to community
           </Link>
         </div>
@@ -144,11 +144,11 @@ export default async function LiveSessionRoom({
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <Link
           href={`/app/communities/${community.slug}/live`}
-          className="text-small text-primary font-semibold"
+          className="text-[14px] text-brand-600 font-semibold"
         >
           ← All sessions
         </Link>
-        <span className="text-caption text-text-secondary">
+        <span className="text-[12px] text-text-secondary">
           {community.name} · {fmt(session.scheduled_at)}
         </span>
         {isMod && (
@@ -163,7 +163,7 @@ export default async function LiveSessionRoom({
         )}
       </div>
 
-      <h1 className="mb-4 text-h3 font-bold">{session.title}</h1>
+      <h1 className="mb-4 text-[20px] font-semibold tracking-tight">{session.title}</h1>
 
       {/* Two-column live layout: stage + controls (left), Q&A/Chat rail (right) */}
       <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
@@ -177,7 +177,7 @@ export default async function LiveSessionRoom({
           />
 
           {/* Interaction controls row (matches the screenshot: Raise hand · React · Poll) */}
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-card p-3">
+          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-white p-3">
             <LiveInteractions
               sessionId={session.id}
               meId={profile!.id}
@@ -185,7 +185,7 @@ export default async function LiveSessionRoom({
             />
           </div>
 
-          <p className="rounded-lg border border-dashed border-border bg-card px-4 py-3 text-caption text-text-secondary">
+          <p className="rounded-lg border border-dashed border-border bg-white px-4 py-3 text-[12px] text-text-secondary">
             Q&amp;A is the heartbeat: members submit and upvote questions; the host answers the
             top-voted without being interrupted. Sessions can record and the AI posts a summary +
             action items afterward.
@@ -205,7 +205,7 @@ export default async function LiveSessionRoom({
         </div>
 
         {/* Right rail: Q&A / Chat / Participants */}
-        <div className="rounded-lg border border-border bg-card p-4">
+        <div className="rounded-lg border border-border bg-white p-4">
           <LiveRail
             sessionId={session.id}
             communityId={community.id}
@@ -268,7 +268,7 @@ function StatusButton({
       <input type="hidden" name="community_id" value={communityId} />
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="status" value={status} />
-      <button className="rounded-sm border border-primary px-4 py-2 text-small font-semibold text-primary hover:bg-[#eef2ff]">
+      <button className="rounded-lg border border-primary px-4 py-2 text-[14px] font-semibold text-brand-600 hover:bg-[#eef2ff]">
         {label}
       </button>
     </form>

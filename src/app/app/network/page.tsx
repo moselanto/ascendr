@@ -339,8 +339,8 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
             <p className="text-[13px] text-text-secondary">Demand = openings needing the skill. Supply = sharing members who have it, plus those working on it.</p>
           </div>
           <div className="flex gap-4 text-[12px] text-text-secondary">
-            <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm bg-ink" />Have it</span>
-            <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-sm bg-ink/25" />Learning</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-lg bg-ink" />Have it</span>
+            <span className="flex items-center gap-1.5"><span className="h-2 w-3 rounded-lg bg-ink/25" />Learning</span>
             <span className="flex items-center gap-1.5"><span className="h-3 w-0.5 bg-danger" />Needed</span>
           </div>
         </div>
