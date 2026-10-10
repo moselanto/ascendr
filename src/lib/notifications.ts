@@ -10,7 +10,7 @@ export type NotifRow = {
 
 /** Where a notification should take the member when they open it. */
 export async function resolveNotificationTarget(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   n: NotifRow
 ): Promise<string> {
   if (n.type === "dm" && n.actor_id) return `/app/networking?dm=${n.actor_id}`;

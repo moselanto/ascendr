@@ -125,7 +125,7 @@ export async function askMentorClone(
     return { answer: "I couldn't process that question. Please try again.", citations: [], grounded: false };
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: matches, error } = await supabase.rpc("match_ai_chunks", {
     p_community_id: communityId,
     p_query_embedding: qEmbedding,

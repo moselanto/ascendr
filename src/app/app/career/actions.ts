@@ -20,7 +20,7 @@ export async function markSkillHeld(formData: FormData) {
   const goalId = String(formData.get("goal_id") ?? "") || null;
   if (!skillId) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase
     .from("user_skills")
     .upsert(
@@ -41,7 +41,7 @@ export async function markSkillHeld(formData: FormData) {
   }
   revalidatePath("/app/career");
   revalidatePath("/app");
-  if (error == null) backWithToast("Skill added to your profile", "/app/career");
+  if (error == null) return backWithToast("Skill added to your profile", "/app/career");
 }
 
 /** Undo a self-reported skill. */
@@ -51,7 +51,7 @@ export async function unmarkSkillHeld(formData: FormData) {
   const skillId = String(formData.get("skill_id") ?? "");
   if (!skillId) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase
     .from("user_skills")
     .delete()
@@ -88,7 +88,7 @@ export async function recordOutcome(formData: FormData) {
   const rawDate = String(formData.get("occurred_on") ?? "");
   const occurredOn = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) && rawDate <= today ? rawDate : today;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("career_outcomes").insert({
     user_id: profile.id,
     goal_id: goalId,
@@ -104,7 +104,7 @@ export async function recordOutcome(formData: FormData) {
   }
   revalidatePath("/app/career");
   revalidatePath("/app/outcomes");
-  if (error == null) backWithToast("Win logged. Nice work.", "/app/outcomes");
+  if (error == null) return backWithToast("Win logged. Nice work.", "/app/outcomes");
 }
 
 /** Remove one of the member's own outcomes (e.g. entered by mistake). */
@@ -114,7 +114,7 @@ export async function deleteOutcome(formData: FormData) {
   const id = String(formData.get("outcome_id") ?? "");
   if (!id) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("career_outcomes").delete().eq("id", id).eq("user_id", profile.id);
   revalidatePath("/app/career");
   revalidatePath("/app/outcomes");
@@ -140,7 +140,7 @@ export async function togglePlanStep(formData: FormData) {
   const isDone = String(formData.get("done") ?? "") === "1";
   if (stepKey.length === 0) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   if (isDone) {
     await supabase
@@ -168,5 +168,5 @@ export async function togglePlanStep(formData: FormData) {
 
   revalidatePath("/app/career");
   revalidatePath("/app");
-  if (isDone === false) backWithToast("Step completed. That counts as a career action.", "/app/career");
+  if (isDone === false) return backWithToast("Step completed. That counts as a career action.", "/app/career");
 }

@@ -52,7 +52,7 @@ export default function ChannelChat({
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const messagesRef = useRef<Msg[]>(initialMessages);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const channelRef = useRef<ReturnType<Awaited<ReturnType<typeof createClient>>["channel"]> | null>(null);
 
   useEffect(() => {
     messagesRef.current = messages;

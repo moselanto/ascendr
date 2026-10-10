@@ -14,7 +14,7 @@ export default async function CreateHubPage(
 ) {
   const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Communities where the user can schedule live sessions (owner/moderator).
   let hosted: HostedCommunity[] = [];

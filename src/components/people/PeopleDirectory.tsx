@@ -40,7 +40,7 @@ export function ConnectButton({ p, compact = false }: { p: PersonCard; compact?:
 
 export async function PeopleDirectory({ q, mode }: { q: string; mode: "all" | "mentors" }) {
   const me = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
   const ctx = await getViewerContext(me?.id ?? "");
 
   let query = supabase

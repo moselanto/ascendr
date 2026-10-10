@@ -98,7 +98,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "community_id and non-empty content are required" }, { status: 400 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Authorization: must be owner/moderator of the community.
   const { data: membership } = await supabase

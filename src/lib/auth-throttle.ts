@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -19,8 +19,8 @@ const RULES = {
   signupIp: { limit: 5, windowSecs: 3600 },
 } as const;
 
-function clientIp(): string {
-  const h = (/* Next 15: synchronous access kept on purpose (temporary); see PR notes. */ headers() as unknown as UnsafeUnwrappedHeaders);
+async function clientIp(): Promise<string> {
+  const h = await headers();
   const fwd = h.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
   return h.get("x-real-ip") ?? "unknown";
@@ -47,7 +47,7 @@ async function hit(key: string, rule: { limit: number; windowSecs: number }): Pr
 /** Returns true when this sign-in attempt may proceed. */
 export async function allowLogin(email: string): Promise<boolean> {
   const [ipOk, emailOk] = await Promise.all([
-    hit(`login-ip:${clientIp()}`, RULES.loginIp),
+    hit(`login-ip:${await clientIp()}`, RULES.loginIp),
     hit(`login-email:${email.trim().toLowerCase()}`, RULES.loginEmail),
   ]);
   return ipOk && emailOk;
@@ -55,5 +55,5 @@ export async function allowLogin(email: string): Promise<boolean> {
 
 /** Returns true when this sign-up attempt may proceed. */
 export async function allowSignup(): Promise<boolean> {
-  return hit(`signup-ip:${clientIp()}`, RULES.signupIp);
+  return hit(`signup-ip:${await clientIp()}`, RULES.signupIp);
 }

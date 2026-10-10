@@ -39,7 +39,7 @@ export default async function OutcomesPage(props: { searchParams: Promise<{ kind
   const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
   const me = profile?.id ?? "";
-  const supabase = createClient();
+  const supabase = await createClient();
   const filter = (searchParams.kind ?? "").trim();
 
   const since = new Date();

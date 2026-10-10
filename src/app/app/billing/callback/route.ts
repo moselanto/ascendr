@@ -27,7 +27,7 @@ export async function GET(req: Request) {
   if (meta.profile_id !== profile.id || isPaidPlan(meta.plan) === false) return back("This payment belongs to another account");
 
   // A Plus renewal paid before the period ends adds a month on top of the time left.
-  const { data: existing } = await createClient()
+  const { data: existing } = await (await createClient())
     .from("subscriptions")
     .select("plan, current_period_end, last_reference")
     .eq("user_id", profile.id)

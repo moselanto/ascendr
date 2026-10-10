@@ -25,7 +25,7 @@ export default async function NetworkReportPage(props: { searchParams: Promise<{
   if (profile == null) redirect("/login");
   const org = String(searchParams.org ?? "");
   if (org.length === 0) redirect("/app/network");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: me } = await supabase
     .from("organization_members")

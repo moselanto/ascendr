@@ -18,7 +18,7 @@ function initials(name: string) {
 
 export default async function CommunitiesPage() {
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: communities } = await supabase
     .from("communities")

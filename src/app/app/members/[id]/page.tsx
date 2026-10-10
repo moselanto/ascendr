@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function MemberProfile(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;
-  const supabase = createClient();
+  const supabase = await createClient();
   const me = await getCurrentProfile();
 
   const { data: profile } = await supabase

@@ -38,7 +38,7 @@ export async function createCommunity(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const slug = `${slugify(name)}-${Math.random().toString(36).slice(2, 6)}`;
 
   const { data: community, error } = await supabase
@@ -84,7 +84,7 @@ export async function createChannel(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   // Authorization: must be owner/moderator (RLS also enforces this).
   const { data: membership } = await supabase
     .from("community_members")
@@ -127,7 +127,7 @@ export async function deleteChannel(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: membership } = await supabase
     .from("community_members")
     .select("role")
@@ -164,7 +164,7 @@ export async function joinCommunity(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("community_members").insert({
     community_id: communityId,
     user_id: profile.id,
@@ -202,7 +202,7 @@ export async function sendMessage(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("channel_messages").insert({
     channel_id: channelId,
     author_id: profile.id,
@@ -243,7 +243,7 @@ export async function postChannelMessage(input: {
   const attachments = cleanAttachments(input.attachments, profile.auth_user_id);
   if (body.length === 0 && attachments.length === 0) return { ok: false };
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("channel_messages").insert({
     channel_id: input.channelId,
     author_id: profile.id,
@@ -277,7 +277,7 @@ export async function toggleReaction(
   const profile = await getCurrentProfile();
   if (!profile) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: existing } = await supabase
     .from("message_reactions")
     .select("emoji")
@@ -305,7 +305,7 @@ export async function toggleReaction(
 export async function markChannelRead(channelId: string) {
   const profile = await getCurrentProfile();
   if (!profile) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase
     .from("channel_reads")
     .upsert(
@@ -321,7 +321,7 @@ export async function leaveCommunity(formData: FormData) {
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: m } = await supabase
     .from("community_members")
     .select("role")

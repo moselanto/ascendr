@@ -67,7 +67,7 @@ export async function consumeQuota(
   tier: Tier = "free"
 ): Promise<QuotaResult> {
   const limit = LIMITS[bucket][tier];
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data, error } = await supabase
     .rpc("consume_quota", {
@@ -140,7 +140,7 @@ export function quotaExceededResponse(q: QuotaResult, bucket: QuotaBucket) {
  */
 export async function getTier(profileId: string): Promise<Tier> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data } = await supabase
       .from("subscriptions")
       .select("plan, status, current_period_end")

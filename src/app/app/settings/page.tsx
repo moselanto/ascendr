@@ -45,7 +45,7 @@ export default async function SettingsPage(
   const base = await getCurrentProfile();
   if (!base) redirect("/login");
   const profile = base as ProfileWithGoals;
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const {
     data: { user },

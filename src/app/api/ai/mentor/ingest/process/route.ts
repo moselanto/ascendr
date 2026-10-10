@@ -23,7 +23,7 @@ export async function POST(req: Request) {
   const sourceId = String(body.source_id ?? "");
   if (sourceId.length === 0) return NextResponse.json({ error: "source_id is required" }, { status: 400 });
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: source } = await supabase.from("ai_sources").select("id, owner_id, community_id, status").eq("id", sourceId).maybeSingle();
   if (!source) return NextResponse.json({ error: "Source not found" }, { status: 404 });
 

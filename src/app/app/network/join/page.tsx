@@ -16,7 +16,7 @@ const KIND_LABEL: Record<string, string> = {
 export default async function JoinNetworkPage(props: { searchParams: Promise<{ code?: string; error?: string }> }) {
   const searchParams = await props.searchParams;
   const code = (searchParams.code ?? "").trim();
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = code ? await supabase.rpc("org_invite_preview", { p_code: code }) : { data: null };
   const inv = ((data ?? []) as { organization_id: string; organization_name: string; kind: string; valid: boolean }[])[0];
 

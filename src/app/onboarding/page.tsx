@@ -12,7 +12,7 @@ export default async function OnboardingPage() {
 
   // Supported target roles. Falls back to free text in the flow when the
   // role catalogue has not been seeded yet.
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: roleRows } = await supabase.from("role_profiles").select("id, title").order("title").limit(200);
   const roles = Array.from(
     new Set(((roleRows ?? []) as { id: string; title: string }[]).map((r) => r.title).filter(Boolean))

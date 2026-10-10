@@ -52,7 +52,7 @@ function SectionTitle({ children, action }: { children: React.ReactNode; action?
 
 export default async function LearnPage() {
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: memberships } = await supabase
     .from("community_members")

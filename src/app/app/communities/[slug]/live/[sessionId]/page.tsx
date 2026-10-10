@@ -39,7 +39,7 @@ export default async function LiveSessionRoom(
 ) {
   const params = await props.params;
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: community } = await supabase
     .from("communities")

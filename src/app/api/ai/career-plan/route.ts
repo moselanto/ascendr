@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const quota = await consumeQuota(profile.id, "ai:career-plan", await getTier(profile.id));
   if (!quota.allowed) return quotaExceededResponse(quota, "ai:career-plan");
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let body: { goal?: string; horizon?: string };
   try {

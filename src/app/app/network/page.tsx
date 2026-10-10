@@ -111,7 +111,7 @@ export default async function NetworkPage(props: { searchParams: Promise<{ org?:
   const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
   const me = profile?.id ?? "";
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const mine = await supabase
     .from("organization_members")

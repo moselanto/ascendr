@@ -14,7 +14,7 @@ export async function awardXp(
   points: number,
   communityId?: string | null
 ) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   await supabase.from("xp_events").insert({
     user_id: profileId,

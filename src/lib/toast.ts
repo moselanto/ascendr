@@ -1,4 +1,4 @@
-import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 /**
@@ -6,10 +6,11 @@ import { redirect } from "next/navigation";
  * `toast` message the <Toast /> component (in the /app layout) shows as a
  * pop-up confirmation. Only same-origin paths are used: the referer is
  * reduced to its pathname + query, so this can never redirect off-site.
+ * Always `await` it: the redirect is thrown from inside the promise.
  */
-export function backWithToast(message: string, fallback = "/app"): never {
+export async function backWithToast(message: string, fallback = "/app"): Promise<never> {
   let path = fallback;
-  const ref = (/* Next 15: synchronous access kept on purpose (temporary); see PR notes. */ headers() as unknown as UnsafeUnwrappedHeaders).get("referer");
+  const ref = (await headers()).get("referer");
   if (ref) {
     try {
       const u = new URL(ref);

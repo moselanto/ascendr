@@ -30,7 +30,7 @@ export default async function AIStudioPage(
     ? searchParams.tab
     : "coaches") as TabKey;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const profile = await getCurrentProfile();
 
   // Active career goal (used to tailor the coach's suggested prompts).

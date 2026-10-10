@@ -40,7 +40,7 @@ export default async function CommunityHome(
   const searchParams = await props.searchParams;
   const params = await props.params;
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: community } = await supabase
     .from("communities")

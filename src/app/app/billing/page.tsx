@@ -20,7 +20,7 @@ const STATUS: Record<string, { label: string; tone: string }> = {
 export default async function BillingPage() {
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login?next=/app/billing");
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: sub, error } = await supabase
     .from("subscriptions")
     .select("*")

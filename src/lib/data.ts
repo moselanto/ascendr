@@ -3,7 +3,7 @@ import type { Profile } from "@/lib/types";
 
 /** Returns the current user's profile row, or null if not signed in / no profile. */
 export async function getCurrentProfile(): Promise<Profile | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();

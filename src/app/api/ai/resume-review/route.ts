@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   const quota = await consumeQuota(profile.id, "ai:resume-review", await getTier(profile.id));
   if (!quota.allowed) return quotaExceededResponse(quota, "ai:resume-review");
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let body: { resumeText?: string; fileName?: string; targetRole?: string };
   try {

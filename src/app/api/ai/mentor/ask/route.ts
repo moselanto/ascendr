@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "community_id and question are required" }, { status: 400 });
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: membership } = await supabase
     .from("community_members")
     .select("status")

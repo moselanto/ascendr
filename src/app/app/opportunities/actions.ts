@@ -21,7 +21,7 @@ export async function saveOpportunity(formData: FormData) {
   const company = clean(formData.get("company"), 200);
   if (externalId.length === 0 || title.length === 0 || company.length === 0) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("saved_opportunities").upsert(
     {
       user_id: profile.id,
@@ -36,7 +36,7 @@ export async function saveOpportunity(formData: FormData) {
   );
   await track("opportunity_viewed", { userId: profile.id, props: { action: "saved" } });
   revalidatePath("/app/opportunities");
-  backWithToast("Saved to your tracker", "/app/opportunities");
+  return backWithToast("Saved to your tracker", "/app/opportunities");
 }
 
 /**
@@ -50,7 +50,7 @@ export async function moveOpportunity(formData: FormData) {
   const status = clean(formData.get("status"), 20);
   if (id.length === 0 || STAGES.has(status) === false) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: row } = await supabase
     .from("saved_opportunities")
     .update({ status, updated_at: new Date().toISOString() })
@@ -72,7 +72,7 @@ export async function moveOpportunity(formData: FormData) {
   }
   revalidatePath("/app/opportunities");
   revalidatePath("/app");
-  if (row) backWithToast(status === "applied" ? "Marked as applied. That counts as a career action." : `Moved to ${status}`, "/app/opportunities");
+  if (row) return backWithToast(status === "applied" ? "Marked as applied. That counts as a career action." : `Moved to ${status}`, "/app/opportunities");
 }
 
 export async function removeOpportunity(formData: FormData) {
@@ -80,7 +80,7 @@ export async function removeOpportunity(formData: FormData) {
   if (profile == null) return;
   const id = clean(formData.get("id"), 60);
   if (id.length === 0) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("saved_opportunities").delete().eq("id", id).eq("user_id", profile.id);
   revalidatePath("/app/opportunities");
 }

@@ -17,7 +17,7 @@ import Toast from "@/components/ui/Toast";
  * logic on the community page, but rolled up to a single boolean for the nav.
  */
 async function hasUnreadAnywhere(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   userId: string
 ): Promise<boolean> {
   // Communities the user actively belongs to.
@@ -72,7 +72,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: streak } = await supabase
     .from("streaks")
     .select("current_len")
