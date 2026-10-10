@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import type { Profile } from "@/lib/types";
 import { updateProfile } from "./actions";
-import { signOut } from "@/app/login/actions";
+import { signOut, updatePassword } from "@/app/login/actions";
 import PhotoUploader from "./PhotoUploader";
 import { Avatar } from "@/components/ui/Avatar";
 import { MfaSetup } from "@/components/security/MfaSetup";
@@ -39,7 +39,7 @@ const secondaryBtn =
 
 export default async function SettingsPage(
   props: {
-    searchParams: Promise<{ saved?: string; error?: string; mfa?: string }>;
+    searchParams: Promise<{ saved?: string; error?: string; mfa?: string; pwerror?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -113,6 +113,25 @@ export default async function SettingsPage(
       <div className="mt-6">
         <MfaSetup required={profile.role === "admin"} />
       </div>
+
+      <section id="password" className={`mt-6 scroll-mt-24 ${card}`}>
+        <p className={sectionEyebrow}>Password</p>
+        <h2 className="mt-1 text-[17px] font-semibold text-ink">Change password</h2>
+        <p className="mt-1 text-[13px] text-text-secondary">Use at least 8 characters. You stay signed in on this device.</p>
+        {searchParams.pwerror ? <p className="mt-3 text-[13px] text-danger">{searchParams.pwerror}</p> : null}
+        <form action={updatePassword} className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <input type="hidden" name="from" value="settings" />
+          <label className="text-[12px] font-medium text-text-secondary">
+            New password
+            <input name="password" type="password" required minLength={8} maxLength={72} autoComplete="new-password" className="mt-1 block w-full rounded-xl border border-border bg-white px-3 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-text-secondary/70 focus:border-ink/40" />
+          </label>
+          <label className="text-[12px] font-medium text-text-secondary">
+            Confirm new password
+            <input name="confirm" type="password" required minLength={8} maxLength={72} autoComplete="new-password" className="mt-1 block w-full rounded-xl border border-border bg-white px-3 py-2.5 text-[14px] text-ink outline-none transition-colors placeholder:text-text-secondary/70 focus:border-ink/40" />
+          </label>
+          <button className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">Update password</button>
+        </form>
+      </section>
 
       <div className="mt-6">
         <PhotoUploader

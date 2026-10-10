@@ -17,6 +17,8 @@ const RULES = {
   loginIp: { limit: 20, windowSecs: 900 },
   loginEmail: { limit: 8, windowSecs: 900 },
   signupIp: { limit: 5, windowSecs: 3600 },
+  resetIp: { limit: 10, windowSecs: 3600 },
+  resetEmail: { limit: 3, windowSecs: 3600 },
 } as const;
 
 async function clientIp(): Promise<string> {
@@ -56,4 +58,13 @@ export async function allowLogin(email: string): Promise<boolean> {
 /** Returns true when this sign-up attempt may proceed. */
 export async function allowSignup(): Promise<boolean> {
   return hit(`signup-ip:${await clientIp()}`, RULES.signupIp);
+}
+
+/** Returns true when this password-reset email may be sent. */
+export async function allowReset(email: string): Promise<boolean> {
+  const [ipOk, emailOk] = await Promise.all([
+    hit(`reset-ip:${await clientIp()}`, RULES.resetIp),
+    hit(`reset-email:${email.trim().toLowerCase()}`, RULES.resetEmail),
+  ]);
+  return ipOk && emailOk;
 }

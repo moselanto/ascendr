@@ -116,9 +116,16 @@ export default async function LoginPage(
                 </div>
 
                 <div>
-                  <label htmlFor="password" className="mb-1.5 block text-[13px] font-medium text-ink">
-                    Password
-                  </label>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <label htmlFor="password" className="block text-[13px] font-medium text-ink">
+                      Password
+                    </label>
+                    {isSignup ? null : (
+                      <Link href="/login/forgot" className="text-[12px] font-medium text-text-secondary underline-offset-4 hover:text-ink hover:underline">
+                        Forgot password?
+                      </Link>
+                    )}
+                  </div>
                   <PasswordField autoComplete={isSignup ? "new-password" : "current-password"} />
                 </div>
 
