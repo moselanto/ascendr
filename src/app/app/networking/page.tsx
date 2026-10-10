@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { sendConnectionRequest, respondToConnection } from "../net-actions";
-import DmThread from "./DmThread";
+import DmThread, { type DmMessage } from "./DmThread";
 
 export const dynamic = "force-dynamic";
 
@@ -101,7 +101,7 @@ export default async function NetworkingPage({
   // Active DM target (via ?dm=<profileId>), only if provided.
   const dmId = searchParams.dm || "";
   let dmPeer: Prof | null = null;
-  let dmMessages: { id: string; sender_id: string; body: string; created_at: string }[] = [];
+  let dmMessages: DmMessage[] = [];
   if (dmId) {
     const { data: peer } = await supabase
       .from("profiles")
@@ -112,13 +112,21 @@ export default async function NetworkingPage({
     if (dmPeer) {
       const { data: msgs } = await supabase
         .from("direct_messages")
-        .select("id, sender_id, body, created_at")
+        .select("*")
         .or(
           `and(sender_id.eq.${myId},recipient_id.eq.${dmId}),and(sender_id.eq.${dmId},recipient_id.eq.${myId})`
         )
         .order("created_at", { ascending: true })
         .limit(100);
-      dmMessages = msgs ?? [];
+      const base = (msgs ?? []) as DmMessage[];
+      const ids = base.map((m) => m.id);
+      const { data: rx } = ids.length
+        ? await supabase.from("dm_reactions").select("message_id, emoji, user_id").in("message_id", ids)
+        : { data: [] as { message_id: string; emoji: string; user_id: string }[] };
+      dmMessages = base.map((m) => ({
+        ...m,
+        reactions: (rx ?? []).filter((r) => r.message_id === m.id).map((r) => ({ emoji: r.emoji, user_id: r.user_id })),
+      }));
     }
   }
 

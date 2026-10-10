@@ -29,6 +29,7 @@ export type ChannelMessage = {
   channel_id: string;
   author_id: string;
   body: string | null;
+  attachments?: import("@/lib/chat").Attachment[] | null;
   created_at: string;
   profiles?: Pick<Profile, "full_name" | "handle" | "avatar_url"> | null;
 };

@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { awardXp } from "@/lib/xp";
+import { cleanAttachments, type Attachment } from "@/lib/chat";
 
 function slugify(name: string) {
   return (
@@ -226,6 +227,44 @@ export async function sendMessage(formData: FormData) {
 
   await awardXp(profile.id, "channel_message", 5, communityId);
   revalidatePath(`/app/communities/${slug}`);
+}
+
+/** Post a message with optional media from the chat composer. */
+export async function postChannelMessage(input: {
+  channelId: string;
+  communityId: string;
+  slug: string;
+  body: string;
+  attachments: Attachment[];
+}): Promise<{ ok: boolean }> {
+  const profile = await getCurrentProfile();
+  if (profile == null) return { ok: false };
+  const body = String(input.body ?? "").trim().slice(0, 4000);
+  const attachments = cleanAttachments(input.attachments, profile.auth_user_id);
+  if (body.length === 0 && attachments.length === 0) return { ok: false };
+
+  const supabase = createClient();
+  const { error } = await supabase.from("channel_messages").insert({
+    channel_id: input.channelId,
+    author_id: profile.id,
+    body: body.length ? body : null,
+    attachments,
+  });
+  if (error) return { ok: false };
+
+  const { data: community } = await supabase.from("communities").select("owner_id, name").eq("id", input.communityId).maybeSingle();
+  if (community && community.owner_id !== profile.id) {
+    await supabase.from("notifications").insert({
+      user_id: community.owner_id,
+      type: "message",
+      actor_id: profile.id,
+      entity_type: "community",
+      entity_id: input.communityId,
+      body: `${profile.full_name || "A member"} posted in ${community.name}`,
+    });
+  }
+  await awardXp(profile.id, "channel_message", 5, input.communityId);
+  return { ok: true };
 }
 
 /** Toggle a reaction emoji on a message (add if absent, remove if present). */

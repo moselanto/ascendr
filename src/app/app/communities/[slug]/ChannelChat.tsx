@@ -2,16 +2,34 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { sendMessage, toggleReaction, markChannelRead } from "../actions";
+import { postChannelMessage, toggleReaction, markChannelRead } from "../actions";
 import type { ChannelMessage } from "@/lib/types";
+import { toggleLocal, type Reaction } from "@/lib/chat";
+import { Avatar } from "@/components/ui/Avatar";
+import Composer from "@/components/chat/Composer";
+import MessageToolbar from "@/components/chat/MessageToolbar";
+import ReactionRow from "@/components/chat/ReactionRow";
+import { MessageAttachments, MessageText } from "@/components/chat/MessageBody";
 
-type MsgWithReactions = ChannelMessage & {
-  reactions?: { emoji: string; user_id: string }[];
-};
+type Msg = ChannelMessage & { reactions?: Reaction[] };
 
-// Quick reactions as plain unicode glyphs (stored as the reaction value).
-const EMOJIS = ["↑", "★", "✓", "♥"];
+const GROUP_WINDOW_MS = 5 * 60 * 1000;
 
+function timeLabel(iso: string) {
+  return new Date(iso).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function dayLabel(iso: string) {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return "Today";
+  if (d.toDateString() === yesterday.toDateString()) return "Yesterday";
+  return d.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
+}
+
+/** Real-time channel chat with Slack-style reactions, media and presence. */
 export default function ChannelChat({
   channelId,
   communityId,
@@ -27,24 +45,39 @@ export default function ChannelChat({
   channelName: string;
   meId: string;
   meName: string;
-  initialMessages: MsgWithReactions[];
+  initialMessages: Msg[];
 }) {
-  const [messages, setMessages] = useState<MsgWithReactions[]>(initialMessages);
+  const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [onlineCount, setOnlineCount] = useState(1);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesRef = useRef<Msg[]>(initialMessages);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
-  const supabase = createClient();
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   useEffect(() => {
     markChannelRead(channelId);
   }, [channelId, messages.length]);
 
   useEffect(() => {
-    const channel = supabase.channel(`room:${channelId}`, {
-      config: { presence: { key: meId } },
-    });
+    const supabase = createClient();
+    const channel = supabase.channel(`room:${channelId}`, { config: { presence: { key: meId } } });
     channelRef.current = channel;
+
+    async function refreshReactions() {
+      const ids = messagesRef.current.map((m) => m.id);
+      if (ids.length === 0) return;
+      const { data } = await supabase.from("message_reactions").select("message_id, emoji, user_id").in("message_id", ids);
+      setMessages((prev) =>
+        prev.map((m) => ({
+          ...m,
+          reactions: (data ?? []).filter((r) => r.message_id === m.id).map((r) => ({ emoji: r.emoji, user_id: r.user_id })),
+        }))
+      );
+    }
 
     channel
       .on(
@@ -52,83 +85,51 @@ export default function ChannelChat({
         { event: "INSERT", schema: "public", table: "channel_messages", filter: `channel_id=eq.${channelId}` },
         async (payload) => {
           const row = payload.new as ChannelMessage;
-          const { data: prof } = await supabase
-            .from("profiles")
-            .select("full_name, handle, avatar_url")
-            .eq("id", row.author_id)
-            .maybeSingle();
-          setMessages((prev) =>
-            prev.some((m) => m.id === row.id)
-              ? prev
-              : [...prev, { ...row, profiles: prof ?? null, reactions: [] }]
-          );
+          const { data: prof } = await supabase.from("profiles").select("full_name, handle, avatar_url").eq("id", row.author_id).maybeSingle();
+          setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, { ...row, profiles: prof ?? null, reactions: [] }]));
           setTypingUsers((prev) => prev.filter((n) => n !== (prof?.full_name || "")));
         }
       )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "message_reactions" },
-        () => refreshReactions()
-      )
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        setOnlineCount(Object.keys(state).length || 1);
-      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "message_reactions" }, () => refreshReactions())
+      .on("presence", { event: "sync" }, () => setOnlineCount(Object.keys(channel.presenceState()).length || 1))
       .on("broadcast", { event: "typing" }, ({ payload }) => {
         const name = payload?.name as string;
         const id = payload?.id as string;
-        if (!name || id === meId) return;
+        if (name == null || id === meId) return;
         setTypingUsers((prev) => (prev.includes(name) ? prev : [...prev, name]));
         setTimeout(() => setTypingUsers((prev) => prev.filter((n) => n !== name)), 3000);
       })
       .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({ id: meId, name: meName, at: Date.now() });
-        }
+        if (status === "SUBSCRIBED") await channel.track({ id: meId, name: meName, at: Date.now() });
       });
 
     return () => {
       supabase.removeChannel(channel);
       channelRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [channelId]);
-
-  async function refreshReactions() {
-    const ids = messages.map((m) => m.id);
-    if (!ids.length) return;
-    const { data } = await supabase
-      .from("message_reactions")
-      .select("message_id, emoji, user_id")
-      .in("message_id", ids);
-    setMessages((prev) =>
-      prev.map((m) => ({
-        ...m,
-        reactions: (data ?? [])
-          .filter((r) => r.message_id === m.id)
-          .map((r) => ({ emoji: r.emoji, user_id: r.user_id })),
-      }))
-    );
-  }
-
-  function handleTyping() {
-    channelRef.current?.send({
-      type: "broadcast",
-      event: "typing",
-      payload: { id: meId, name: meName },
-    });
-  }
+  }, [channelId, meId, meName]);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [messages.length]);
 
+  function react(messageId: string, emoji: string) {
+    setMessages((prev) => prev.map((m) => (m.id === messageId ? { ...m, reactions: toggleLocal(m.reactions ?? [], emoji, meId) } : m)));
+    toggleReaction(messageId, emoji, communityId, slug);
+  }
+
+  function sendTyping() {
+    channelRef.current?.send({ type: "broadcast", event: "typing", payload: { id: meId, name: meName } });
+  }
+
+  async function send(body: string, attachments: Parameters<typeof postChannelMessage>[0]["attachments"]) {
+    const res = await postChannelMessage({ channelId, communityId, slug, body, attachments });
+    return res.ok;
+  }
+
   const typingLabel =
-    typingUsers.length === 1
-      ? `${typingUsers[0]} is typing…`
-      : typingUsers.length > 1
-      ? `${typingUsers.length} people are typing…`
-      : "";
+    typingUsers.length === 1 ? `${typingUsers[0]} is typing…` : typingUsers.length > 1 ? `${typingUsers.length} people are typing…` : "";
 
   return (
     <>
@@ -137,83 +138,58 @@ export default function ChannelChat({
         {onlineCount} online in #{channelName}
       </div>
 
-      <div className="flex max-h-[480px] flex-col gap-5 overflow-auto px-5 py-5">
+      <div ref={scrollRef} className="flex max-h-[560px] min-h-[320px] flex-col overflow-y-auto py-3">
         {messages.length ? (
-          messages.map((m) => {
-            const counts = (m.reactions ?? []).reduce<Record<string, number>>((acc, r) => {
-              acc[r.emoji] = (acc[r.emoji] ?? 0) + 1;
-              return acc;
-            }, {});
-            const mine = new Set((m.reactions ?? []).filter((r) => r.user_id === meId).map((r) => r.emoji));
+          messages.map((m, i) => {
+            const prev = messages[i - 1];
+            const newDay = prev == null || new Date(prev.created_at).toDateString() !== new Date(m.created_at).toDateString();
+            const grouped =
+              newDay === false &&
+              prev.author_id === m.author_id &&
+              new Date(m.created_at).getTime() - new Date(prev.created_at).getTime() < GROUP_WINDOW_MS;
             return (
-              <div key={m.id} className="group flex gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
-                  {(m.profiles?.full_name || "M").slice(0, 1).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-[14px]">
-                    <span className="font-semibold text-ink">{m.profiles?.full_name || "Member"}</span>
-                    <span className="text-[12px] text-text-secondary"> · {new Date(m.created_at).toLocaleString()}</span>
+              <div key={m.id}>
+                {newDay && (
+                  <div className="my-3 flex items-center gap-3 px-5">
+                    <span className="h-px flex-1 bg-border" />
+                    <span className="rounded-full border border-border bg-white px-3 py-0.5 text-[11px] font-medium text-text-secondary">{dayLabel(m.created_at)}</span>
+                    <span className="h-px flex-1 bg-border" />
                   </div>
-                  <p className="mt-0.5 whitespace-pre-wrap break-words text-[14px] text-ink">{m.body}</p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    {Object.entries(counts).map(([emoji, n]) => (
-                      <button
-                        key={emoji}
-                        onClick={() => toggleReaction(m.id, emoji, communityId, slug)}
-                        className={`rounded-full border px-2 py-0.5 text-[12px] ${
-                          mine.has(emoji)
-                            ? "border-brand-600 bg-brand-50 text-brand-700"
-                            : "border-border text-text-secondary hover:border-ink/40"
-                        }`}
-                      >
-                        {emoji} {n}
-                      </button>
-                    ))}
-                    <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
-                      {EMOJIS.filter((e) => !(e in counts)).map((e) => (
-                        <button
-                          key={e}
-                          onClick={() => toggleReaction(m.id, e, communityId, slug)}
-                          className="rounded-full border border-transparent px-2 py-0.5 text-[12px] text-text-secondary hover:border-border hover:bg-surface"
-                          aria-label={`React ${e}`}
-                        >
-                          {e}
-                        </button>
-                      ))}
-                    </div>
+                )}
+                <div className={`group relative flex gap-3 px-5 hover:bg-surface/70 ${grouped ? "py-0.5" : "pt-2.5 pb-0.5"}`}>
+                  <MessageToolbar onReact={(e) => react(m.id, e)} />
+                  <div className="w-9 shrink-0">
+                    {grouped ? (
+                      <span className="block pt-1 text-right text-[10px] text-text-secondary opacity-0 group-hover:opacity-100">{timeLabel(m.created_at)}</span>
+                    ) : (
+                      <Avatar name={m.profiles?.full_name} url={m.profiles?.avatar_url} size={36} shape="rounded-lg" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    {grouped === false && (
+                      <p className="text-[14px] leading-tight">
+                        <span className="font-semibold text-ink">{m.profiles?.full_name || "Member"}</span>
+                        <span className="ml-2 text-[11px] text-text-secondary">{timeLabel(m.created_at)}</span>
+                      </p>
+                    )}
+                    <MessageText body={m.body} />
+                    <MessageAttachments items={m.attachments} />
+                    <ReactionRow reactions={m.reactions ?? []} meId={meId} onToggle={(e) => react(m.id, e)} />
                   </div>
                 </div>
               </div>
             );
           })
         ) : (
-          <div className="py-8 text-center">
-            <div className="text-[15px] font-semibold text-ink">No messages yet</div>
-            <p className="mt-1 text-[14px] text-text-secondary">Start the conversation in #{channelName}.</p>
+          <div className="m-auto max-w-sm px-5 py-10 text-center">
+            <p className="text-[15px] font-semibold text-ink">This is the start of #{channelName}</p>
+            <p className="mt-1 text-[14px] text-text-secondary">Say hello, share a photo or a video, or react to get the conversation going.</p>
           </div>
         )}
-        <div ref={bottomRef} />
       </div>
 
       <div className="h-5 px-5 text-[12px] italic text-text-secondary">{typingLabel}</div>
-
-      <form action={sendMessage} className="flex gap-2 border-t border-border p-4">
-        <input type="hidden" name="channel_id" value={channelId} />
-        <input type="hidden" name="community_id" value={communityId} />
-        <input type="hidden" name="slug" value={slug} />
-        <input
-          name="body"
-          required
-          autoComplete="off"
-          onChange={handleTyping}
-          placeholder={`Message #${channelName}…`}
-          className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink"
-        />
-        <button className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">
-          Send
-        </button>
-      </form>
+      <Composer placeholder={`Message #${channelName}`} onSend={send} onTyping={sendTyping} />
     </>
   );
 }

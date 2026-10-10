@@ -27,6 +27,10 @@ const csp = [
   // Fonts are self-hosted by next/font, so no third-party font origin.
   "font-src 'self' data:",
   "img-src 'self' data: blob: https:",
+  // Chat videos are served from Supabase Storage; previews use blob: URLs.
+  "media-src 'self' blob: https://*.supabase.co",
+  // YouTube links in chat render as privacy-enhanced embeds.
+  "frame-src https://www.youtube-nocookie.com",
   `connect-src 'self' ${SUPABASE}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",

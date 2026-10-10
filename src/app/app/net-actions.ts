@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { backWithToast } from "@/lib/toast";
+import { cleanAttachments } from "@/lib/chat";
 
 /** Send a connection request to another profile. */
 export async function sendConnectionRequest(formData: FormData) {
@@ -89,18 +90,22 @@ export async function respondToConnection(formData: FormData) {
 export async function sendDirectMessage(formData: FormData) {
   const recipientId = String(formData.get("recipient_id") || "");
   const body = String(formData.get("body") || "").trim();
-  if (!recipientId || !body) return;
+  if (recipientId.length === 0) return { ok: false as const, error: "No recipient" };
 
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
-  if (recipientId === profile.id) return;
+  if (recipientId === profile.id) return { ok: false as const, error: "Cannot message yourself" };
 
   const supabase = createClient();
-  const { error } = await supabase.from("direct_messages").insert({
+  const attachments = cleanAttachments(formData.get("attachments"), profile.auth_user_id);
+  if (body.length === 0 && attachments.length === 0) return { ok: false as const, error: "Empty message" };
+  const row: Record<string, unknown> = {
     sender_id: profile.id,
     recipient_id: recipientId,
-    body: body.slice(0, 4000),
-  });
+    body: body.length ? body.slice(0, 4000) : null,
+  };
+  if (attachments.length) row.attachments = attachments;
+  const { error } = await supabase.from("direct_messages").insert(row);
   if (error) return { ok: false as const, error: error.message };
 
   // Notify the recipient, once per unread conversation (no spam per message).
@@ -146,4 +151,23 @@ export async function markDmRead(senderId: string) {
     .eq("actor_id", senderId)
     .is("read_at", null);
   revalidatePath("/app", "layout");
+}
+
+/** Toggle my emoji reaction on a direct message. */
+export async function toggleDmReaction(messageId: string, emoji: string) {
+  const profile = await getCurrentProfile();
+  if (profile == null || emoji.length === 0 || emoji.length > 16) return;
+  const supabase = createClient();
+  const { data: existing } = await supabase
+    .from("dm_reactions")
+    .select("emoji")
+    .eq("message_id", messageId)
+    .eq("user_id", profile.id)
+    .eq("emoji", emoji)
+    .maybeSingle();
+  if (existing) {
+    await supabase.from("dm_reactions").delete().eq("message_id", messageId).eq("user_id", profile.id).eq("emoji", emoji);
+  } else {
+    await supabase.from("dm_reactions").insert({ message_id: messageId, user_id: profile.id, emoji });
+  }
 }
