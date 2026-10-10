@@ -120,11 +120,15 @@ Universities and professional associations that want to develop whole cohorts to
 
 | Homepage | Member dashboard |
 |---|---|
-| \![ASCENDR homepage](docs/screenshots/homepage.jpg) | \![Member dashboard with the Start here guide](docs/screenshots/dashboard.jpg) |
+| ![ASCENDR homepage](docs/screenshots/homepage.jpg) | ![Member dashboard with the Start here guide](docs/screenshots/dashboard.jpg) |
+
+| Career plan: skills gap and 90-day roadmap | Network readiness map |
+|---|---|
+| ![Career plan with skills gap and roadmap](docs/screenshots/career-plan.jpg) | ![Network readiness map by role](docs/screenshots/readiness-map.jpg) |
 
 | Learning paths | Plans and pricing |
 |---|---|
-| \![Learning paths by role](docs/screenshots/learning-paths.jpg) | \![Plans and pricing in KES](docs/screenshots/plans.jpg) |
+| ![Learning paths by role](docs/screenshots/learning-paths.jpg) | ![Plans and pricing in KES](docs/screenshots/plans.jpg) |
 
 ## The network pilot workflow
 
