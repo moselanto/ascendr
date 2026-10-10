@@ -328,8 +328,8 @@ src/
 Every request → middleware.ts → updateSession() → refresh cookie
 ```
 
-`middleware.ts` matches everything except static assets, images, and
-`/prototype`.
+`middleware.ts` matches everything except static assets, images, and the
+Sentry tunnel (`/monitoring`).
 
 ### 7.2 Read path
 

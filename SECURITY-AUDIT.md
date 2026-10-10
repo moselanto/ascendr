@@ -285,6 +285,8 @@ Supabase defaults only. For a product intended to hold career history and
 professional network data, MFA should be on the roadmap.
 
 ### L-5 — Public prototype directory
+
+**Status:** Resolved. `public/prototype/` was removed and dropped from the middleware exclusions; the design files remain in git history.
 `public/prototype/` (68 KB of HTML) is excluded from middleware and served
 publicly. It is presumably intentional, but it is unversioned design material
 on the production domain and should be confirmed or removed.
