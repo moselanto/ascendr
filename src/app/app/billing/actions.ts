@@ -13,17 +13,17 @@ export async function startCheckout(formData: FormData) {
   const plan = String(formData.get("plan") ?? "");
   if (isPaidPlan(plan) === false) return;
   const profile = await getCurrentProfile();
-  if (profile == null) redirect("/login?next=/app/pro");
+  if (profile == null) redirect("/login?next=/app/plans");
 
   if (billingConfigured() === false) {
     await track("pro_interest", { userId: profile.id, props: { plan } });
-    backWithToast("Payments open soon. You're on the early-access list", "/app/pro");
+    backWithToast("Payments open soon. You're on the early-access list", "/app/plans");
   }
 
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const email = user?.email;
-  if (email == null) backWithToast("Your account has no email address for billing", "/app/pro");
+  if (email == null) backWithToast("Your account has no email address for billing", "/app/plans");
 
   const origin = headers().get("origin") ?? undefined;
   const res = await paystack<{ authorization_url: string; reference: string }>("/transaction/initialize", {
@@ -38,7 +38,7 @@ export async function startCheckout(formData: FormData) {
     },
   });
   if (res.status === false || res.data == null) {
-    backWithToast(`Checkout could not start: ${res.message}`, "/app/pro");
+    backWithToast(`Checkout could not start: ${res.message}`, "/app/plans");
   }
 
   await upsertSubscription({ user_id: profile.id, plan, status: "pending", email: email?.toLowerCase(), last_reference: res.data.reference });

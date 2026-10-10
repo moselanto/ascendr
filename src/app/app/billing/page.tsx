@@ -66,7 +66,7 @@ export default async function BillingPage() {
               </p>
             )}
           </div>
-          <Link href="/app/pro" className="w-fit rounded-full bg-white px-5 py-2.5 text-[14px] font-semibold text-ink hover:bg-brand-50">
+          <Link href="/app/plans" className="w-fit rounded-full bg-white px-5 py-2.5 text-[14px] font-semibold text-ink hover:bg-brand-50">
             {paid ? "Change plan" : "Upgrade"}
           </Link>
         </div>

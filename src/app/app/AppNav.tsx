@@ -145,7 +145,7 @@ export function AppSidebar({
               From <span className="font-semibold text-white">KES 13,000</span>/month
             </p>
             <Link
-              href="/app/pro"
+              href="/app/plans"
               className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-ink transition-colors hover:bg-brand-50"
             >
               See plans <span aria-hidden>{"\u2192"}</span>

@@ -15,5 +15,5 @@ export async function joinProEarlyAccess(formData: FormData) {
       : plan === "starter"
         ? "You're on the Starter early-access list"
         : "You're on the Pro early-access list";
-  backWithToast(msg, "/app/pro");
+  backWithToast(msg, "/app/plans");
 }
