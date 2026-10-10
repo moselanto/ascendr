@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { backWithToast } from "@/lib/toast";
+import { limitMessage } from "@/lib/network-limits";
 
 /**
  * ASCENDR Networks server actions. Writes that need elevated rights
@@ -56,6 +57,7 @@ export async function acceptInvite(formData: FormData) {
   if (profile == null) redirect("/login");
   const supabase = createClient();
   const { data, error } = await supabase.rpc("accept_org_invite", { p_code: code });
+  if (error && limitMessage(error.message)) redirect(`/app/network/join?code=${encodeURIComponent(code)}&error=full`);
   if (error || data == null) redirect(`/app/network/join?code=${encodeURIComponent(code)}&error=1`);
   revalidatePath("/app/network");
   redirect(`/app/network?org=${data}&toast=${encodeURIComponent("Welcome to the network")}`);
@@ -68,8 +70,12 @@ export async function addOrgRole(formData: FormData) {
   const openings = Math.max(1, Math.min(500, Number(formData.get("openings") ?? 1) || 1));
   if (org.length === 0 || roleId.length === 0 || company.length === 0) return;
   const supabase = createClient();
-  await supabase.from("organization_roles").insert({ organization_id: org, role_profile_id: roleId, company, openings });
+  const { error } = await supabase.from("organization_roles").insert({ organization_id: org, role_profile_id: roleId, company, openings });
   revalidatePath("/app/network");
+  const limit = limitMessage(error?.message);
+  if (limit) backWithToast(limit, `/app/network?org=${org}`);
+  if (error) backWithToast(`Could not add the role: ${error.message}`, `/app/network?org=${org}`);
+  backWithToast("Role added", `/app/network?org=${org}`);
 }
 
 export async function removeOrgRole(formData: FormData) {

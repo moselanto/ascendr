@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { initials } from "@/lib/people";
+import { getNetworkUsage, NETWORK_PLAN_LABEL } from "@/lib/network-limits";
 import {
   createOrganization,
   createInvite,
@@ -351,12 +352,36 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
   });
   const maxSupply = Math.max(1, ...supply.map((s) => Math.max(s.demand, s.have + s.learning)));
 
+  const usage = await getNetworkUsage(current.id);
+  const fmtCap = (n: number, max: number | null) => (max == null ? `${n}` : `${n} of ${max}`);
+
   return (
     <div className="space-y-8 pb-16">
       <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         {head}
         {switcher}
       </div>
+
+      {usage ? (
+        <div className={`flex flex-wrap items-center gap-x-5 gap-y-2 rounded-2xl border px-5 py-3 text-[13px] ${usage.membersFull || usage.rolesFull ? "border-amber-200 bg-amber-50 text-amber-900" : "border-border bg-white text-text-secondary"}`}>
+          <span className="font-semibold text-ink">{NETWORK_PLAN_LABEL[usage.plan]} plan</span>
+          <span>
+            Members: <span className="font-medium text-ink">{fmtCap(usage.members, usage.maxMembers)}</span>
+          </span>
+          <span>
+            Open roles: <span className="font-medium text-ink">{fmtCap(usage.roles, usage.maxRoles)}</span>
+            {usage.maxRoles == null ? " (unlimited)" : ""}
+          </span>
+          {usage.membersFull || usage.rolesFull ? (
+            <span>{usage.membersFull ? "New members can't join until you upgrade." : "Remove a role or upgrade to add another."}</span>
+          ) : null}
+          {usage.plan === "free" || usage.plan === "starter" ? (
+            <Link href="/app/plans" className="ml-auto rounded-full bg-ink px-3.5 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700">
+              Upgrade
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-center gap-3">
         <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-ink text-[13px] font-semibold text-white">{initials(current.name)}</span>
@@ -689,7 +714,13 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
               Openings
               <input name="openings" type="number" min={1} max={500} defaultValue={1} className="mt-1 block w-full rounded-lg border border-border px-2.5 py-2 text-[13px] text-ink" />
             </label>
-            <button className="rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-white hover:bg-ink-700">Add role</button>
+            <button
+              disabled={usage?.rolesFull ?? false}
+              title={usage?.rolesFull ? "Your plan's role limit is reached" : undefined}
+              className="rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-white hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Add role
+            </button>
           </form>
         </section>
 

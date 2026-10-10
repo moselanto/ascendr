@@ -30,7 +30,11 @@ export default async function JoinNetworkPage({ searchParams }: { searchParams: 
               Its admins will see your goal, your readiness for the roles they hire for, and the outcomes you log. You can switch sharing off
               or leave at any time.
             </p>
-            {searchParams.error ? <p className="mt-3 text-[13px] text-danger">That invite could not be used. Ask for a new link.</p> : null}
+            {searchParams.error === "full" ? (
+              <p className="mt-3 text-[13px] text-danger">This network is full on its current plan. Ask its admin to upgrade, then try the link again.</p>
+            ) : searchParams.error ? (
+              <p className="mt-3 text-[13px] text-danger">That invite could not be used. Ask for a new link.</p>
+            ) : null}
             <form action={acceptInvite} className="mt-6">
               <input type="hidden" name="code" value={code} />
               <button className="w-full rounded-full bg-ink px-5 py-3 text-[14px] font-medium text-white hover:bg-ink-700">Join {inv.organization_name}</button>

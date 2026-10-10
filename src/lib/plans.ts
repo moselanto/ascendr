@@ -24,6 +24,7 @@ export const PLANS: Plan[] = [
       "90-day roadmap and learning paths",
       `${LIMITS["ai:coach"].free} AI coach messages a day`,
       "Communities, mentors and messaging",
+      "Try a network: 10 members, 1 role",
     ],
   },
   {
@@ -36,7 +37,7 @@ export const PLANS: Plan[] = [
       `${LIMITS["ai:coach"].starter} AI coach messages a day`,
       `${LIMITS["ai:interview"].starter} mock interviews a day`,
       "Network of up to 50 members",
-      "3 open roles with a readiness map",
+      "Up to 3 open roles with a readiness map",
     ],
   },
   {
