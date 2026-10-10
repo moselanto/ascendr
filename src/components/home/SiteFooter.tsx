@@ -57,7 +57,18 @@ export function SiteFooter() {
       </div>
       <div className="border-t border-ink/[0.06]">
         <div className="mx-auto flex max-w-6xl flex-col justify-between gap-2 px-6 py-6 text-[13px] text-text-secondary sm:flex-row">
-          <span>© {new Date().getFullYear()} ASCENDR. All rights reserved.</span>
+          <span>
+            © {new Date().getFullYear()} ASCENDR. All rights reserved. A product of{" "}
+            <a
+              href="https://pimofydigital.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-ink underline-offset-4 hover:text-brand-600 hover:underline"
+            >
+              Pimofy Digital LLP
+            </a>
+            .
+          </span>
           <span>Rise. Learn. Connect. Lead.</span>
         </div>
       </div>
