@@ -11,6 +11,11 @@ import {
   removeOrgMember,
   setSharing,
   leaveOrganization,
+  inviteToPathway,
+  proposeIntro,
+  advanceIntro,
+  respondToPathway,
+  respondToIntro,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -33,6 +38,42 @@ type Overview = { members: number; sharing: number; activated: number; acted_7d:
 type Readiness = { org_role_id: string; role_title: string; company: string; openings: number; member_id: string; member_name: string | null; band: string; matched: number; essential: number; missing: string[] | null; goal_match: boolean };
 type Supply = { skill_id: string; skill: string; demand: number; have: number; learning: number };
 type MemberRow = { user_id: string; full_name: string | null; role: string; share_career_data: boolean; joined_at: string; goal_title: string | null };
+
+type Trend = { captured_on: string; strong: number; partial: number; stretch: number };
+type Mover = { member_id: string; member_name: string | null; role_title: string; company: string; from_band: string; to_band: string };
+type Pipe = { kind: "pathway" | "intro"; id: string; org_role_id: string; member_id: string; member_name: string | null; role_title: string; company: string; status: string; updated_at: string };
+type MyReq = { kind: "pathway" | "intro"; id: string; org_name: string; role_title: string; company: string; status: string; note: string | null; created_at: string };
+
+const BAND_NAME: Record<string, string> = { strong: "Ready now", partial: "Within 90 days", stretch: "Developing" };
+const STATUS_LABEL: Record<string, string> = {
+  invited: "Invited",
+  accepted: "Working toward it",
+  declined: "Declined",
+  proposed: "Awaiting consent",
+  consented: "Consented",
+  introduced: "Introduced",
+  interviewing: "Interviewing",
+  hired: "Hired",
+  closed: "Closed",
+};
+const STATUS_TONE: Record<string, string> = {
+  invited: "bg-surface text-text-secondary",
+  proposed: "bg-surface text-text-secondary",
+  accepted: "bg-brand-50 text-brand-700",
+  consented: "bg-amber-50 text-amber-800",
+  introduced: "bg-amber-50 text-amber-800",
+  interviewing: "bg-amber-50 text-amber-800",
+  hired: "bg-emerald-50 text-emerald-800",
+  declined: "bg-surface text-text-secondary",
+  closed: "bg-surface text-text-secondary",
+};
+const NEXT_STEP: Record<string, { status: string; label: string }> = {
+  consented: { status: "introduced", label: "Mark introduced" },
+  introduced: { status: "interviewing", label: "Mark interviewing" },
+  interviewing: { status: "hired", label: "Mark hired" },
+};
+const smallPrimary = "rounded-full bg-ink px-2.5 py-1 text-[11px] font-medium text-white hover:bg-ink-700";
+const smallSecondary = "rounded-full border border-ink/15 bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:border-ink/40";
 
 const KIND_LABEL: Record<string, string> = {
   vc_fund: "VC fund",
@@ -169,6 +210,9 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
     ) : null;
 
   /* ------------------------------------------------ member view */
+  const myReqRes = await supabase.rpc("my_network_requests");
+  const myRequests = ((myReqRes.data ?? []) as MyReq[]).filter((q) => q.status !== "closed");
+  /* ------------------------------------------------ member view */
   if (current.role !== "admin") {
     return (
       <div className="space-y-6">
@@ -198,11 +242,84 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
             </form>
           </div>
         </section>
+        {myRequests.length > 0 && (
+          <section className="rounded-2xl border border-border bg-white shadow-card">
+            <div className="border-b border-border px-5 py-4">
+              <h2 className="text-[16px] font-semibold text-ink">Requests from your networks</h2>
+              <p className="text-[12px] text-text-secondary">Nothing is shared with a company until you say yes.</p>
+            </div>
+            <ul className="divide-y divide-border">
+              {myRequests.map((q) => {
+                const pending = q.status === "invited" || q.status === "proposed";
+                return (
+                  <li key={`${q.kind}-${q.id}`} className="flex flex-col gap-3 px-5 py-4 md:flex-row md:items-center">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[14px] font-medium text-ink">
+                        {q.kind === "pathway"
+                          ? `${q.org_name} invited you to work toward ${q.role_title} at ${q.company}`
+                          : `${q.org_name} would like to introduce you to ${q.company} for ${q.role_title}`}
+                      </p>
+                      {q.note && <p className="mt-0.5 text-[13px] text-text-secondary">{"\u201C"}{q.note}{"\u201D"}</p>}
+                      {q.kind === "pathway" && pending && (
+                        <p className="mt-0.5 text-[12px] text-text-secondary">Accepting makes this role your career goal and builds your roadmap.</p>
+                      )}
+                    </div>
+                    {pending ? (
+                      <div className="flex gap-2">
+                        <form action={q.kind === "pathway" ? respondToPathway : respondToIntro}>
+                          <input type="hidden" name="id" value={q.id} />
+                          <input type="hidden" name={q.kind === "pathway" ? "accept" : "consent"} value="1" />
+                          <button className="rounded-full bg-ink px-3 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700">
+                            {q.kind === "pathway" ? "Accept pathway" : "Yes, introduce me"}
+                          </button>
+                        </form>
+                        <form action={q.kind === "pathway" ? respondToPathway : respondToIntro}>
+                          <input type="hidden" name="id" value={q.id} />
+                          <input type="hidden" name={q.kind === "pathway" ? "accept" : "consent"} value="0" />
+                          <button className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40">Decline</button>
+                        </form>
+                      </div>
+                    ) : (
+                      <span className={`w-fit rounded-full px-2.5 py-1 text-[12px] font-medium ${STATUS_TONE[q.status] ?? "bg-surface text-text-secondary"}`}>
+                        {STATUS_LABEL[q.status] ?? q.status}
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+        )}
       </div>
     );
   }
 
   /* ------------------------------------------------ admin view */
+  // One readiness snapshot per role/member per day powers the trend below.
+  await supabase.rpc("capture_org_readiness", { p_org: current.id });
+  const [trendRes, moversRes, pipeRes] = await Promise.all([
+    supabase.rpc("org_readiness_trend", { p_org: current.id }),
+    supabase.rpc("org_readiness_movers", { p_org: current.id }),
+    supabase.rpc("org_pipeline", { p_org: current.id }),
+  ]);
+  const pilotReady = trendRes.error == null;
+  const trend = (trendRes.data ?? []) as Trend[];
+  const movers = (moversRes.data ?? []) as Mover[];
+  const pipeline = (pipeRes.data ?? []) as Pipe[];
+  const pipeKey = new Map<string, { pathway?: string; intro?: string }>();
+  pipeline.forEach((p) => {
+    const k = `${p.org_role_id}:${p.member_id}`;
+    const cur = pipeKey.get(k) ?? {};
+    if (p.kind === "pathway" && cur.pathway == null) cur.pathway = p.status;
+    if (p.kind === "intro" && cur.intro == null && p.status !== "declined" && p.status !== "closed") cur.intro = p.status;
+    pipeKey.set(k, cur);
+  });
+  const firstT = trend[0];
+  const lastT = trend[trend.length - 1];
+  const maxT = Math.max(1, ...trend.map((t) => t.strong + t.partial + t.stretch));
+  const intros = pipeline.filter((p) => p.kind === "intro");
+  const pathways = pipeline.filter((p) => p.kind === "pathway");
+
   const [ovRes, memRes, readyRes, supplyRes, invRes, rolesRes, catalogRes] = await Promise.all([
     supabase.rpc("org_overview", { p_org: current.id }),
     supabase.rpc("org_members_list", { p_org: current.id }),
@@ -266,6 +383,130 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
         ))}
       </div>
 
+      {/* Readiness over time + pipeline */}
+      {pilotReady ? (
+        <div className="grid gap-4 lg:grid-cols-[1.2fr_1fr]">
+          <section className="rounded-2xl border border-border bg-white p-6 shadow-card">
+            <div className="flex flex-wrap items-end justify-between gap-2">
+              <div>
+                <h2 className="text-[17px] font-semibold tracking-tight text-ink">Readiness over time</h2>
+                <p className="text-[12px] text-text-secondary">Member-role matches by band, from a daily snapshot. Last 120 days.</p>
+              </div>
+              {lastT && (
+                <div className="flex gap-4 text-[12px]">
+                  {BANDS.map((b) => {
+                    const now = lastT[b.key as "strong" | "partial" | "stretch"];
+                    const was = firstT ? firstT[b.key as "strong" | "partial" | "stretch"] : now;
+                    const d = now - was;
+                    return (
+                      <span key={b.key} className="flex items-center gap-1.5">
+                        <span className={`h-2 w-2 rounded-full ${b.dot}`} />
+                        <span className="nums font-semibold text-ink">{now}</span>
+                        {trend.length > 1 && d !== 0 && <span className={d > 0 ? "text-emerald-700" : "text-text-secondary"}>{d > 0 ? `+${d}` : d}</span>}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            {trend.length < 2 ? (
+              <p className="mt-5 rounded-xl bg-surface p-4 text-[13px] text-text-secondary">
+                {trend.length === 0
+                  ? "Add roles and invite members to start tracking readiness."
+                  : "First snapshot taken today. The trend appears as members add skills and complete roadmap steps."}
+              </p>
+            ) : (
+              <div className="mt-5 flex h-36 items-end gap-1">
+                {trend.slice(-30).map((t) => {
+                  const total = t.strong + t.partial + t.stretch;
+                  return (
+                    <div key={t.captured_on} className="flex flex-1 flex-col justify-end" title={`${t.captured_on}: ${t.strong} ready, ${t.partial} within 90 days, ${t.stretch} developing`}>
+                      <div className="flex flex-col overflow-hidden rounded-md" style={{ height: `${(total / maxT) * 100}%` }}>
+                        <div className="bg-emerald-500" style={{ flex: t.strong }} />
+                        <div className="bg-amber-500" style={{ flex: t.partial }} />
+                        <div className="bg-brand-400" style={{ flex: t.stretch }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            {movers.length > 0 && (
+              <div className="mt-5 border-t border-border pt-4">
+                <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-secondary">Moved up, last 90 days</p>
+                <ul className="mt-2 space-y-1.5">
+                  {movers.slice(0, 6).map((m) => (
+                    <li key={`${m.member_id}-${m.role_title}-${m.company}`} className="text-[13px] text-ink">
+                      <span className="font-medium">{m.member_name ?? "Member"}</span>{" "}
+                      <span className="text-text-secondary">
+                        {BAND_NAME[m.from_band] ?? m.from_band} {"\u2192"} {BAND_NAME[m.to_band] ?? m.to_band} for {m.role_title} at {m.company}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </section>
+
+          <section className="rounded-2xl border border-border bg-white shadow-card">
+            <div className="border-b border-border px-5 py-4">
+              <h2 className="text-[17px] font-semibold tracking-tight text-ink">Talent pipeline</h2>
+              <p className="text-[12px] text-text-secondary">
+                {pathways.filter((p) => p.status === "accepted").length} on pathways {"\u00b7"} {intros.filter((p) => p.status === "consented").length} ready to introduce {"\u00b7"} {intros.filter((p) => p.status === "hired").length} hired
+              </p>
+            </div>
+            {pipeline.length === 0 ? (
+              <p className="px-5 py-6 text-[13px] text-text-secondary">
+                Use <span className="font-medium text-ink">Invite to pathway</span> or <span className="font-medium text-ink">Propose intro</span> on a member in the readiness map. Members must consent before anything is shared.
+              </p>
+            ) : (
+              <ul className="max-h-[420px] divide-y divide-border overflow-auto">
+                {pipeline.slice(0, 40).map((p) => {
+                  const next = p.kind === "intro" ? NEXT_STEP[p.status] : undefined;
+                  const open = p.kind === "intro" && ["proposed", "consented", "introduced", "interviewing"].includes(p.status);
+                  return (
+                    <li key={`${p.kind}-${p.id}`} className="px-5 py-3">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-[13px] font-medium text-ink">{p.member_name ?? "Member"}</p>
+                          <p className="truncate text-[12px] text-text-secondary">
+                            {p.kind === "pathway" ? "Pathway" : "Intro"} {"\u00b7"} {p.role_title} at {p.company}
+                          </p>
+                        </div>
+                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_TONE[p.status] ?? ""}`}>{STATUS_LABEL[p.status] ?? p.status}</span>
+                      </div>
+                      {(next || open) && (
+                        <div className="mt-2 flex gap-1.5">
+                          {next && (
+                            <form action={advanceIntro}>
+                              <input type="hidden" name="id" value={p.id} />
+                              <input type="hidden" name="status" value={next.status} />
+                              <button className={smallPrimary}>{next.label}</button>
+                            </form>
+                          )}
+                          {open && (
+                            <form action={advanceIntro}>
+                              <input type="hidden" name="id" value={p.id} />
+                              <input type="hidden" name="status" value="closed" />
+                              <button className={smallSecondary}>Close</button>
+                            </form>
+                          )}
+                        </div>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </section>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-[13px] leading-relaxed text-amber-900">
+          <span className="font-semibold">Readiness trend, pathways and introductions need one database update.</span> Run{" "}
+          <code className="rounded bg-white/70 px-1.5 py-0.5">supabase/migrations/0016_network_pilot.sql</code> in the Supabase SQL editor.
+        </div>
+      )}
+
       {/* Readiness map */}
       <section>
         <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-ink">Readiness map</h2>
@@ -317,6 +558,35 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                                 {(r.missing ?? []).length > 0 && (
                                   <p className="mt-1 text-[12px] text-ink/70">Missing: {(r.missing ?? []).slice(0, 3).join(", ")}</p>
                                 )}
+                                {pilotReady && (() => {
+                                  const st = pipeKey.get(`${id}:${r.member_id}`) ?? {};
+                                  return (
+                                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                                      {st.pathway ? (
+                                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_TONE[st.pathway] ?? ""}`}>
+                                          Pathway: {STATUS_LABEL[st.pathway] ?? st.pathway}
+                                        </span>
+                                      ) : b.key !== "strong" ? (
+                                        <form action={inviteToPathway}>
+                                          <input type="hidden" name="org_role_id" value={id} />
+                                          <input type="hidden" name="member_id" value={r.member_id} />
+                                          <button className={smallSecondary}>Invite to pathway</button>
+                                        </form>
+                                      ) : null}
+                                      {st.intro ? (
+                                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_TONE[st.intro] ?? ""}`}>
+                                          Intro: {STATUS_LABEL[st.intro] ?? st.intro}
+                                        </span>
+                                      ) : b.key !== "stretch" ? (
+                                        <form action={proposeIntro}>
+                                          <input type="hidden" name="org_role_id" value={id} />
+                                          <input type="hidden" name="member_id" value={r.member_id} />
+                                          <button className={smallPrimary}>Propose intro</button>
+                                        </form>
+                                      ) : null}
+                                    </div>
+                                  );
+                                })()}
                               </li>
                             ))}
                           </ul>

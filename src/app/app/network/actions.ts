@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
+import { backWithToast } from "@/lib/toast";
 
 /**
  * ASCENDR Networks server actions. Writes that need elevated rights
@@ -105,4 +106,73 @@ export async function leaveOrganization(formData: FormData) {
   await supabase.from("organization_members").delete().eq("organization_id", org).eq("user_id", profile.id);
   revalidatePath("/app/network");
   redirect("/app/network");
+}
+
+/* ---------------------------------------------------------------- pilot workflow (migration 0016) */
+
+function explain(res: { data: unknown; error: { message: string } | null }, ok: string): string {
+  if (res.error) {
+    return /function|relation|does not exist/i.test(res.error.message)
+      ? "Run migration 0016 in Supabase to enable this"
+      : `Could not save: ${res.error.message}`;
+  }
+  const code = String(res.data ?? "");
+  if (code === "ok") return ok;
+  if (code === "not_sharing") return "This member isn't sharing career data with the network";
+  if (code === "exists") return "An introduction for this role is already in progress";
+  if (code === "invalid") return "That step isn't available yet";
+  return "You don't have permission to do that";
+}
+
+export async function inviteToPathway(formData: FormData) {
+  const role = s(formData.get("org_role_id"), 60);
+  const member = s(formData.get("member_id"), 60);
+  if (role.length === 0 || member.length === 0) return;
+  const supabase = createClient();
+  const res = await supabase.rpc("org_invite_pathway", { p_role: role, p_member: member, p_note: s(formData.get("note"), 500) || null });
+  revalidatePath("/app/network");
+  backWithToast(explain(res, "Pathway invite sent"), "/app/network");
+}
+
+export async function proposeIntro(formData: FormData) {
+  const role = s(formData.get("org_role_id"), 60);
+  const member = s(formData.get("member_id"), 60);
+  if (role.length === 0 || member.length === 0) return;
+  const supabase = createClient();
+  const res = await supabase.rpc("org_propose_intro", { p_role: role, p_member: member, p_note: s(formData.get("note"), 500) || null });
+  revalidatePath("/app/network");
+  backWithToast(explain(res, "Introduction proposed. Waiting for the member's consent"), "/app/network");
+}
+
+export async function advanceIntro(formData: FormData) {
+  const id = s(formData.get("id"), 60);
+  const status = s(formData.get("status"), 20);
+  if (id.length === 0 || ["introduced", "interviewing", "hired", "closed"].includes(status) === false) return;
+  const supabase = createClient();
+  const res = await supabase.rpc("org_advance_intro", { p_id: id, p_status: status });
+  revalidatePath("/app/network");
+  revalidatePath("/app/outcomes");
+  backWithToast(explain(res, status === "closed" ? "Introduction closed" : "Pipeline updated and outcome recorded"), "/app/network");
+}
+
+export async function respondToPathway(formData: FormData) {
+  const id = s(formData.get("id"), 60);
+  const accept = s(formData.get("accept"), 5) === "1";
+  if (id.length === 0) return;
+  const supabase = createClient();
+  const res = await supabase.rpc("respond_pathway", { p_id: id, p_accept: accept });
+  revalidatePath("/app/network");
+  revalidatePath("/app/career");
+  revalidatePath("/app");
+  backWithToast(explain(res, accept ? "Pathway accepted. It's now your career goal" : "Pathway declined"), "/app/network");
+}
+
+export async function respondToIntro(formData: FormData) {
+  const id = s(formData.get("id"), 60);
+  const consent = s(formData.get("consent"), 5) === "1";
+  if (id.length === 0) return;
+  const supabase = createClient();
+  const res = await supabase.rpc("respond_intro", { p_id: id, p_consent: consent });
+  revalidatePath("/app/network");
+  backWithToast(explain(res, consent ? "Consent given. The network will make the introduction" : "Introduction declined"), "/app/network");
 }

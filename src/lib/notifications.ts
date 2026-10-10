@@ -22,6 +22,7 @@ export async function resolveNotificationTarget(
     return "/app/communities";
   }
   if (n.entity_type === "profile" && n.entity_id) return `/app/members/${n.entity_id}`;
+  if (n.entity_type === "organization") return n.entity_id ? `/app/network?org=${n.entity_id}` : "/app/network";
   return "/app/notifications";
 }
 
