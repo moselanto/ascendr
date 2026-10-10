@@ -136,7 +136,7 @@ export default async function LiveSessionRoom({
       <div className="mb-3 flex flex-wrap items-center gap-3">
         <Link
           href={`/app/communities/${community.slug}/live`}
-          className="text-[14px] text-brand-600 font-semibold"
+          className="inline-flex items-center gap-1 rounded-full border border-ink/10 bg-white px-3 py-1.5 text-[13px] font-medium text-ink hover:border-ink/30"
         >
           ← All sessions
         </Link>
@@ -155,10 +155,15 @@ export default async function LiveSessionRoom({
         )}
       </div>
 
-      <h1 className="mb-4 text-[20px] font-semibold tracking-tight">{session.title}</h1>
+      <div className="mb-5">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">
+          {session.status === "live" ? "Live now" : session.status === "ended" ? "Session ended" : "Live session"}
+        </p>
+        <h1 className="mt-1 text-[26px] font-semibold tracking-[-0.02em] text-ink md:text-[30px]">{session.title}</h1>
+      </div>
 
       {/* Two-column live layout: stage + controls (left), Q&A/Chat rail (right) */}
-      <div className="grid gap-4 lg:grid-cols-[1fr_340px]">
+      <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-4">
           <LiveStage
             hostName={hostDisplay}
@@ -169,7 +174,7 @@ export default async function LiveSessionRoom({
           />
 
           {/* Interaction controls row (matches the screenshot: Raise hand · React · Poll) */}
-          <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-white p-3">
+          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-white p-3 shadow-card">
             <LiveInteractions
               sessionId={session.id}
               meId={profile!.id}
@@ -177,11 +182,18 @@ export default async function LiveSessionRoom({
             />
           </div>
 
-          <p className="rounded-lg border border-dashed border-border bg-white px-4 py-3 text-[12px] text-text-secondary">
-            Q&amp;A is the heartbeat: members submit and upvote questions; the host answers the
-            top-voted without being interrupted. Sessions can record and the AI posts a summary +
-            action items afterward.
-          </p>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {[
+              { t: "Ask and upvote", d: "Questions with the most votes rise to the top for the host." },
+              { t: "Raise your hand", d: "The host sees who wants to speak, without interruptions." },
+              { t: "Summary after", d: "Recorded sessions get an AI summary and action items." },
+            ].map((x) => (
+              <div key={x.t} className="rounded-2xl border border-border bg-white px-4 py-3">
+                <p className="text-[13px] font-semibold text-ink">{x.t}</p>
+                <p className="mt-0.5 text-[12px] leading-snug text-text-secondary">{x.d}</p>
+              </div>
+            ))}
+          </div>
 
           {/* Polls under the stage */}
           <div className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
@@ -197,7 +209,7 @@ export default async function LiveSessionRoom({
         </div>
 
         {/* Right rail: Q&A / Chat / Participants */}
-        <div className="rounded-lg border border-border bg-white p-4">
+        <div className="rounded-2xl border border-border bg-white p-4 shadow-card lg:sticky lg:top-20 lg:self-start">
           <LiveRail
             sessionId={session.id}
             communityId={community.id}
@@ -251,7 +263,7 @@ function StatusButton({
       <input type="hidden" name="community_id" value={communityId} />
       <input type="hidden" name="slug" value={slug} />
       <input type="hidden" name="status" value={status} />
-      <button className="rounded-lg border border-primary px-4 py-2 text-[14px] font-semibold text-brand-600 hover:bg-[#eef2ff]">
+      <button className="rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-white hover:bg-ink-700">
         {label}
       </button>
     </form>

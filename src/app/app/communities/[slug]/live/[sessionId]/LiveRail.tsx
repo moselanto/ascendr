@@ -309,7 +309,7 @@ export default function LiveRail({
   ];
 
   return (
-    <div className="flex h-[560px] flex-col">
+    <div className="flex h-[620px] flex-col">
       {/* Tab bar */}
       <div className="flex border-b border-border">
         {tabs.map((t) => (
@@ -340,8 +340,8 @@ export default function LiveRail({
             {orderedQuestions.map((q) => (
               <li
                 key={q.id}
-                className={`flex gap-3 rounded-xl border px-3 py-3 ${
-                  q.status === "pinned" ? "border-amber-800/20 bg-amber-50" : "border-border bg-white"
+                className={`flex gap-3 rounded-xl border px-3 py-3 transition-colors ${
+                  q.status === "pinned" ? "border-amber-800/20 bg-amber-50" : q.status === "answered" ? "border-border bg-surface/60" : "border-border bg-white hover:border-ink/20"
                 }`}
               >
                 <button
@@ -357,7 +357,7 @@ export default function LiveRail({
                   <span>{q.votes}</span>
                 </button>
                 <div className="flex-1">
-                  <p className={`text-[14px] ${q.status === "answered" ? "text-text-secondary line-through" : "text-ink"}`}>
+                  <p className={`text-[14px] ${q.status === "answered" ? "text-text-secondary" : "text-ink"}`}>
                     {q.body}
                   </p>
                   <div className="mt-1 flex items-center gap-2">
@@ -396,7 +396,7 @@ export default function LiveRail({
               value={qBody}
               onChange={(e) => setQBody(e.target.value)}
               placeholder="Ask a question…"
-              className="w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
+              className="w-full rounded-xl border border-border bg-surface/50 px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40 focus:bg-white"
             />
             <div className="mt-2 flex items-center justify-between">
               <label className="flex items-center gap-1.5 text-[12px] font-medium text-text-secondary">
@@ -455,7 +455,7 @@ export default function LiveRail({
               value={chatBody}
               onChange={(e) => setChatBody(e.target.value)}
               placeholder="Message the room…"
-              className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
+              className="flex-1 rounded-xl border border-border bg-surface/50 px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40 focus:bg-white"
             />
             <button
               type="submit"
