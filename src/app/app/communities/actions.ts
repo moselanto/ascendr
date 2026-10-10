@@ -232,7 +232,7 @@ export async function sendMessage(formData: FormData) {
 export async function toggleReaction(
   messageId: string,
   emoji: string,
-  communityId: string,
+  _communityId: string,
   slug: string
 ) {
   const profile = await getCurrentProfile();

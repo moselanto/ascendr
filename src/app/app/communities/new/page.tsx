@@ -24,8 +24,8 @@ export default async function CreateHubPage({
       .eq("user_id", profile.id)
       .in("role", ["owner", "moderator"]);
     hosted = (rows ?? [])
-      .filter((r: any) => r.status === "active")
-      .map((r: any) => {
+      .filter((r) => r.status === "active")
+      .map((r) => {
         const c = Array.isArray(r.communities) ? r.communities[0] : r.communities;
         return c ? { name: String(c.name ?? "Community"), slug: String(c.slug ?? "") } : null;
       })

@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react";
 // ASCENDR AI Studio — coach, mentor clones, and career tools.
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
@@ -46,8 +47,8 @@ export default async function AIStudioPage({
   }
 
   // Load saved artifacts for the active tab (cheap, per-user).
-  let plans: any[] = [];
-  let latestReview: any = null;
+  let plans: ComponentProps<typeof CareerPlanTab>["initialPlans"] = [];
+  let latestReview: ComponentProps<typeof ResumeReviewTab>["latest"] = null;
   if (profile && tab === "plan") {
     const { data } = await supabase
       .from("career_plans")

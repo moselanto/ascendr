@@ -39,10 +39,9 @@ export default async function MemberProfile({ params }: { params: { id: string }
   const ctx = await getViewerContext(me?.id ?? "");
   const [card] = isMe ? [null] : await enrichPeople(ctx, [profile as never]);
 
-  const [{ data: skills }, { data: memberships }, { data: outcomes }] = await Promise.all([
+  const [{ data: skills }, { data: memberships }] = await Promise.all([
     supabase.from("user_skills").select("skill_id, evidence, skills(preferred_label)").eq("user_id", profile.id).limit(24),
     supabase.from("community_members").select("role, communities:community_id(id, name, slug, member_count)").eq("user_id", profile.id).eq("status", "active"),
-    supabase.from("career_outcomes").select("id", { count: "exact", head: true }).eq("user_id", profile.id),
   ]);
 
   const gapSet = new Set(ctx.gapIds);

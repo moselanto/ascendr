@@ -4,22 +4,20 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { joinCommunity, leaveCommunity, createChannel, deleteChannel } from "../actions";
 import ChannelChat from "./ChannelChat";
-import { AskMentorPanel } from "@/components/mentor/AskMentorPanel";
 import type { ChannelMessage, Community } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
 type Channel = { id: string; name: string; kind: string; position: number };
+type JoinedProfile = { id: string; full_name: string | null; handle: string | null; avatar_url: string | null; xp: number | null };
+type MemberRow = { user_id: string; role: string; profiles: JoinedProfile | JoinedProfile[] | null };
 
 // Top-level tabs shown on every community. `discussion` is the default view.
 const TABS: { key: string; label: string }[] = [
   { key: "discussion", label: "Discussion" },
-  { key: "courses", label: "Courses" },
   { key: "live", label: "Live" },
   { key: "members", label: "Members" },
   { key: "leaderboard", label: "Leaderboard" },
-  { key: "events", label: "Events" },
-  { key: "resources", label: "Resources" },
 ];
 
 function initials(name: string) {
@@ -113,9 +111,8 @@ export default async function CommunityHome({
       .eq("community_id", c.id)
       .eq("status", "active");
     members = (rows ?? [])
-      .map((r: any) => {
-        // Supabase can return the joined `profiles` as either an object or a
-        // single-element array depending on the relationship inference — handle both.
+      .map((r: MemberRow) => {
+        // Supabase may return the joined profile as an object or a one-element array.
         const p = Array.isArray(r.profiles) ? r.profiles[0] : r.profiles;
         return {
           // Fall back to the row's user_id so a member never disappears even if
@@ -158,7 +155,6 @@ export default async function CommunityHome({
   }
 
   const tabHref = (key: string) => `/app/communities/${c.slug}?tab=${key}`;
-  const activeTabLabel = TABS.find((t) => t.key === tab)?.label ?? "";
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -433,26 +429,7 @@ export default async function CommunityHome({
             )}
           </ul>
         </div>
-      ) : (
-        // Courses / Events / Resources — placeholder scaffolds ready for content.
-        <div className="mt-5 rounded-2xl border border-dashed border-border bg-white p-10 text-center">
-          <div className="text-[15px] font-semibold text-ink">{activeTabLabel} are coming soon</div>
-          <p className="mt-1 text-[14px] text-text-secondary">
-            {tab === "courses"
-              ? "Structured lessons for this community will live here."
-              : tab === "events"
-              ? "Upcoming events and RSVPs will appear here."
-              : "Shared files, links, and resources will live here."}
-            {isMod && ` As a moderator you will be able to add ${activeTabLabel.toLowerCase()} here.`}
-          </p>
-          <Link
-            href={tabHref("discussion")}
-            className="mt-4 inline-block rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40"
-          >
-            Back to discussion
-          </Link>
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }

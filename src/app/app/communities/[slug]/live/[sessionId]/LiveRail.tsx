@@ -57,7 +57,6 @@ export default function LiveRail({
   slug,
   meId,
   isMod,
-  isHost,
   initialQuestions,
   initialChat,
 }: {

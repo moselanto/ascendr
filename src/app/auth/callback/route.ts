@@ -1,3 +1,4 @@
+import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { safeNext } from "@/app/login/safe-next";
@@ -29,8 +30,7 @@ export async function GET(request: Request) {
     ok = !error;
   } else if (tokenHash && type) {
     const { error } = await supabase.auth.verifyOtp({
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      type: type as any,
+      type: type as EmailOtpType,
       token_hash: tokenHash,
     });
     ok = !error;

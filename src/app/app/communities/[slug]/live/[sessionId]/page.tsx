@@ -128,16 +128,8 @@ export default async function LiveSessionRoom({
     .order("created_at", { ascending: true })
     .limit(200);
 
-  const statusBadge =
-    session.status === "live"
-      ? "bg-emerald-50 text-emerald-800"
-      : session.status === "scheduled"
-      ? "bg-brand-50 text-brand-700"
-      : "bg-surface text-text-secondary";
-
   const isHost = session.host_id === profile!.id;
-  const hostName = session.title ? "Host" : "Host";
-  const hostDisplay = profileHostName(session, profile!, isHost);
+  const hostDisplay = isHost ? profile!.full_name || "You" : "Host";
 
   return (
     <div>
@@ -239,15 +231,6 @@ export default async function LiveSessionRoom({
   );
 }
 
-/** Resolve a display name for the host (falls back to "Host"). */
-function profileHostName(
-  session: { host_id: string | null },
-  profile: { id: string; full_name: string | null },
-  isHost: boolean
-) {
-  if (isHost) return profile.full_name || "You";
-  return "Host";
-}
 
 function StatusButton({
   sessionId,

@@ -130,6 +130,14 @@ export async function resolveSkills(inputs: string[]): Promise<Map<string, Skill
  * Pure set arithmetic over two tables. No model call, no randomness — the same
  * inputs always produce the same analysis, which is what makes it auditable.
  */
+type SkillJoin = { id: string; preferred_label: string; skill_type: string | null };
+
+/** Supabase returns a to-one join as an object or a one-element array. */
+function one<T>(v: T | T[] | null | undefined): T | null {
+  if (v == null) return null;
+  return Array.isArray(v) ? v[0] ?? null : v;
+}
+
 export async function analyzeGap(profileId: string, goalId: string): Promise<GapAnalysis | null> {
   const supabase = createClient();
 
@@ -150,8 +158,9 @@ export async function analyzeGap(profileId: string, goalId: string): Promise<Gap
     .eq("user_id", profileId);
 
   const held: HeldSkill[] = (heldRows ?? [])
-    .filter((r: any) => r.skills)
-    .map((r: any) => ({
+    .map((r) => ({ ...r, skills: one(r.skills as SkillJoin | SkillJoin[] | null) }))
+    .filter((r): r is typeof r & { skills: SkillJoin } => r.skills != null)
+    .map((r) => ({
       skillId: r.skills.id,
       label: r.skills.preferred_label,
       skillType: r.skills.skill_type,
@@ -180,11 +189,12 @@ export async function analyzeGap(profileId: string, goalId: string): Promise<Gap
     .eq("role_id", roleId);
 
   const required = (requiredRows ?? [])
-    .filter((r: any) => r.skills)
-    .map((r: any) => ({
-      skillId: r.skills.id as string,
-      label: r.skills.preferred_label as string,
-      skillType: r.skills.skill_type as string | null,
+    .map((r) => ({ ...r, skills: one(r.skills as SkillJoin | SkillJoin[] | null) }))
+    .filter((r): r is typeof r & { skills: SkillJoin } => r.skills != null)
+    .map((r) => ({
+      skillId: r.skills.id,
+      label: r.skills.preferred_label,
+      skillType: r.skills.skill_type,
       importance: r.importance as "essential" | "optional",
       weight: Number(r.weight),
     }));
@@ -222,7 +232,7 @@ export async function analyzeGap(profileId: string, goalId: string): Promise<Gap
   return {
     goalId,
     roleId,
-    roleTitle: (goal as any).role_profiles?.title ?? goal.target_title ?? null,
+    roleTitle: one(goal.role_profiles as { title: string } | { title: string }[] | null)?.title ?? goal.target_title ?? null,
     held,
     matched,
     gaps,

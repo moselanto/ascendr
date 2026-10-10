@@ -28,17 +28,6 @@ type ProfileWithGoals = Profile & {
   website?: string | null;
 };
 
-function initials(name: string | null | undefined) {
-  return (
-    (name || "Member")
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "M"
-  );
-}
-
 const card = "rounded-2xl border border-border bg-white p-5 shadow-card md:p-6";
 const label = "block text-[12px] font-medium text-text-secondary";
 const input =
