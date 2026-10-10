@@ -67,7 +67,10 @@ const REMOTE = /\bremote\b/i;
 
 async function getJson(url: string): Promise<unknown> {
   try {
+    // Cap each board at 4s: one slow job board used to hold the whole
+    // Opportunities page on its loading screen for 20+ seconds.
     const res = await fetch(url, {
+      signal: AbortSignal.timeout(4000),
       next: { revalidate: 3600 },
       headers: { Accept: "application/json", "User-Agent": "ASCENDR/1.0 (+https://ascendr-two.vercel.app)" },
     });

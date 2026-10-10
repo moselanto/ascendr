@@ -304,10 +304,17 @@ export default async function SettingsPage(
           </li>
           <li className="flex items-start justify-between gap-4 px-5 py-4">
             <div>
-              <p className="text-[14px] font-medium text-ink">Career goal &amp; skills</p>
+              <p className="text-[14px] font-medium text-ink">Career goal</p>
               <p className="text-[13px] text-text-secondary">Used to personalise your coach and roadmap. Not shown on your public profile.</p>
             </div>
             <span className="shrink-0 rounded-full bg-surface px-2.5 py-1 text-[12px] font-semibold text-text-secondary">Private</span>
+          </li>
+          <li className="flex items-start justify-between gap-4 px-5 py-4">
+            <div>
+              <p className="text-[14px] font-medium text-ink">Skills</p>
+              <p className="text-[13px] text-text-secondary">Listed under Relevant expertise on your profile, so signed-in members can find you for introductions.</p>
+            </div>
+            <span className="shrink-0 rounded-full bg-emerald-50 px-2.5 py-1 text-[12px] font-semibold text-emerald-800">Visible</span>
           </li>
           <li className="flex items-start justify-between gap-4 px-5 py-4">
             <div>
