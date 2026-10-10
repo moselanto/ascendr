@@ -135,9 +135,24 @@ export function quotaExceededResponse(q: QuotaResult, bucket: QuotaBucket) {
 /**
  * Resolve the caller's billing tier.
  *
- * Stubbed to "free" until the subscriptions table lands. Centralised here so
- * that turning on billing is a one-function change, not a grep across routes.
+ * Reads the member's Paystack subscription (migration 0017). A cancelled plan
+ * keeps its tier until the paid period ends; past_due keeps it during retries.
  */
-export async function getTier(_profileId: string): Promise<Tier> {
-  return "free";
+export async function getTier(profileId: string): Promise<Tier> {
+  try {
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("subscriptions")
+      .select("plan, status, current_period_end")
+      .eq("user_id", profileId)
+      .maybeSingle();
+    if (data == null) return "free";
+    const live = data.status === "active" || data.status === "non_renewing" || data.status === "past_due";
+    const inPeriod = data.current_period_end == null || new Date(data.current_period_end).getTime() > Date.now();
+    if (live && inPeriod && (data.plan === "starter" || data.plan === "pro")) return data.plan;
+    return "free";
+  } catch {
+    // Billing table missing (migration 0017 not run) or a transient error: fail to free.
+    return "free";
+  }
 }

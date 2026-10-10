@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { LIMITS } from "@/lib/usage";
 import { joinProEarlyAccess } from "./actions";
+import { startCheckout } from "../billing/actions";
+import { getCurrentProfile } from "@/lib/data";
+import { getTier } from "@/lib/usage";
 
 export const metadata = { title: "Plans and pricing | ASCENDR" };
 
@@ -99,13 +102,18 @@ const PLANS: Plan[] = [
 const FAQ = [
   { q: "Can I keep using ASCENDR for free?", a: "Yes. The Free plan stays free, with daily limits on AI tools and one target role." },
   { q: "Who are Starter and Pro for?", a: "Individuals who want much more AI coaching and interview practice, and network operators such as funds and accelerators who want to develop and place their members." },
+  { q: "How does billing work?", a: "Starter and Pro are billed monthly by card through Paystack. You can update your card or cancel from Billing at any time, and keep your plan until the period ends." },
   { q: "Do you offer annual billing?", a: "Yes, through the Custom plan. Contact sales for annual contracts and invoicing." },
   { q: "We're a university. Which plan fits?", a: "Custom. We set up your programs, cohorts and skill frameworks, and connect your sign-in system." },
 ];
 
 const check = <span aria-hidden className="text-accent">{"\u2713"}</span>;
 
-export default function PlansPage() {
+export const dynamic = "force-dynamic";
+
+export default async function PlansPage() {
+  const profile = await getCurrentProfile();
+  const tier = profile ? await getTier(profile.id) : "free";
   return (
     <div className="mx-auto max-w-6xl space-y-10 pb-16">
       {/* Head */}
@@ -138,13 +146,15 @@ export default function PlansPage() {
               {p.per && <span className="text-[14px] text-text-secondary">{p.per}</span>}
             </p>
             <p className="mt-1 text-[12px] text-text-secondary">
-              {p.key === "custom" ? "Tailored to your institution" : p.key === "free" ? "Free forever" : "Billed monthly"}
+              {p.key === "custom" ? "Tailored to your institution" : p.key === "free" ? "Free forever" : "Billed monthly in USD. Cancel anytime"}
             </p>
 
-            {p.key === "free" ? (
-              <span className="mt-5 block rounded-full bg-surface px-4 py-2.5 text-center text-[14px] font-medium text-text-secondary">{p.cta}</span>
+            {p.key === tier || (p.key === "free" && tier === "premium") ? (
+              <span className="mt-5 block rounded-full bg-surface px-4 py-2.5 text-center text-[14px] font-medium text-text-secondary">Your current plan</span>
+            ) : p.key === "free" ? (
+              <span className="mt-5 block rounded-full border border-border px-4 py-2.5 text-center text-[14px] font-medium text-text-secondary">Included</span>
             ) : (
-              <form action={joinProEarlyAccess} className="mt-5">
+              <form action={p.key === "custom" ? joinProEarlyAccess : startCheckout} className="mt-5">
                 <input type="hidden" name="plan" value={p.key} />
                 <button
                   className={`w-full rounded-full px-4 py-2.5 text-[14px] font-semibold ${
