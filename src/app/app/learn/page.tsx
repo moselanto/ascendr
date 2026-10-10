@@ -34,13 +34,12 @@ type Course = {
  * them. A path is marked as matching the member only when its keywords
  * appear in their goal role title (a traceable string match).
  */
-type Path = { title: string; sub: string; keywords: string[] };
+type RoleReq = { role_id: string; importance: string; weight: number | null; skills: unknown };
 
-const PATHS: Path[] = [
-  { title: "Product Manager Track", sub: "6 courses \u00b7 beginner \u2192 advanced", keywords: ["product"] },
-  { title: "Engineering Leadership", sub: "5 courses \u00b7 intermediate", keywords: ["engineer", "developer", "software"] },
-  { title: "Founder Fundamentals", sub: "4 courses \u00b7 all levels", keywords: ["founder", "startup"] },
-];
+function labelOf(x: unknown): string | null {
+  if (Array.isArray(x)) return (x[0] as { preferred_label?: string } | undefined)?.preferred_label ?? null;
+  return (x as { preferred_label?: string } | null)?.preferred_label ?? null;
+}
 
 function SectionTitle({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
@@ -114,7 +113,31 @@ export default async function LearnPage() {
     nextLearn = nxt ? { title: nxt.title, skill: nxt.skill } : null;
   }
   const roleLower = roleTitle.toLowerCase();
-  const matchesGoal = (p: Path) => roleLower.length > 0 && p.keywords.some((k) => roleLower.includes(k));
+
+  // Learning paths by role: real requirements from role_profiles (ESCO).
+  const [{ data: roleRows }, { data: reqRows }] = await Promise.all([
+    supabase.from("role_profiles").select("id, title").order("title"),
+    supabase.from("role_required_skills").select("role_id, importance, weight, skills(preferred_label)"),
+  ]);
+  const reqs = (reqRows ?? []) as unknown as RoleReq[];
+  const rolePaths = ((roleRows ?? []) as { id: string; title: string }[])
+    .map((r) => {
+      const mine = reqs.filter((q) => q.role_id === r.id);
+      const ess = mine
+        .filter((q) => q.importance === "essential")
+        .sort((x, y) => (y.weight ?? 0) - (x.weight ?? 0));
+      return {
+        id: r.id,
+        title: r.title,
+        isGoal: roleLower.length > 0 && r.title.toLowerCase() === roleLower,
+        essential: ess.length,
+        optional: mine.length - ess.length,
+        top: ess.map((q) => labelOf(q.skills)).filter((l): l is string => Boolean(l)).slice(0, 3),
+      };
+    })
+    .filter((r) => r.essential > 0)
+    .sort((x, y) => Number(y.isGoal) - Number(x.isGoal))
+    .slice(0, 6);
 
   return (
     <div className="space-y-8">
@@ -136,12 +159,12 @@ export default async function LearnPage() {
           >
             Find courses
           </Link>
-          <a
+          <Link
             href="/app/career#roadmap"
             className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
           >
             My roadmap
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -157,9 +180,27 @@ export default async function LearnPage() {
                 <p className="mt-1 text-[14px] text-white/70">
                   From your 90-day roadmap. {nextLearn.skill} is a core skill for {roleTitle} that you don&apos;t have yet.
                 </p>
-                <Link href="/app/career#roadmap" className="mt-5 inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
-                  Open roadmap {"\u2192"}
-                </Link>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Link href="/app/career#roadmap" className="inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
+                    Mark done on roadmap {"\u2192"}
+                  </Link>
+                  <a
+                    href={`https://www.coursera.org/search?query=${encodeURIComponent(nextLearn.skill)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex rounded-full border border-white/25 px-4 py-2.5 text-[14px] font-medium text-white hover:border-white/60"
+                  >
+                    Find a course
+                  </a>
+                  <a
+                    href={`https://www.youtube.com/results?search_query=${encodeURIComponent(nextLearn.skill + " tutorial")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex rounded-full border border-white/25 px-4 py-2.5 text-[14px] font-medium text-white hover:border-white/60"
+                  >
+                    Free videos
+                  </a>
+                </div>
               </>
             ) : goal ? (
               <>
@@ -197,31 +238,60 @@ export default async function LearnPage() {
         </div>
       </div>
 
-      {/* Learning paths */}
+      {/* Role learning paths (real Career Graph data) */}
       <section id="paths">
-        <SectionTitle>Curated paths</SectionTitle>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {PATHS.map((p) => {
-            const match = matchesGoal(p);
-            return (
-              <div key={p.title} className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+        <SectionTitle
+          action={
+            <Link href="/app/search" className="text-[13px] font-medium text-brand-600 hover:text-brand-700">
+              Search roles {"\u2192"}
+            </Link>
+          }
+        >
+          Learning paths by role
+        </SectionTitle>
+        {rolePaths.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <p className="text-[15px] font-semibold text-ink">No role paths yet</p>
+            <p className="mt-1 text-[14px] text-text-secondary">Role skill data hasn&apos;t been imported yet.</p>
+          </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {rolePaths.map((r) => (
+              <div key={r.id} className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
                 <div className="flex items-start justify-between gap-3">
-                  {match ? (
-                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">Matches your goal</span>
+                  {r.isGoal ? (
+                    <span className="rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">Your goal</span>
                   ) : (
                     <span />
                   )}
-                  <span className="rounded-full bg-surface px-2.5 py-1 text-[12px] font-medium text-text-secondary">Coming soon</span>
+                  <span className="text-[12px] text-text-secondary">ESCO</span>
                 </div>
-                <h3 className="mt-4 text-[16px] font-semibold text-ink">{p.title}</h3>
-                <p className="mt-0.5 text-[13px] text-text-secondary">{p.sub}</p>
-                <p className="mt-4 text-[13px] text-text-secondary">
-                  Curated paths open soon. Until then, your roadmap and community courses are the fastest way to close your gaps.
+                <h3 className="mt-4 text-[16px] font-semibold capitalize text-ink">{r.title}</h3>
+                <p className="mt-0.5 text-[13px] text-text-secondary">
+                  {r.essential} essential {"\u00b7"} {r.optional} nice-to-have skills
                 </p>
+                {r.top.length > 0 && (
+                  <ul className="mt-3 flex flex-wrap gap-1.5">
+                    {r.top.map((l) => (
+                      <li key={l} className="rounded-full bg-surface px-2.5 py-1 text-[12px] text-ink/80">{l}</li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-auto pt-5">
+                  {r.isGoal ? (
+                    <Link href="/app/career#roadmap" className="inline-flex rounded-full bg-ink px-3 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700">
+                      Continue my path {"\u2192"}
+                    </Link>
+                  ) : (
+                    <Link href="/onboarding" className="inline-flex rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40">
+                      Make this my goal
+                    </Link>
+                  )}
+                </div>
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Courses from communities + certificates */}
@@ -278,7 +348,7 @@ export default async function LearnPage() {
           <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
             <p className="text-[15px] font-semibold text-ink">No certificates yet</p>
             <p className="mt-1 text-[14px] text-text-secondary">
-              Certificates arrive with curated paths. Log certifications you earn elsewhere as a win.
+              Earned a certification on Coursera, LinkedIn or elsewhere? Log it as a win and it shows on your outcomes.
             </p>
             <Link
               href="/app/outcomes#log"
