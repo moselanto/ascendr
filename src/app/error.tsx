@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 
 /**
@@ -21,6 +22,7 @@ export default function Error({
     // Replace with Sentry.captureException(error) once monitoring lands
     // (SECURITY-AUDIT.md M-2). Until then this at least reaches Vercel logs.
     console.error("Unhandled error:", error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (

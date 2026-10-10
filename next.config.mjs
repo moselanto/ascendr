@@ -10,6 +10,8 @@
  * "Content-Security-Policy-Report-Only" and redeploy.
  */
 
+import { withSentryConfig } from "@sentry/nextjs";
+
 /** @type {import('next').NextConfig} */
 
 // Anything that must load cross-origin goes here so the policy stays readable.
@@ -81,6 +83,9 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
 
+  // Next 14 needs this flag for src/instrumentation.ts (Sentry, M-2).
+  experimental: { instrumentationHook: true },
+
   // Removes "X-Powered-By: Next.js". Minor, but there is no reason to
   // advertise the framework and version to a scanner.
   poweredByHeader: false,
@@ -96,4 +101,17 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+// Sentry (SECURITY-AUDIT M-2). Inert until NEXT_PUBLIC_SENTRY_DSN is set.
+// Source maps upload only when SENTRY_AUTH_TOKEN, SENTRY_ORG and
+// SENTRY_PROJECT are set; otherwise the build skips that step.
+export default withSentryConfig(nextConfig, {
+  org: process.env.SENTRY_ORG,
+  project: process.env.SENTRY_PROJECT,
+  authToken: process.env.SENTRY_AUTH_TOKEN,
+  silent: true,
+  tunnelRoute: "/monitoring",
+  hideSourceMaps: true,
+  disableLogger: true,
+  automaticVercelMonitors: false,
+  sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+});

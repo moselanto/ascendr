@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import * as Sentry from "@sentry/nextjs";
 import Link from "next/link";
 
 /**
@@ -21,6 +22,7 @@ export default function AppError({
     // Replace with Sentry.captureException(error) once monitoring lands
     // (SECURITY-AUDIT.md M-2).
     console.error("App error:", error);
+    Sentry.captureException(error);
   }, [error]);
 
   return (
