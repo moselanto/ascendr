@@ -15,7 +15,7 @@ export async function createPost(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("feed_posts").insert({
     author_id: profile.id,
     community_id: communityId,
@@ -32,7 +32,7 @@ export async function togglePostReaction(postId: string, emoji: string) {
   const profile = await getCurrentProfile();
   if (!profile) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: existing } = await supabase
     .from("post_reactions")
     .select("emoji")
@@ -63,7 +63,7 @@ export async function addComment(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("post_comments").insert({
     post_id: postId,
     author_id: profile.id,

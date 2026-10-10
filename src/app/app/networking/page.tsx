@@ -44,7 +44,7 @@ export default async function NetworkingPage(
 ) {
   const searchParams = await props.searchParams;
   const me = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
   const myId = me!.id;
 
   // All my connection rows (either side).

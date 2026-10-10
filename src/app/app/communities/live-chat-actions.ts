@@ -17,7 +17,7 @@ export async function sendLiveChat(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("live_chat_messages").insert({
     session_id: sessionId,
     author_id: profile.id,
@@ -39,7 +39,7 @@ export async function deleteLiveChat(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   // RLS enforces author-or-mod; this is just the call.
   await supabase.from("live_chat_messages").delete().eq("id", messageId);
   revalidatePath(`/app/communities/${slug}/live/${sessionId}`);
@@ -54,7 +54,7 @@ export async function touchPresence(sessionId: string, handRaised?: boolean) {
   const profile = await getCurrentProfile();
   if (!profile) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.rpc("touch_presence", {
     p_session_id: sessionId,
     p_hand: handRaised ?? null,
@@ -65,7 +65,7 @@ export async function touchPresence(sessionId: string, handRaised?: boolean) {
 export async function leavePresence(sessionId: string) {
   const profile = await getCurrentProfile();
   if (!profile) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase
     .from("session_presence")
     .delete()
@@ -77,7 +77,7 @@ export async function leavePresence(sessionId: string) {
 export async function toggleHand(sessionId: string, raised: boolean) {
   const profile = await getCurrentProfile();
   if (!profile) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.rpc("touch_presence", {
     p_session_id: sessionId,
     p_hand: raised,

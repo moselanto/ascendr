@@ -19,13 +19,13 @@ export async function startCheckout(formData: FormData) {
 
   if (billingConfigured(plan, interval) === false) {
     await track("pro_interest", { userId: profile.id, props: { plan } });
-    backWithToast("Payments open soon. You're on the early-access list", "/app/plans");
+    return backWithToast("Payments open soon. You're on the early-access list", "/app/plans");
   }
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const email = user?.email;
-  if (email == null) backWithToast("Your account has no email address for billing", "/app/plans");
+  if (email == null) return backWithToast("Your account has no email address for billing", "/app/plans");
 
   const origin = (await headers()).get("origin") ?? undefined;
   const res = await paystack<{ authorization_url: string; reference: string }>("/transaction/initialize", {
@@ -41,7 +41,7 @@ export async function startCheckout(formData: FormData) {
     },
   });
   if (res.status === false || res.data == null) {
-    backWithToast(`Checkout could not start: ${res.message}`, "/app/plans");
+    return backWithToast(`Checkout could not start: ${res.message}`, "/app/plans");
   }
 
   // Renewing Plus while it is still active must not flip the member to pending.
@@ -56,11 +56,11 @@ export async function startCheckout(formData: FormData) {
 export async function manageSubscription() {
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login?next=/app/billing");
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: sub } = await supabase.from("subscriptions").select("subscription_code").eq("user_id", profile.id).maybeSingle();
-  if (sub?.subscription_code == null) backWithToast("No active subscription to manage yet", "/app/billing");
+  if (sub?.subscription_code == null) return backWithToast("No active subscription to manage yet", "/app/billing");
   const res = await paystack<{ link: string }>(`/subscription/${sub.subscription_code}/manage/link`);
-  if (res.status === false || res.data?.link == null) backWithToast(`Could not open billing: ${res.message}`, "/app/billing");
+  if (res.status === false || res.data?.link == null) return backWithToast(`Could not open billing: ${res.message}`, "/app/billing");
   redirect(res.data.link);
 }
 
@@ -68,20 +68,20 @@ export async function manageSubscription() {
 export async function cancelSubscription() {
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login?next=/app/billing");
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: sub } = await supabase
     .from("subscriptions")
     .select("plan, subscription_code, email_token")
     .eq("user_id", profile.id)
     .maybeSingle();
-  if (sub?.subscription_code == null || sub.email_token == null) backWithToast("No active subscription to cancel", "/app/billing");
+  if (sub?.subscription_code == null || sub.email_token == null) return backWithToast("No active subscription to cancel", "/app/billing");
   const res = await paystack<unknown>("/subscription/disable", {
     method: "POST",
     body: { code: sub.subscription_code, token: sub.email_token },
   });
-  if (res.status === false) backWithToast(`Could not cancel: ${res.message}`, "/app/billing");
+  if (res.status === false) return backWithToast(`Could not cancel: ${res.message}`, "/app/billing");
   await upsertSubscription({ user_id: profile.id, plan: sub.plan, status: "non_renewing" });
-  backWithToast("Subscription cancelled. You keep your plan until the end of this period", "/app/billing");
+  return backWithToast("Subscription cancelled. You keep your plan until the end of this period", "/app/billing");
 }
 
 const SPONSOR_MESSAGES: Record<string, string> = {
@@ -97,13 +97,13 @@ const SPONSOR_MESSAGES: Record<string, string> = {
 /** Redeem a sponsor code for Plus (migration 0024). */
 export async function redeemSponsorCode(formData: FormData) {
   const code = String(formData.get("code") ?? "").trim().toUpperCase().slice(0, 32);
-  if (code.length < 6) backWithToast("Enter the full sponsor code", "/app/billing");
+  if (code.length < 6) return backWithToast("Enter the full sponsor code", "/app/billing");
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login?next=/app/billing");
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc("redeem_sponsor_code", { p_code: code });
-  if (error) backWithToast(/function|does not exist/i.test(error.message) ? "Sponsor codes aren't switched on yet" : `Could not use the code: ${error.message}`, "/app/billing");
+  if (error) return backWithToast(/function|does not exist/i.test(error.message) ? "Sponsor codes aren't switched on yet" : `Could not use the code: ${error.message}`, "/app/billing");
   const result = String(data ?? "invalid");
   if (result === "ok") await track("pro_interest", { userId: profile.id, props: { plan: "plus", step: "sponsor_redeemed" } });
-  backWithToast(SPONSOR_MESSAGES[result] ?? SPONSOR_MESSAGES.invalid, "/app/billing");
+  return backWithToast(SPONSOR_MESSAGES[result] ?? SPONSOR_MESSAGES.invalid, "/app/billing");
 }

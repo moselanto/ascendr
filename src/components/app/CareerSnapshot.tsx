@@ -94,7 +94,7 @@ export function pickNextAction(input: {
 }
 
 export async function CareerSnapshot({ profileId, communityCount }: { profileId: string; communityCount: number }) {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: goal } = await supabase
     .from("career_goals")

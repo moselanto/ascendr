@@ -17,7 +17,7 @@ export async function scheduleSession(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: membership } = await supabase
     .from("community_members")
     .select("role")
@@ -59,7 +59,7 @@ export async function setSessionStatus(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: membership } = await supabase
     .from("community_members")
     .select("role")
@@ -89,7 +89,7 @@ export async function askQuestion(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.from("live_questions").insert({
     session_id: sessionId,
     author_id: profile.id,
@@ -111,7 +111,7 @@ export async function toggleQuestionVote(
   const profile = await getCurrentProfile();
   if (!profile) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: existing } = await supabase
     .from("question_votes")
     .select("question_id")
@@ -143,7 +143,7 @@ export async function setQuestionStatus(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: membership } = await supabase
     .from("community_members")
     .select("role")

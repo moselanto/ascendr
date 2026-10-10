@@ -7,7 +7,7 @@ import { getCurrentProfile } from "@/lib/data";
 
 /** Confirm the caller is owner/moderator of the community (or the session host). */
 async function canModerateSession(
-  supabase: ReturnType<typeof createClient>,
+  supabase: Awaited<ReturnType<typeof createClient>>,
   sessionId: string,
   profileId: string
 ): Promise<boolean> {
@@ -46,7 +46,7 @@ export async function createLivePoll(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   if (!(await canModerateSession(supabase, sessionId, profile.id))) return;
 
   await supabase.from("live_polls").insert({
@@ -66,7 +66,7 @@ export async function voteLivePoll(pollId: string, optionIndex: number) {
   if (!profile) redirect("/login");
   if (!pollId || optionIndex < 0) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase
     .from("live_poll_votes")
     .upsert(
@@ -81,7 +81,7 @@ export async function closeLivePoll(pollId: string, sessionId: string, slug: str
   if (!profile) redirect("/login");
   if (!pollId) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   if (!(await canModerateSession(supabase, sessionId, profile.id))) return;
 
   await supabase.from("live_polls").update({ status: "closed" }).eq("id", pollId);

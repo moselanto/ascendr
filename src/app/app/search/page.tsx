@@ -14,7 +14,7 @@ export default async function SearchPage(props: { searchParams: Promise<{ q?: st
   const searchParams = await props.searchParams;
   const q = (searchParams.q ?? "").trim().slice(0, 80);
   const me = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
   const like = `%${q.replace(/[%,()]/g, "")}%`;
 
   const [people, communities, roles] = q

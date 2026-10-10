@@ -73,7 +73,7 @@ export default function LiveRail({
   const [, startTransition] = useTransition();
 
   // ---- shared supabase client (one per mount) ----
-  const supaRef = useRef<ReturnType<typeof createClient> | null>(null);
+  const supaRef = useRef<Awaited<ReturnType<typeof createClient>> | null>(null);
   if (!supaRef.current) supaRef.current = createClient();
   const supabase = supaRef.current;
 

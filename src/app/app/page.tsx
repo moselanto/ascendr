@@ -82,7 +82,7 @@ type Mentor = { id: string; full_name: string | null; bio: string | null; verifi
 export default async function HomePage() {
   const profile = await getCurrentProfile();
   const me = profile?.id ?? "";
-  const supabase = createClient();
+  const supabase = await createClient();
   const firstName = (profile?.full_name || "there").split(" ")[0];
 
   const monthStart = new Date();

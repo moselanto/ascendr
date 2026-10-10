@@ -24,7 +24,7 @@ export async function RoleExplorer({ selected }: { selected?: string }) {
   let reqs: Req[] = [];
   let role: Role | undefined;
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data } = await supabase.from("role_profiles").select("id, title, description").order("title");
     roles = (data ?? []) as Role[];
     role = roles.find((r) => r.id === selected) ?? roles[0];

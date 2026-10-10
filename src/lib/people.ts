@@ -40,7 +40,7 @@ export type ViewerContext = {
 };
 
 export async function getViewerContext(me: string): Promise<ViewerContext> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const [{ data: goal }, { data: mem }] = await Promise.all([
     supabase
       .from("career_goals")
@@ -74,7 +74,7 @@ type RawProfile = {
 };
 
 export async function enrichPeople(ctx: ViewerContext, profiles: RawProfile[]): Promise<PersonCard[]> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const ids = profiles.map((p) => p.id).filter((id) => id !== ctx.me);
   if (ids.length === 0) return [];
 

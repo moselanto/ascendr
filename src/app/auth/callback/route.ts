@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   const rawNext = url.searchParams.get("next");
   const next = safeNext(rawNext, "/app");
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   let ok = false;
   if (code) {

@@ -10,7 +10,7 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
   const profile = await getCurrentProfile();
   if (profile == null) return NextResponse.redirect(new URL("/login", origin));
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data } = await supabase
     .from("notifications")
     .select("id, type, actor_id, entity_type, entity_id")

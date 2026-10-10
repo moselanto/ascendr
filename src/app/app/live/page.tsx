@@ -65,7 +65,7 @@ function SectionTitle({ title, count }: { title: string; count: number }) {
 
 export default async function LiveIndexPage() {
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Communities the user actively belongs to.
   const { data: memberships } = await supabase

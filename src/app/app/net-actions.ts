@@ -16,7 +16,7 @@ export async function sendConnectionRequest(formData: FormData) {
   if (!profile) redirect("/login");
   if (addresseeId === profile.id) return;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   // Avoid duplicates in either direction; if a row exists, leave it.
   const { data: existing } = await supabase
     .from("connections")
@@ -46,7 +46,7 @@ export async function sendConnectionRequest(formData: FormData) {
   revalidatePath(`/app/members/${addresseeId}`);
   revalidatePath("/app/members");
   revalidatePath("/app/mentors");
-  backWithToast(existing ? "You are already connected or have a request pending" : "Connection request sent", "/app/members");
+  return backWithToast(existing ? "You are already connected or have a request pending" : "Connection request sent", "/app/members");
 }
 
 /** Accept or decline an incoming connection request (addressee only). */
@@ -58,7 +58,7 @@ export async function respondToConnection(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
   // RLS ensures only a party to the connection can update; also require the
   // caller be the addressee of a pending request.
   const { data: updated } = await supabase
@@ -83,7 +83,7 @@ export async function respondToConnection(formData: FormData) {
 
   revalidatePath("/app/networking");
   revalidatePath("/app", "layout");
-  backWithToast(decision === "accepted" ? "Connection accepted" : "Request declined", "/app/networking");
+  return backWithToast(decision === "accepted" ? "Connection accepted" : "Request declined", "/app/networking");
 }
 
 /** Send a direct message to another profile. */
@@ -96,7 +96,7 @@ export async function sendDirectMessage(formData: FormData) {
   if (!profile) redirect("/login");
   if (recipientId === profile.id) return { ok: false as const, error: "Cannot message yourself" };
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const attachments = cleanAttachments(formData.get("attachments"), profile.auth_user_id);
   if (body.length === 0 && attachments.length === 0) return { ok: false as const, error: "Empty message" };
   const row: Record<string, unknown> = {
@@ -135,7 +135,7 @@ export async function sendDirectMessage(formData: FormData) {
 export async function markDmRead(senderId: string) {
   const profile = await getCurrentProfile();
   if (!profile) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase
     .from("direct_messages")
     .update({ read_at: new Date().toISOString() })
@@ -157,7 +157,7 @@ export async function markDmRead(senderId: string) {
 export async function toggleDmReaction(messageId: string, emoji: string) {
   const profile = await getCurrentProfile();
   if (profile == null || emoji.length === 0 || emoji.length > 16) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: existing } = await supabase
     .from("dm_reactions")
     .select("emoji")

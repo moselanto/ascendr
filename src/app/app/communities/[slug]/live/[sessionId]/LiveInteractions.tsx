@@ -29,7 +29,7 @@ export default function LiveInteractions({
   const [handRaised, setHandRaised] = useState(false);
   const [raisedHands, setRaisedHands] = useState<Record<string, string>>({});
   const [floaters, setFloaters] = useState<FloatingReaction[]>([]);
-  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+  const channelRef = useRef<ReturnType<Awaited<ReturnType<typeof createClient>>["channel"]> | null>(null);
   const floatSeq = useRef(0);
 
   useEffect(() => {

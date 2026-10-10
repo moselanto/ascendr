@@ -26,7 +26,7 @@ export const NETWORK_PLAN_LABEL: Record<NetworkPlan, string> = {
 };
 
 export async function getNetworkUsage(orgId: string): Promise<NetworkUsage | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.rpc("org_limits", { p_org: orgId });
   if (error) return null;
   const row = (Array.isArray(data) ? data[0] : data) as

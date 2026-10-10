@@ -53,7 +53,7 @@ function daysAgo(iso: string) {
 export default async function OpportunitiesPage() {
   const profile = await getCurrentProfile();
   const me = profile?.id ?? "";
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: goal } = await supabase
     .from("career_goals")

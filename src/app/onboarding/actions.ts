@@ -33,7 +33,7 @@ export async function completeOnboarding(formData: FormData) {
   const horizonRaw = Number(formData.get("horizon_months") || 0);
   const horizonMonths = [3, 6, 12, 24].includes(horizonRaw) ? horizonRaw : null;
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Keep the denormalised columns on profiles: existing UI still reads them,
   // and migration 0008 defined them.

@@ -35,7 +35,7 @@ const STOPWORDS = new Set(["and", "the", "of", "a", "an", "for", "to", "in", "ma
 
 async function resolveTargetRole(goal: { id: string; target_role_id: string | null; target_title: string | null }) {
   if (goal.target_role_id || !goal.target_title) return goal.target_role_id;
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data: roles } = await supabase.from("role_profiles").select("id, title, alt_titles");
   const want = goal.target_title.trim().toLowerCase();
   const hit = (roles ?? []).find(
@@ -49,7 +49,7 @@ async function resolveTargetRole(goal: { id: string; target_role_id: string | nu
 export default async function CareerPage() {
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: goal } = await supabase
     .from("career_goals")

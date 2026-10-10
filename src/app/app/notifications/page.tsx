@@ -20,7 +20,7 @@ type Row = {
 export default async function NotificationsPage() {
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login");
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data } = await supabase
     .from("notifications")

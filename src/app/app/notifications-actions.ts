@@ -8,7 +8,7 @@ import { getCurrentProfile } from "@/lib/data";
 export async function markNotificationsRead() {
   const profile = await getCurrentProfile();
   if (profile == null) return;
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase
     .from("notifications")
     .update({ read_at: new Date().toISOString() })

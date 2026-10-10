@@ -31,7 +31,7 @@ export async function login(formData: FormData) {
 
   if ((await allowLogin(email)) === false) redirect(loginUrl({ error: THROTTLE_MESSAGE, next }));
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
@@ -56,7 +56,7 @@ export async function signup(formData: FormData) {
     ? `${origin}/auth/callback?next=${encodeURIComponent(next ?? "/onboarding")}`
     : undefined;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -80,7 +80,7 @@ export async function signup(formData: FormData) {
 }
 
 export async function signOut() {
-  const supabase = createClient();
+  const supabase = await createClient();
   await supabase.auth.signOut();
   redirect("/login");
 }

@@ -35,7 +35,7 @@ export async function updateProfile(formData: FormData) {
     .filter(Boolean)
     .slice(0, 10);
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const base = {
     full_name: fullName || null,
     handle,
@@ -80,7 +80,7 @@ export async function savePhoto(kind: "avatar" | "cover", url: string): Promise<
     return { ok: false, error: "That image location isn't allowed." };
   }
   const column = kind === "cover" ? "cover_url" : "avatar_url";
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ [column]: url }).eq("id", profile.id);
   if (error) {
     return {
@@ -96,7 +96,7 @@ export async function removePhoto(kind: "avatar" | "cover"): Promise<PhotoResult
   const profile = await getCurrentProfile();
   if (profile == null) return { ok: false, error: "Please sign in again." };
   const column = kind === "cover" ? "cover_url" : "avatar_url";
-  const supabase = createClient();
+  const supabase = await createClient();
   const { error } = await supabase.from("profiles").update({ [column]: null }).eq("id", profile.id);
   if (error) return { ok: false, error: error.message };
   revalidatePath("/app", "layout");

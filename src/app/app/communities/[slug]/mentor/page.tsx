@@ -15,7 +15,7 @@ export default async function MentorWorkspacePage(props: { params: Promise<{ slu
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: community } = await supabase
     .from("communities")

@@ -25,7 +25,7 @@ function initialsOf(name: string | null | undefined) {
 
 export default async function FeedPage() {
   const profile = await getCurrentProfile();
-  const supabase = createClient();
+  const supabase = await createClient();
 
   // Posts with author info.
   const { data: postRows } = await supabase

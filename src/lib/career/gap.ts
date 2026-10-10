@@ -66,7 +66,7 @@ export async function resolveSkills(inputs: string[]): Promise<Map<string, Skill
   const resolved = new Map<string, SkillRef>();
   if (inputs.length === 0) return resolved;
 
-  const supabase = createClient();
+  const supabase = await createClient();
   const cleaned = inputs.map((s) => s.trim()).filter(Boolean);
 
   // Stage 1 — exact match on preferred label or alias.
@@ -139,7 +139,7 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 }
 
 export async function analyzeGap(profileId: string, goalId: string): Promise<GapAnalysis | null> {
-  const supabase = createClient();
+  const supabase = await createClient();
 
   const { data: goal } = await supabase
     .from("career_goals")
