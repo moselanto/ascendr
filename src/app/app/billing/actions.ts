@@ -6,16 +6,18 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { track } from "@/lib/analytics";
 import { backWithToast } from "@/lib/toast";
-import { appUrl, billingConfigured, isPaidPlan, isRecurring, paystack, planCode, PLAN_PRICE_KES, BILLING_CURRENCY, upsertSubscription } from "@/lib/billing";
+import { appUrl, billingConfigured, isInterval, isPaidPlan, isRecurring, paystack, planCode, priceFor, BILLING_CURRENCY, upsertSubscription } from "@/lib/billing";
 
 /** Start a Paystack checkout for Starter or Pro. Falls back to early-access interest if billing isn't configured. */
 export async function startCheckout(formData: FormData) {
   const plan = String(formData.get("plan") ?? "");
   if (isPaidPlan(plan) === false) return;
+  const rawInterval = String(formData.get("interval") ?? "monthly");
+  const interval = isInterval(rawInterval) && plan !== "plus" ? rawInterval : "monthly";
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login?next=/app/plans");
 
-  if (billingConfigured(plan) === false) {
+  if (billingConfigured(plan, interval) === false) {
     await track("pro_interest", { userId: profile.id, props: { plan } });
     backWithToast("Payments open soon. You're on the early-access list", "/app/plans");
   }
@@ -30,12 +32,12 @@ export async function startCheckout(formData: FormData) {
     method: "POST",
     body: {
       email,
-      amount: PLAN_PRICE_KES[plan] * 100,
+      amount: priceFor(plan, interval) * 100,
       currency: BILLING_CURRENCY,
       // Plus is a one-off payment: offer M-Pesa (mobile money) first, card as fallback.
-      ...(isRecurring(plan) ? { plan: planCode(plan) } : { channels: ["mobile_money", "card"] }),
+      ...(isRecurring(plan) ? { plan: planCode(plan, interval) } : { channels: ["mobile_money", "card"] }),
       callback_url: `${appUrl(origin)}/app/billing/callback`,
-      metadata: { profile_id: profile.id, plan },
+      metadata: { profile_id: profile.id, plan, interval },
     },
   });
   if (res.status === false || res.data == null) {

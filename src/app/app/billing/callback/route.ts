@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
-import { addMonth, isPaidPlan, paystack, PLAN_LABEL, upsertSubscription } from "@/lib/billing";
+import { addMonth, addYear, isPaidPlan, paystack, PLAN_LABEL, upsertSubscription } from "@/lib/billing";
 
 type Verify = {
   status: string;
   reference: string;
-  metadata: { profile_id?: string; plan?: string } | null;
+  metadata: { profile_id?: string; plan?: string; interval?: string } | null;
   customer: { customer_code: string; email: string } | null;
 };
 
@@ -41,8 +41,14 @@ export async function GET(req: Request) {
     status: "active",
     email: res.data.customer?.email?.toLowerCase() ?? null,
     customer_code: res.data.customer?.customer_code ?? null,
-    current_period_end: alreadyApplied ? existing?.current_period_end : addMonth(meta.plan === "plus" ? from : new Date()),
+    current_period_end: alreadyApplied
+      ? existing?.current_period_end
+      : meta.interval === "annual"
+        ? addYear()
+        : addMonth(meta.plan === "plus" ? from : new Date()),
+    // Only written for yearly plans, so monthly checkout works even before migration 0023.
+    ...(meta.interval === "annual" ? { billing_interval: "annual" } : {}),
     last_reference: res.data.reference,
   });
-  return back(`Welcome to ${PLAN_LABEL[meta.plan]}. Your new limits are active`);
+  return back(`Welcome to ${PLAN_LABEL[meta.plan]}${meta.interval === "annual" ? " (yearly)" : ""}. Your new limits are active`);
 }

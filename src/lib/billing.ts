@@ -7,6 +7,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
  *   PAYSTACK_SECRET_KEY      sk_test_... / sk_live_...
  *   PAYSTACK_PLAN_STARTER    plan code for Starter (KES 13,000/month)
  *   PAYSTACK_PLAN_PRO        plan code for Pro (KES 26,000/month)
+ *   PAYSTACK_PLAN_STARTER_ANNUAL  plan code for Starter yearly (KES 130,000/year), optional
+ *   PAYSTACK_PLAN_PRO_ANNUAL      plan code for Pro yearly (KES 260,000/year), optional
  *   NEXT_PUBLIC_APP_URL      e.g. https://ascendr-two.vercel.app
  */
 
@@ -26,6 +28,16 @@ export const PLAN_LABEL: Record<PaidPlan, string> = { plus: "Plus", starter: "St
 export const PLAN_PRICE_KES: Record<PaidPlan, number> = { plus: 499, starter: 13000, pro: 26000 };
 export const BILLING_CURRENCY = "KES";
 
+/** Starter and Pro can be paid yearly: 10 months' price, so two months free. */
+export type BillingInterval = "monthly" | "annual";
+export const ANNUAL_PRICE_KES: Record<"starter" | "pro", number> = { starter: 130000, pro: 260000 };
+export function isInterval(v: unknown): v is BillingInterval {
+  return v === "monthly" || v === "annual";
+}
+export function priceFor(plan: PaidPlan, interval: BillingInterval): number {
+  return interval === "annual" && plan !== "plus" ? ANNUAL_PRICE_KES[plan] : PLAN_PRICE_KES[plan];
+}
+
 /** Flat fee the hiring company pays per confirmed hire (migration 0022). */
 export const HIRE_FEE = { amountKes: 25000, networkShareKes: 5000 };
 export function formatKes(n: number) {
@@ -36,9 +48,16 @@ export function isPaidPlan(v: unknown): v is PaidPlan {
   return v === "plus" || v === "starter" || v === "pro";
 }
 
-export function planCode(plan: PaidPlan): string | null {
+export function planCode(plan: PaidPlan, interval: BillingInterval = "monthly"): string | null {
   if (plan === "plus") return null;
-  const code = plan === "starter" ? process.env.PAYSTACK_PLAN_STARTER : process.env.PAYSTACK_PLAN_PRO;
+  const code =
+    interval === "annual"
+      ? plan === "starter"
+        ? process.env.PAYSTACK_PLAN_STARTER_ANNUAL
+        : process.env.PAYSTACK_PLAN_PRO_ANNUAL
+      : plan === "starter"
+        ? process.env.PAYSTACK_PLAN_STARTER
+        : process.env.PAYSTACK_PLAN_PRO;
   return code && code.trim().length > 0 ? code.trim() : null;
 }
 
@@ -46,12 +65,26 @@ export function planFromCode(code: string | null | undefined): PaidPlan | null {
   if (code == null) return null;
   if (code === process.env.PAYSTACK_PLAN_STARTER) return "starter";
   if (code === process.env.PAYSTACK_PLAN_PRO) return "pro";
+  if (code === process.env.PAYSTACK_PLAN_STARTER_ANNUAL) return "starter";
+  if (code === process.env.PAYSTACK_PLAN_PRO_ANNUAL) return "pro";
   return null;
 }
 
-export function billingConfigured(plan?: PaidPlan): boolean {
+export function intervalFromCode(code: string | null | undefined): BillingInterval | null {
+  if (code == null) return null;
+  if (code === process.env.PAYSTACK_PLAN_STARTER_ANNUAL || code === process.env.PAYSTACK_PLAN_PRO_ANNUAL) return "annual";
+  if (code === process.env.PAYSTACK_PLAN_STARTER || code === process.env.PAYSTACK_PLAN_PRO) return "monthly";
+  return null;
+}
+
+/** True when yearly checkout is set up (both annual plan codes exist). */
+export function annualConfigured(): boolean {
+  return Boolean(process.env.PAYSTACK_SECRET_KEY && planCode("starter", "annual") && planCode("pro", "annual"));
+}
+
+export function billingConfigured(plan?: PaidPlan, interval: BillingInterval = "monthly"): boolean {
   if (!process.env.PAYSTACK_SECRET_KEY) return false;
-  if (plan) return isRecurring(plan) ? planCode(plan) != null : true;
+  if (plan) return isRecurring(plan) ? planCode(plan, interval) != null : true;
   return Boolean(planCode("starter") && planCode("pro"));
 }
 
@@ -74,6 +107,12 @@ export async function paystack<T>(path: string, init?: { method?: string; body?:
   const json = (await res.json().catch(() => null)) as PaystackResponse<T> | null;
   if (json == null) return { status: false, message: `Paystack error ${res.status}`, data: null as T };
   return json;
+}
+
+export function addYear(from: Date = new Date()): string {
+  const d = new Date(from);
+  d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString();
 }
 
 export function addMonth(from: Date = new Date()): string {

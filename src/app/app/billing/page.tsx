@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { getTier, LIMITS } from "@/lib/usage";
-import { PLAN_LABEL, PLAN_PRICE_KES, formatKes, isPaidPlan } from "@/lib/billing";
+import { ANNUAL_PRICE_KES, PLAN_LABEL, PLAN_PRICE_KES, formatKes, isPaidPlan } from "@/lib/billing";
 import { manageSubscription, cancelSubscription, startCheckout } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -23,12 +23,13 @@ export default async function BillingPage() {
   const supabase = createClient();
   const { data: sub, error } = await supabase
     .from("subscriptions")
-    .select("plan, status, current_period_end, subscription_code")
+    .select("*")
     .eq("user_id", profile.id)
     .maybeSingle();
   const tier = await getTier(profile.id);
   const paid = tier === "plus" || tier === "starter" || tier === "pro";
   const isPlus = tier === "plus";
+  const yearly = (sub as { billing_interval?: string } | null)?.billing_interval === "annual";
   const st = sub ? STATUS[sub.status] ?? STATUS.pending : null;
   const renews = sub?.current_period_end
     ? new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
@@ -56,7 +57,11 @@ export default async function BillingPage() {
             <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">Current plan</p>
             <p className="mt-2 text-[30px] font-semibold tracking-tight">
               {paid && isPaidPlan(tier) ? PLAN_LABEL[tier] : "Free"}
-              {paid && isPaidPlan(tier) && <span className="ml-2 text-[16px] font-normal text-white/60">{formatKes(PLAN_PRICE_KES[tier])}/month</span>}
+              {paid && isPaidPlan(tier) && (
+                <span className="ml-2 text-[16px] font-normal text-white/60">
+                  {yearly && tier !== "plus" ? `${formatKes(ANNUAL_PRICE_KES[tier])}/year` : `${formatKes(PLAN_PRICE_KES[tier])}/month`}
+                </span>
+              )}
             </p>
             {sub && st && (
               <span className={`mt-2 inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium ${st.tone}`}>{st.label}</span>

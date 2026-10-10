@@ -1,7 +1,7 @@
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { addMonth, isPaidPlan, planFromCode } from "@/lib/billing";
+import { addMonth, addYear, intervalFromCode, isPaidPlan, planFromCode } from "@/lib/billing";
 
 /**
  * Paystack webhook. Set the URL in Paystack > Settings > API Keys & Webhooks:
@@ -66,7 +66,11 @@ export async function POST(req: Request) {
   if (userId == null) return NextResponse.json({ ok: true, skipped: "unknown customer" });
 
   const plan = planFromCode(d.plan?.plan_code ?? d.subscription?.plan?.plan_code) ?? (isPaidPlan(d.metadata?.plan) ? d.metadata.plan : null);
+  const code = d.plan?.plan_code ?? d.subscription?.plan?.plan_code;
+  const interval = intervalFromCode(code) ?? (d.metadata?.interval === "annual" ? "annual" : null);
+  const nextPeriod = () => (interval === "annual" ? addYear() : addMonth());
   const base: Record<string, unknown> = { user_id: userId, updated_at: now };
+  if (interval === "annual") base.billing_interval = "annual";
   if (plan) base.plan = plan;
   if (d.customer?.customer_code) base.customer_code = d.customer.customer_code;
   if (d.customer?.email) base.email = String(d.customer.email).toLowerCase();
@@ -74,7 +78,7 @@ export async function POST(req: Request) {
   let patch: Record<string, unknown> | null = null;
   switch (evt.event) {
     case "charge.success":
-      patch = { ...base, status: "active", current_period_end: addMonth(), last_reference: d.reference ?? null };
+      patch = { ...base, status: "active", current_period_end: nextPeriod(), last_reference: d.reference ?? null };
       break;
     case "subscription.create":
       patch = {
@@ -82,7 +86,7 @@ export async function POST(req: Request) {
         status: "active",
         subscription_code: d.subscription_code ?? null,
         email_token: d.email_token ?? null,
-        current_period_end: d.next_payment_date ?? addMonth(),
+        current_period_end: d.next_payment_date ?? nextPeriod(),
       };
       break;
     case "subscription.not_renew":

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { LIMITS } from "@/lib/usage";
 import { joinProEarlyAccess } from "./actions";
 import { startCheckout } from "../billing/actions";
+import { ANNUAL_PRICE_KES, annualConfigured, formatKes } from "@/lib/billing";
 import { getCurrentProfile } from "@/lib/data";
 import { getTier } from "@/lib/usage";
 
@@ -104,7 +105,7 @@ const FAQ = [
   { q: "Which plan is for me as an individual?", a: "Plus. It costs KES 499 a month, you can pay by M-Pesa, and it more than doubles your daily AI coaching, interview practice and resume reviews." },
   { q: "Who are Starter and Pro for?", a: "Network operators such as funds, accelerators and associations who want to develop and place their members." },
   { q: "How does billing work?", a: "Plus is a one-off monthly payment by M-Pesa or card; pay again to add another month. Starter and Pro are billed monthly by card through Paystack. You can update your card or cancel from Billing at any time, and keep your plan until the period ends." },
-  { q: "Do you offer annual billing?", a: "Yes, through the Custom plan. Contact sales for annual contracts and invoicing." },
+  { q: "Do you offer annual billing?", a: "Yes. Starter and Pro can be paid yearly for the price of 10 months. Custom plans include annual contracts and invoicing." },
   { q: "We're a university. Which plan fits?", a: "Custom. We set up your programs, cohorts and skill frameworks, and connect your sign-in system." },
 ];
 
@@ -191,6 +192,15 @@ export default async function PlansPage() {
                 </button>
               </form>
             )}
+            {(p.key === "starter" || p.key === "pro") && p.key !== tier && annualConfigured() ? (
+              <form action={startCheckout} className="mt-2">
+                <input type="hidden" name="plan" value={p.key} />
+                <input type="hidden" name="interval" value="annual" />
+                <button className="w-full rounded-full px-4 py-2 text-[13px] font-medium text-text-secondary hover:text-ink">
+                  Or pay yearly: {formatKes(ANNUAL_PRICE_KES[p.key])} (2 months free)
+                </button>
+              </form>
+            ) : null}
 
             <p className="mt-6 text-[12px] font-semibold uppercase tracking-[0.12em] text-text-secondary">{p.intro}</p>
             <ul className="mt-3 space-y-2 text-[14px] text-ink/85">

@@ -123,7 +123,7 @@ const GROUPS: Group[] = [
       },
       {
         q: "Do you offer annual billing or invoices?",
-        a: "Yes, through the Custom plan. Contact us for annual contracts and invoicing.",
+        a: "Yes. Starter and Pro can be paid yearly for the price of 10 months, so two months are free. Custom plans include annual contracts and invoicing.",
       },
     ],
   },
