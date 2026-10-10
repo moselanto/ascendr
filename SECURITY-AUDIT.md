@@ -38,7 +38,7 @@ The authorization model remains the strongest part of the system. RLS is enabled
 |---|---|---|
 | Networks (0013, 0016) | All admin reads and writes go through `SECURITY DEFINER` functions that check `is_org_admin()` or the caller's own identity; only members with `share_career_data = true` are included; introductions require member consent | Resolved in 0020: a member's `org_readiness_snapshots` for a network are deleted when they turn sharing off or leave |
 | Storage (0015) | Public-read `avatars` bucket; writes restricted to the caller's `auth.uid()` folder; 5 MB, image MIME types only; server rejects URLs outside the member's folder | Public URLs are guessable only by path; do not store anything private in this bucket |
-| Billing (0017) | No card data handled; checkout callback verifies the transaction server-side and matches `metadata.profile_id` to the signed-in member; webhook verified with HMAC-SHA512 and constant-time comparison; `subscriptions` writable by the service role only | Webhook has no replay window or event-id de-duplication; events are idempotent upserts, so impact is low |
+| Billing (0017) | No card data handled; checkout callback verifies the transaction server-side and matches `metadata.profile_id` to the signed-in member; webhook verified with HMAC-SHA512 and constant-time comparison; `subscriptions` writable by the service role only | Resolved in 0021: each verified webhook body is recorded once in `paystack_events` (SHA-256 of the raw body); duplicates are acknowledged without reprocessing |
 | Notifications deep links | `/app/notifications/[id]` loads only the caller's own notification and redirects to internal paths | None found |
 
 ---|---|---|
@@ -336,7 +336,7 @@ fundraising push.
 | 3 | M-4 ingestion validation | Medium | 1-2 days |
 | 4 | M-3 auth throttling | Medium | ~1 day |
 | 5 | ~~Snapshot purge when a member stops sharing~~ Done in 0020 | Medium | Done |
-| 6 | Webhook replay protection (event-id de-duplication) | Low | Hours |
+| 6 | ~~Webhook replay protection (event-id de-duplication)~~ Done in 0021 | Low | Done |
 | 7 | CSP from report-only to enforcing, with nonces | Medium | 1 day |
 | 8 | M-6 migration workflow | Medium | 2-3 days |
 | 9 | L-1, L-2 CI and scanning | Low | 2-3 days |

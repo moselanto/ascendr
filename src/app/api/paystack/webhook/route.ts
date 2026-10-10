@@ -23,6 +23,23 @@ export async function POST(req: Request) {
   const admin = createAdminClient();
   const now = new Date().toISOString();
 
+  // Replay protection (migration 0021): record each verified body once.
+  // A duplicate delivery is acknowledged with 200 so Paystack stops retrying.
+  const eventId = crypto.createHash("sha256").update(raw).digest("hex");
+  const claim = await admin
+    .from("paystack_events")
+    .insert({ id: eventId, event: String(evt.event ?? ""), reference: d.reference ?? null });
+  if (claim.error) {
+    if (claim.error.code === "23505") return NextResponse.json({ ok: true, duplicate: true });
+    // Table missing (0021 not run) or a transient error: process anyway, but say so.
+    console.warn("paystack webhook: could not record event, processing without replay protection", claim.error.message);
+  }
+  const claimed = claim.error == null;
+  // If processing fails after the claim, release it so Paystack's retry is processed.
+  const release = async () => {
+    if (claimed) await admin.from("paystack_events").delete().eq("id", eventId);
+  };
+
   // Find the member: metadata first, then customer code, then email.
   async function findUser(): Promise<string | null> {
     const metaId = d.metadata?.profile_id;
@@ -85,6 +102,9 @@ export async function POST(req: Request) {
   const { data: existing } = await admin.from("subscriptions").select("plan").eq("user_id", userId).maybeSingle();
   if (existing == null && patch.plan == null) return NextResponse.json({ ok: true, skipped: "no plan" });
   const { error } = await admin.from("subscriptions").upsert(patch, { onConflict: "user_id" });
-  if (error) return new NextResponse(error.message, { status: 500 });
+  if (error) {
+    await release();
+    return new NextResponse(error.message, { status: 500 });
+  }
   return NextResponse.json({ ok: true });
 }
