@@ -41,6 +41,8 @@ export type AnalyticsEventName =
   | "opportunity_applied"
   // Outcomes
   | "outcome_recorded"
+  // Monetisation
+  | "pro_interest"
   // Operational
   | "ai_quota_exceeded";
 

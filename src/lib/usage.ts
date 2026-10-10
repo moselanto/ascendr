@@ -33,7 +33,7 @@ export type Tier = "free" | "pro" | "premium";
  * generous enough that a genuine user never notices, tight enough that a
  * scripted loop stops within a few dollars. Tune once real usage data exists.
  */
-const LIMITS: Record<QuotaBucket, Record<Tier, number>> = {
+export const LIMITS: Record<QuotaBucket, Record<Tier, number>> = {
   "ai:coach":             { free: 25, pro: 200, premium: 600 },
   "ai:career-plan":       { free: 3,  pro: 25,  premium: 100 },
   "ai:career-plan-step":  { free: 20, pro: 150, premium: 500 },

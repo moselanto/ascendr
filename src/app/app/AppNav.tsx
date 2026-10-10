@@ -126,12 +126,28 @@ export function AppSidebar({
         <div className="rounded-xl bg-emerald-50 px-3.5 py-3 text-[12px] font-semibold text-emerald-800">
           {streak > 0 ? `${streak}-day streak. You are building momentum.` : "Take one career action today to start a streak."}
         </div>
-        <div className="rounded-xl border border-border p-3.5">
-          <p className="text-[13px] font-semibold text-ink">Go further with Pro</p>
-          <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">Deeper career intelligence and interview practice.</p>
-          <Link href="/app/settings" className="mt-3 inline-flex rounded-full border border-ink/15 px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40">
-            Explore Pro
-          </Link>
+        <div className="relative overflow-hidden rounded-2xl bg-ink p-4 text-white">
+          <div aria-hidden className="bg-dots-light absolute inset-0 opacity-40" />
+          <div className="relative">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-brand-200">
+              <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+              ASCENDR Pro
+            </span>
+            <p className="mt-2.5 text-[15px] font-semibold leading-snug tracking-tight">
+              Go further, <span className="accent-serif text-brand-200">faster.</span>
+            </p>
+            <ul className="mt-2 space-y-1 text-[12px] text-white/70">
+              <li>{"\u2713"} 8x more AI coaching</li>
+              <li>{"\u2713"} 10x interview practice</li>
+              <li>{"\u2713"} Deeper readiness insight</li>
+            </ul>
+            <Link
+              href="/app/pro"
+              className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-ink transition-colors hover:bg-brand-50"
+            >
+              Explore Pro <span aria-hidden>{"\u2192"}</span>
+            </Link>
+          </div>
         </div>
       </div>
     </aside>
