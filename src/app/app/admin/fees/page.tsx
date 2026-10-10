@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
+import { requireAdminMfa } from "@/lib/mfa";
 import { formatKes } from "@/lib/billing";
 import { tryAdminClient, one } from "../_lib/admin-client";
 import { AdminClientError, PageHead } from "../_components/ui";
@@ -26,6 +27,7 @@ async function setFeeStatus(formData: FormData) {
   "use server";
   const profile = await getCurrentProfile();
   if (profile?.role !== "admin") notFound();
+  await requireAdminMfa("/app/admin/fees");
   const id = String(formData.get("id") ?? "");
   const status = String(formData.get("status") ?? "") as Status;
   if (id.length === 0 || STATUSES.includes(status) === false) return;

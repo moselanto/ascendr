@@ -7,6 +7,7 @@ import { updateProfile } from "./actions";
 import { signOut } from "@/app/login/actions";
 import PhotoUploader from "./PhotoUploader";
 import { Avatar } from "@/components/ui/Avatar";
+import { MfaSetup } from "@/components/security/MfaSetup";
 
 export const dynamic = "force-dynamic";
 
@@ -38,7 +39,7 @@ const secondaryBtn =
 
 export default async function SettingsPage(
   props: {
-    searchParams: Promise<{ saved?: string; error?: string }>;
+    searchParams: Promise<{ saved?: string; error?: string; mfa?: string }>;
   }
 ) {
   const searchParams = await props.searchParams;
@@ -102,6 +103,16 @@ export default async function SettingsPage(
           Could not save your profile: {searchParams.error}
         </div>
       )}
+
+      {searchParams.mfa === "required" && (
+        <div className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-3 text-[14px] text-amber-900">
+          Turn on two-factor sign-in below to use the admin console.
+        </div>
+      )}
+
+      <div className="mt-6">
+        <MfaSetup required={profile.role === "admin"} />
+      </div>
 
       <div className="mt-6">
         <PhotoUploader

@@ -2,6 +2,7 @@ import crypto from "crypto";
 import { revalidatePath } from "next/cache";
 import { notFound, redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
+import { requireAdminMfa } from "@/lib/mfa";
 import { tryAdminClient } from "../_lib/admin-client";
 import { AdminClientError, PageHead } from "../_components/ui";
 
@@ -24,6 +25,7 @@ async function createSponsorCode(formData: FormData) {
   "use server";
   const profile = await getCurrentProfile();
   if (profile?.role !== "admin") notFound();
+  await requireAdminMfa("/app/admin/sponsors");
   const sponsor = String(formData.get("sponsor") ?? "").trim().slice(0, 120);
   const seats = Math.max(1, Math.min(100000, Number(formData.get("seats") ?? 0) || 0));
   const months = Math.max(1, Math.min(24, Number(formData.get("months") ?? 3) || 3));
