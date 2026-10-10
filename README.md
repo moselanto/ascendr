@@ -29,6 +29,7 @@ ASCENDR shows members exactly what stands between them and the role they want, a
 - [Why ASCENDR](#why-ascendr)
 - [Who it is for](#who-it-is-for)
 - [What the product does](#what-the-product-does)
+- [Screenshots](#screenshots)
 - [The network pilot workflow](#the-network-pilot-workflow)
 - [Plans](#plans)
 - [Architecture](#architecture)
@@ -114,6 +115,16 @@ Universities and professional associations that want to develop whole cohorts to
 | **Platform** | Global search, notifications with deep links, profile photos and cover images, plans and Paystack billing, admin console |
 
 ---
+
+## Screenshots
+
+| Homepage | Member dashboard |
+|---|---|
+| \![ASCENDR homepage](docs/screenshots/homepage.jpg) | \![Member dashboard with the Start here guide](docs/screenshots/dashboard.jpg) |
+
+| Learning paths | Plans and pricing |
+|---|---|
+| \![Learning paths by role](docs/screenshots/learning-paths.jpg) | \![Plans and pricing in KES](docs/screenshots/plans.jpg) |
 
 ## The network pilot workflow
 
