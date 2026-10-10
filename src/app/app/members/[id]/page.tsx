@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
@@ -23,7 +24,16 @@ export default async function MemberProfile({ params }: { params: { id: string }
   if (profile == null) notFound();
 
   const isMe = me?.id === profile.id;
-  const extra = profile as { headline?: string | null; company?: string | null };
+  const extra = profile as {
+    headline?: string | null;
+    company?: string | null;
+    cover_url?: string | null;
+    location?: string | null;
+    website?: string | null;
+  };
+  const location = extra.location ?? null;
+  const website = extra.website ?? null;
+  const websiteLabel = website ? website.replace(/^https?:\/\/(www\.)?/i, "").replace(/\/$/, "") : null;
   const headline = extra.headline ?? null;
   const company = extra.company ?? null;
   const ctx = await getViewerContext(me?.id ?? "");
@@ -64,14 +74,23 @@ export default async function MemberProfile({ params }: { params: { id: string }
 
       {/* Header */}
       <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-card">
-        <div className="relative h-28 bg-ink">
-          <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
+        <div className="relative h-28 bg-ink md:h-40">
+          {extra.cover_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={extra.cover_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
+          ) : (
+            <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
+          )}
         </div>
         <div className="flex flex-col gap-4 px-6 pb-6 md:flex-row md:items-end md:justify-between">
           <div className="flex items-end gap-4">
-            <span className="-mt-10 flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border-4 border-white bg-brand-100 text-[22px] font-semibold text-brand-700 shadow-card">
-              {initials(profile.full_name)}
-            </span>
+            <Avatar
+              name={profile.full_name}
+              url={(profile as { avatar_url?: string | null }).avatar_url ?? null}
+              size={88}
+              shape="rounded-2xl"
+              className="-mt-11 border-4 border-white shadow-card"
+            />
             <div className="pb-1">
               <h1 className="flex flex-wrap items-center gap-2 text-[24px] font-semibold tracking-tight text-ink">
                 {profile.full_name || "Member"}
@@ -82,6 +101,16 @@ export default async function MemberProfile({ params }: { params: { id: string }
                   {headline}
                   {headline && company ? " \u00b7 " : ""}
                   {company ? `at ${company}` : ""}
+                </p>
+              )}
+              {(location || website) && (
+                <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-[13px] text-text-secondary">
+                  {location && <span>{"\u25C9"} {location}</span>}
+                  {website && websiteLabel && (
+                    <a href={website} target="_blank" rel="noopener noreferrer nofollow" className="font-medium text-brand-600 hover:text-brand-700">
+                      {websiteLabel} {"\u2197"}
+                    </a>
+                  )}
                 </p>
               )}
               <p className="text-[13px] text-text-secondary">

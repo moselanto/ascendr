@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Avatar } from "@/components/ui/Avatar";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { initials } from "@/lib/people";
@@ -81,7 +82,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
                 {P.map((p) => (
                   <li key={p.id}>
                     <Link href={`/app/members/${p.id}`} className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface/60">
-                      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">{initials(p.full_name)}</span>
+                      <Avatar name={p.full_name} url={(p as { avatar_url?: string | null }).avatar_url ?? null} size={40} />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[14px] font-semibold text-ink">
                           {p.full_name ?? "Member"}

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentProfile } from "@/lib/data";
 import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
+import { Avatar } from "@/components/ui/Avatar";
 import NotificationBell from "./NotificationBell";
 import { AppSidebar, AppCrumb, MobileNav } from "./AppNav";
 import Toast from "@/components/ui/Toast";
@@ -86,13 +87,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const communitiesUnread = await hasUnreadAnywhere(supabase, profile.id);
 
-  const initials =
-    (profile.full_name || "Me")
-      .split(" ")
-      .map((w) => w[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase() || "ME";
 
   const isAdmin = profile.role === "admin";
 
@@ -118,9 +112,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </form>
             <NotificationBell meId={profile.id} initial={notifs ?? []} />
             <Link href="/app/settings" className="flex items-center gap-2.5" aria-label="Account settings">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
-                {initials}
-              </span>
+              <Avatar name={profile.full_name} url={profile.avatar_url} size={36} />
               <span className="hidden leading-tight xl:block">
                 <span className="block text-[13px] font-semibold text-ink">{profile.full_name || "Member"}</span>
                 <span className="block text-[11px] text-text-secondary">View profile</span>

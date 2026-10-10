@@ -5,6 +5,8 @@ import { getCurrentProfile } from "@/lib/data";
 import type { Profile } from "@/lib/types";
 import { updateProfile } from "./actions";
 import { signOut } from "@/app/login/actions";
+import PhotoUploader from "./PhotoUploader";
+import { Avatar } from "@/components/ui/Avatar";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +23,9 @@ type ProfileWithGoals = Profile & {
   target_roles?: string[] | null;
   headline?: string | null;
   company?: string | null;
+  cover_url?: string | null;
+  location?: string | null;
+  website?: string | null;
 };
 
 function initials(name: string | null | undefined) {
@@ -108,13 +113,20 @@ export default async function SettingsPage({
         </div>
       )}
 
+      <div className="mt-6">
+        <PhotoUploader
+          authUserId={profile.auth_user_id}
+          name={profile.full_name}
+          avatarUrl={profile.avatar_url}
+          coverUrl={profile.cover_url ?? null}
+        />
+      </div>
+
       <div className="mt-6 grid gap-5 lg:grid-cols-[1fr_300px]">
         {/* Profile details */}
         <form action={updateProfile} className={card}>
           <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-brand-100 text-[15px] font-semibold text-brand-700">
-              {initials(profile.full_name)}
-            </span>
+            <Avatar name={profile.full_name} url={profile.avatar_url} size={56} />
             <div className="min-w-0">
               <p className={sectionEyebrow}>Profile details</p>
               <p className="mt-0.5 truncate text-[17px] font-semibold text-ink">
@@ -145,6 +157,17 @@ export default async function SettingsPage({
             <div>
               <label htmlFor="company" className={label}>Current company</label>
               <input id="company" name="company" maxLength={80} defaultValue={profile.company ?? ""} placeholder="Where you work today" className={input} />
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="location" className={label}>Location</label>
+              <input id="location" name="location" maxLength={80} defaultValue={profile.location ?? ""} placeholder="Nairobi, Kenya" className={input} />
+            </div>
+            <div>
+              <label htmlFor="website" className={label}>Website or LinkedIn</label>
+              <input id="website" name="website" maxLength={200} defaultValue={profile.website ?? ""} placeholder="linkedin.com/in/yourname" className={input} />
             </div>
           </div>
 
