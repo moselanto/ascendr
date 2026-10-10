@@ -2,15 +2,11 @@ import Link from "next/link";
 import { Logo } from "@/components/home/Logo";
 import { login, signup } from "./actions";
 import PasswordField from "./PasswordField";
+import LoginShowcase from "./LoginShowcase";
 import { safeNext } from "./safe-next";
 
 export const metadata = { title: "Sign in | ASCENDR" };
 
-const VALUE_POINTS = [
-  { title: "See your gap", body: "Compare your skills with the role you want, line by line." },
-  { title: "Learn from people ahead of you", body: "Mentors, communities and live sessions in one place." },
-  { title: "Get matched to real openings", body: "Opportunities ranked by how ready you are today." },
-];
 
 export default function LoginPage({
   searchParams,
@@ -31,12 +27,28 @@ export default function LoginPage({
   const switchHref = switchQs ? `/login?${switchQs}` : "/login";
 
   return (
-    <main className="grid min-h-screen bg-surface lg:grid-cols-[1fr_1fr]">
-      {/* Form column */}
-      <div className="flex flex-col px-5 py-8 sm:px-10">
-        <Logo />
+    <main className="grid min-h-screen bg-surface lg:grid-cols-[1.1fr_1fr]">
+      {/* Brand panel (left, desktop) */}
+      <div className="relative hidden lg:block">
+        <div className="sticky top-0 h-screen">
+          <LoginShowcase />
+        </div>
+      </div>
 
-        <div className="flex flex-1 items-center justify-center py-10">
+      {/* Form column (right) */}
+      <div className="flex flex-col px-5 py-6 sm:px-10 lg:py-8">
+        <div className="flex items-center justify-between">
+          <Logo />
+          <Link href="/" className="text-[13px] font-medium text-text-secondary hover:text-ink">
+            {"\u2190"} Back to home
+          </Link>
+        </div>
+
+        <div className="mt-5 lg:hidden">
+          <LoginShowcase variant="banner" />
+        </div>
+
+        <div className="flex flex-1 items-center justify-center py-8 lg:py-10">
           <div className="w-full max-w-[420px]">
             <div className="rounded-2xl border border-border bg-white p-6 shadow-card sm:p-8">
               <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">
@@ -132,39 +144,6 @@ export default function LoginPage({
         </div>
       </div>
 
-      {/* Brand panel (desktop only) */}
-      <div className="relative hidden overflow-hidden bg-ink text-white lg:flex lg:flex-col lg:justify-between lg:p-14">
-        <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
-
-        <p className="relative text-[12px] font-semibold uppercase tracking-[0.14em] text-white/60">
-          Career intelligence
-        </p>
-
-        <div className="relative max-w-[480px]">
-          <h2 className="text-[40px] font-semibold leading-[1.1] tracking-tight">
-            Your network. Your skills. <span className="accent-serif">Your next opportunity.</span>
-          </h2>
-
-          <ul className="mt-10 flex flex-col gap-5">
-            {VALUE_POINTS.map((p) => (
-              <li key={p.title} className="flex gap-3.5">
-                <span
-                  aria-hidden
-                  className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/10 text-[12px] text-white"
-                >
-                  {"\u2713"}
-                </span>
-                <span>
-                  <span className="block text-[15px] font-medium">{p.title}</span>
-                  <span className="mt-0.5 block text-[14px] leading-relaxed text-white/65">{p.body}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <p className="relative text-[12px] text-white/50">ASCENDR</p>
-      </div>
     </main>
   );
 }
