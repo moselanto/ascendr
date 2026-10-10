@@ -47,7 +47,12 @@ export const NAV_GROUPS: NavGroup[] = [
 
 export const ADMIN_GROUP: NavGroup = {
   label: "Admin",
-  items: [{ href: "/app/admin/metrics", label: "Platform metrics", icon: "▤" }],
+  items: [
+    { href: "/app/admin", label: "Admin console", icon: "▣" },
+    { href: "/app/admin/funders", label: "Funder metrics", icon: "▤" },
+    { href: "/app/admin/fees", label: "Hire fees", icon: "◈" },
+    { href: "/app/admin/sponsors", label: "Sponsor codes", icon: "✦" },
+  ],
 };
 
 export function isActive(pathname: string, href: string) {
