@@ -24,12 +24,22 @@ export async function sendConnectionRequest(formData: FormData) {
       `and(requester_id.eq.${profile.id},addressee_id.eq.${addresseeId}),and(requester_id.eq.${addresseeId},addressee_id.eq.${profile.id})`
     )
     .maybeSingle();
-  if (!existing) {
-    await supabase.from("connections").insert({
+  if (existing == null) {
+    const { error } = await supabase.from("connections").insert({
       requester_id: profile.id,
       addressee_id: addresseeId,
       status: "pending",
     });
+    if (error == null) {
+      await supabase.from("notifications").insert({
+        user_id: addresseeId,
+        type: "connection_request",
+        actor_id: profile.id,
+        entity_type: "profile",
+        entity_id: profile.id,
+        body: `${profile.full_name || "Someone"} wants to connect with you`,
+      });
+    }
   }
   revalidatePath("/app/networking");
   revalidatePath(`/app/members/${addresseeId}`);
@@ -50,14 +60,29 @@ export async function respondToConnection(formData: FormData) {
   const supabase = createClient();
   // RLS ensures only a party to the connection can update; also require the
   // caller be the addressee of a pending request.
-  await supabase
+  const { data: updated } = await supabase
     .from("connections")
     .update({ status: decision, responded_at: new Date().toISOString() })
     .eq("id", connectionId)
     .eq("addressee_id", profile.id)
-    .eq("status", "pending");
+    .eq("status", "pending")
+    .select("requester_id")
+    .maybeSingle();
+
+  if (updated && decision === "accepted") {
+    await supabase.from("notifications").insert({
+      user_id: updated.requester_id,
+      type: "connection_accepted",
+      actor_id: profile.id,
+      entity_type: "profile",
+      entity_id: profile.id,
+      body: `${profile.full_name || "Someone"} accepted your connection request`,
+    });
+  }
 
   revalidatePath("/app/networking");
+  revalidatePath("/app", "layout");
+  backWithToast(decision === "accepted" ? "Connection accepted" : "Request declined", "/app/networking");
 }
 
 /** Send a direct message to another profile. */
@@ -71,23 +96,34 @@ export async function sendDirectMessage(formData: FormData) {
   if (recipientId === profile.id) return;
 
   const supabase = createClient();
-  await supabase.from("direct_messages").insert({
+  const { error } = await supabase.from("direct_messages").insert({
     sender_id: profile.id,
     recipient_id: recipientId,
-    body,
+    body: body.slice(0, 4000),
   });
+  if (error) return { ok: false as const, error: error.message };
 
-  // Notify the recipient.
-  await supabase.from("notifications").insert({
-    user_id: recipientId,
-    type: "dm",
-    actor_id: profile.id,
-    entity_type: "profile",
-    entity_id: profile.id,
-    body: `${profile.full_name || "Someone"} sent you a message`,
-  });
+  // Notify the recipient, once per unread conversation (no spam per message).
+  const { count } = await supabase
+    .from("notifications")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", recipientId)
+    .eq("type", "dm")
+    .eq("actor_id", profile.id)
+    .is("read_at", null);
+  if ((count ?? 0) === 0) {
+    await supabase.from("notifications").insert({
+      user_id: recipientId,
+      type: "dm",
+      actor_id: profile.id,
+      entity_type: "profile",
+      entity_id: profile.id,
+      body: `${profile.full_name || "Someone"} sent you a message`,
+    });
+  }
 
-  revalidatePath(`/app/networking?dm=${recipientId}`);
+  revalidatePath("/app/networking");
+  return { ok: true as const };
 }
 
 /** Mark all messages from a given sender as read (recipient = current user). */
@@ -101,4 +137,13 @@ export async function markDmRead(senderId: string) {
     .eq("sender_id", senderId)
     .eq("recipient_id", profile.id)
     .is("read_at", null);
+  // Opening the conversation also clears its message notification.
+  await supabase
+    .from("notifications")
+    .update({ read_at: new Date().toISOString() })
+    .eq("user_id", profile.id)
+    .eq("type", "dm")
+    .eq("actor_id", senderId)
+    .is("read_at", null);
+  revalidatePath("/app", "layout");
 }

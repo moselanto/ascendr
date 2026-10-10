@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signOut } from "@/app/login/actions";
 import { Avatar } from "@/components/ui/Avatar";
 import NotificationBell from "./NotificationBell";
+import InboxLive from "./InboxLive";
 import { AppSidebar, AppCrumb, MobileNav } from "./AppNav";
 import Toast from "@/components/ui/Toast";
 
@@ -86,13 +87,19 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     .limit(30);
 
   const communitiesUnread = await hasUnreadAnywhere(supabase, profile.id);
+  const { count: dmUnreadCount } = await supabase
+    .from("direct_messages")
+    .select("id", { count: "exact", head: true })
+    .eq("recipient_id", profile.id)
+    .is("read_at", null);
+  const messagesUnread = (dmUnreadCount ?? 0) > 0;
 
 
   const isAdmin = profile.role === "admin";
 
   return (
     <div className="min-h-screen bg-surface">
-      <AppSidebar isAdmin={isAdmin} communitiesUnread={communitiesUnread} streak={streak?.current_len ?? 0} />
+      <AppSidebar isAdmin={isAdmin} communitiesUnread={communitiesUnread} messagesUnread={messagesUnread} streak={streak?.current_len ?? 0} />
 
       <div className="flex min-h-screen flex-col md:pl-[240px]">
         <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border bg-white/90 px-5 backdrop-blur md:px-8">
@@ -127,7 +134,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <main className="mx-auto w-full max-w-[1400px] flex-1 px-5 pb-24 pt-7 md:px-8 md:pb-12">{children}</main>
       </div>
 
-      <MobileNav communitiesUnread={communitiesUnread} />
+      <MobileNav communitiesUnread={communitiesUnread} messagesUnread={messagesUnread} />
+      <InboxLive meId={profile.id} />
 
       <Suspense fallback={null}>
         <Toast />

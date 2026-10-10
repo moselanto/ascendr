@@ -25,6 +25,7 @@ export default function DmThread({
 }) {
   const [messages, setMessages] = useState<Msg[]>(initialMessages);
   const [body, setBody] = useState("");
+  const [sendError, setSendError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -86,6 +87,7 @@ export default function DmThread({
   function submit(e: React.FormEvent) {
     e.preventDefault();
     const text = body.trim();
+    setSendError(null);
     if (!text) return;
     // Optimistic append.
     setMessages((prev) => [
@@ -97,7 +99,17 @@ export default function DmThread({
     const fd = new FormData();
     fd.append("recipient_id", peerId);
     fd.append("body", text);
-    startTransition(() => sendDirectMessage(fd));
+    const tmpId = `tmp-${Date.now()}`;
+    startTransition(async () => {
+      const res = await sendDirectMessage(fd);
+      if (res && res.ok === false) {
+        // Roll back the optimistic bubble and give the text back.
+        setMessages((prev) => prev.filter((m) => m.id.startsWith("tmp-") === false || m.body !== text));
+        setBody(text);
+        setSendError("Message not sent. Check your connection and try again.");
+      }
+    });
+    void tmpId;
   }
 
   const firstName = (peerName || "").split(" ")[0] || "them";
@@ -134,6 +146,11 @@ export default function DmThread({
           })
         )}
       </div>
+      {sendError && (
+        <p role="alert" className="border-t border-border bg-danger/5 px-4 py-2 text-[12px] text-danger">
+          {sendError}
+        </p>
+      )}
       <form onSubmit={submit} className="flex items-center gap-2 border-t border-border bg-white p-3">
         <input
           value={body}

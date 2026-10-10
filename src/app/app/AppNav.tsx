@@ -71,10 +71,12 @@ export function titleFor(pathname: string, groups: NavGroup[]) {
 export function AppSidebar({
   isAdmin,
   communitiesUnread,
+  messagesUnread = false,
   streak,
 }: {
   isAdmin: boolean;
   communitiesUnread: boolean;
+  messagesUnread?: boolean;
   streak: number;
 }) {
   const pathname = usePathname() ?? "/app";
@@ -99,7 +101,7 @@ export function AppSidebar({
             <div className="flex flex-col gap-0.5">
               {g.items.map((n) => {
                 const active = isActive(pathname, n.href);
-                const showDot = n.href === "/app/communities" && communitiesUnread;
+                const showDot = (n.href === "/app/communities" && communitiesUnread) || (n.href === "/app/networking" && messagesUnread);
                 return (
                   <Link
                     key={n.href}
@@ -154,7 +156,13 @@ const PRIMARY_MOBILE = ["/app", "/app/career", "/app/opportunities", "/app/mento
  * every destination grouped as in the sidebar. Replaces the scrolling strip
  * of 14 icons, which was hard to scan on a phone.
  */
-export function MobileNav({ communitiesUnread }: { communitiesUnread: boolean }) {
+export function MobileNav({
+  communitiesUnread,
+  messagesUnread = false,
+}: {
+  communitiesUnread: boolean;
+  messagesUnread?: boolean;
+}) {
   const pathname = usePathname() ?? "/app";
   const [open, setOpen] = useState(false);
   const all = NAV_GROUPS.flatMap((g) => g.items);
@@ -174,7 +182,7 @@ export function MobileNav({ communitiesUnread }: { communitiesUnread: boolean })
                 <div className="grid grid-cols-2 gap-2">
                   {g.items.map((n) => {
                     const active = isActive(pathname, n.href);
-                    const showDot = n.href === "/app/communities" && communitiesUnread;
+                    const showDot = (n.href === "/app/communities" && communitiesUnread) || (n.href === "/app/networking" && messagesUnread);
                     return (
                       <Link
                         key={n.href}
@@ -219,7 +227,7 @@ export function MobileNav({ communitiesUnread }: { communitiesUnread: boolean })
         >
           <span className={`flex h-7 w-10 items-center justify-center rounded-full text-[15px] ${moreActive || open ? "bg-ink text-white" : ""}`}>{"\u2261"}</span>
           <span className="text-[10px] font-medium leading-tight">More</span>
-          {communitiesUnread && <span className="absolute right-4 top-1.5 h-2 w-2 rounded-full bg-danger" />}
+          {(communitiesUnread || messagesUnread) && <span className="absolute right-4 top-1.5 h-2 w-2 rounded-full bg-danger" />}
         </button>
       </nav>
     </>
