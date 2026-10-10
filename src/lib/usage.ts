@@ -24,7 +24,7 @@ export type QuotaBucket =
   | "ai:mentor-ask"
   | "ai:mentor-ingest";
 
-export type Tier = "free" | "pro" | "premium";
+export type Tier = "free" | "starter" | "pro" | "premium";
 
 /**
  * Daily call limits per tier.
@@ -34,14 +34,14 @@ export type Tier = "free" | "pro" | "premium";
  * scripted loop stops within a few dollars. Tune once real usage data exists.
  */
 export const LIMITS: Record<QuotaBucket, Record<Tier, number>> = {
-  "ai:coach":             { free: 25, pro: 200, premium: 600 },
-  "ai:career-plan":       { free: 3,  pro: 25,  premium: 100 },
-  "ai:career-plan-step":  { free: 20, pro: 150, premium: 500 },
-  "ai:interview":         { free: 5,  pro: 50,  premium: 200 },
-  "ai:resume-review":     { free: 3,  pro: 30,  premium: 120 },
-  "ai:mentor-ask":        { free: 20, pro: 150, premium: 500 },
+  "ai:coach":             { free: 25, starter: 100, pro: 200, premium: 600 },
+  "ai:career-plan":       { free: 3, starter: 10,  pro: 25,  premium: 100 },
+  "ai:career-plan-step":  { free: 20, starter: 75, pro: 150, premium: 500 },
+  "ai:interview":         { free: 5, starter: 20,  pro: 50,  premium: 200 },
+  "ai:resume-review":     { free: 3, starter: 12,  pro: 30,  premium: 120 },
+  "ai:mentor-ask":        { free: 20, starter: 75, pro: 150, premium: 500 },
   // Ingestion is the expensive one: embeddings scale with document size.
-  "ai:mentor-ingest":     { free: 2,  pro: 20,  premium: 60 },
+  "ai:mentor-ingest":     { free: 2, starter: 8,  pro: 20,  premium: 60 },
 };
 
 const WINDOW_SECS = 86_400; // 24h fixed window

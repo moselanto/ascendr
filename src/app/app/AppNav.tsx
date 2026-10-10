@@ -139,13 +139,16 @@ export function AppSidebar({
             <ul className="mt-2 space-y-1 text-[12px] text-white/70">
               <li>{"\u2713"} 8x more AI coaching</li>
               <li>{"\u2713"} 10x interview practice</li>
-              <li>{"\u2713"} Deeper readiness insight</li>
+              <li>{"\u2713"} Run your own talent network</li>
             </ul>
+            <p className="mt-2.5 text-[12px] text-white/60">
+              From <span className="font-semibold text-white">$99</span>/month
+            </p>
             <Link
               href="/app/pro"
               className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-ink transition-colors hover:bg-brand-50"
             >
-              Explore Pro <span aria-hidden>{"\u2192"}</span>
+              See plans <span aria-hidden>{"\u2192"}</span>
             </Link>
           </div>
         </div>
