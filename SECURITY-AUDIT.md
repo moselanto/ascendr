@@ -337,7 +337,7 @@ fundraising push.
 | 4 | M-3 auth throttling | Medium | ~1 day |
 | 5 | ~~Snapshot purge when a member stops sharing~~ Done in 0020 | Medium | Done |
 | 6 | ~~Webhook replay protection (event-id de-duplication)~~ Done in 0021 | Low | Done |
-| 7 | CSP from report-only to enforcing, with nonces | Medium | 1 day |
+| 7 | ~~CSP from report-only to enforcing~~ Enforcing since 10 Oct 2026 (nonces still a later hardening step) | Medium | Done |
 | 8 | M-6 migration workflow | Medium | 2-3 days |
 | 9 | L-1, L-2 CI and scanning | Low | 2-3 days |
 

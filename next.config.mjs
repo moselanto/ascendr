@@ -5,8 +5,9 @@
  * Applied at the edge by Vercel to every route, so there is nothing to
  * remember to add per-page and no way for a new route to miss them.
  *
- * On the Content-Security-Policy below: it is deliberately Report-Only for
- * now. See the note above the policy before switching it to enforcing.
+ * The Content-Security-Policy below is ENFORCING (switched from Report-Only
+ * on 10 Oct 2026). To roll back, rename the key to
+ * "Content-Security-Policy-Report-Only" and redeploy.
  */
 
 /** @type {import('next').NextConfig} */
@@ -74,7 +75,7 @@ const securityHeaders = [
   // of normal use, fix whatever legitimately reports, then rename this key to
   // "Content-Security-Policy". Do that as its own change, not bundled with
   // anything else, so a rollback is one revert.
-  { key: "Content-Security-Policy-Report-Only", value: csp },
+  { key: "Content-Security-Policy", value: csp },
 ];
 
 const nextConfig = {
