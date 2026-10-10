@@ -264,6 +264,8 @@ migrations in CI.
 ## Low
 
 ### L-1 — No dependency scanning
+
+**Status:** Partly resolved. Dependabot (weekly npm, monthly Actions) and a report-only `npm audit` step in CI. Open: Next 14.2 has critical/high advisories fixed only in Next 15.5.24+; image optimisation is disabled (`images.unoptimized`) to remove the critical AVIF exposure until the upgrade.
 No Dependabot, no `npm audit` in CI, no lockfile policy. Five runtime
 dependencies keeps exposure small, but nothing would surface a known CVE.
 
