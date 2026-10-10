@@ -55,10 +55,8 @@ export async function completeOnboarding(formData: FormData) {
   // metric all key off `career_goals`, so without this they would silently
   // see nothing.
   //
-  // target_role_id stays null until the free-text title can be resolved
-  // against role_profiles, which needs the ESCO seed. analyzeGap() handles a
-  // null target role by returning band "unknown" rather than failing.
-  // Resolve the chosen title to a real role so gap analysis works from day one.
+  // The role step is a pick-list of role_profiles titles, so the chosen
+  // title resolves to a real role and gap analysis works from day one.
   let targetRoleId: string | null = null;
   if (targetRoles[0]) {
     const { data: role } = await supabase

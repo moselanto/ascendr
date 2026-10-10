@@ -122,11 +122,12 @@ export default function OnboardingFlow({ roles, firstName }: { roles: string[]; 
           <select
             id="target_roles"
             name="target_roles"
+            required
             value={targetRole}
             onChange={(e) => setTargetRole(e.target.value)}
             className={`${inputCls} appearance-none`}
           >
-            <option value="">Choose a role</option>
+            <option value="">Choose a role ({roles.length} available)</option>
             {roles.map((r) => (
               <option key={r} value={r}>
                 {r}
@@ -134,14 +135,12 @@ export default function OnboardingFlow({ roles, firstName }: { roles: string[]; 
             ))}
           </select>
         ) : (
-          <input
-            id="target_roles"
-            name="target_roles"
-            value={targetRole}
-            onChange={(e) => setTargetRole(e.target.value)}
-            placeholder="e.g. Product Manager"
-            className={inputCls}
-          />
+          // Only the roles in the catalogue can be analysed, so never accept free
+          // text here: a typed title that matches no role leaves the member with
+          // an empty career plan.
+          <p role="status" className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[13px] leading-relaxed text-amber-900">
+            Role options couldn&apos;t load right now. Use Skip for now and set your goal later from Career intelligence.
+          </p>
         )}
         <p className="mt-2 text-[12px] text-text-secondary">
           We compare your skills against this role&apos;s requirements. You can change it any time.
