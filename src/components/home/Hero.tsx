@@ -131,6 +131,12 @@ export function Hero() {
           </div>
 
           <p className="mt-5 text-[14px] text-text-secondary">Free to start. No credit card required.</p>
+          <p className="mt-2 text-[14px] text-text-secondary">
+            Run a fund, accelerator or university?{" "}
+            <Link href="/networks" className="font-medium text-ink underline-offset-4 hover:underline">
+              See who in your network is ready for the roles you need {"\u2192"}
+            </Link>
+          </p>
         </div>
 
         <ProductPreview />

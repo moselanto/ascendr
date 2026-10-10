@@ -155,10 +155,11 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                 See who in your network is ready for the roles you need, and grow the rest.
               </h2>
               <ul className="mt-5 space-y-2 text-[14px] text-white/75">
-                <li>Invite members with one link</li>
+                <li>Invite members with one link. They choose what they share.</li>
                 <li>Add the roles your portfolio is hiring for</li>
                 <li>Get a readiness map: ready now, within 90 days, developing</li>
-                <li>Track intros, interviews and hires from inside the network</li>
+                <li>Invite members onto a pathway and watch readiness change over time</li>
+                <li>Propose introductions the member consents to, then track interviews and hires</li>
               </ul>
               <Link href="/networks" className="mt-6 inline-flex rounded-full bg-white px-4 py-2 text-[13px] font-medium text-ink hover:bg-brand-50">
                 See the interactive demo
