@@ -176,11 +176,11 @@ export default async function NetworkPage(props: { searchParams: Promise<{ org?:
             <form action={createOrganization} className="mt-5 space-y-3">
               <label className="block text-[12px] font-medium text-text-secondary">
                 Name
-                <input name="name" required minLength={2} maxLength={120} placeholder="e.g. Northstar Ventures" className="mt-1 block w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink" />
+                <input name="name" required minLength={2} maxLength={120} placeholder="e.g. Northstar Ventures" className="mt-1 block w-full rounded-xl border border-border px-3 py-2.5 text-[14px] text-ink" />
               </label>
               <label className="block text-[12px] font-medium text-text-secondary">
                 Type
-                <select name="kind" className="mt-1 block w-full rounded-lg border border-border bg-white px-3 py-2.5 text-[14px] text-ink">
+                <select name="kind" className="mt-1 block w-full rounded-xl border border-border bg-white px-3 py-2.5 text-[14px] text-ink">
                   {Object.entries(KIND_LABEL).map(([k, v]) => (
                     <option key={k} value={k}>
                       {v}
@@ -705,7 +705,7 @@ export default async function NetworkPage(props: { searchParams: Promise<{ org?:
             <input type="hidden" name="org" value={current.id} />
             <label className="text-[12px] font-medium text-text-secondary">
               Role
-              <select name="role_profile_id" required className="mt-1 block w-full rounded-lg border border-border bg-white px-2.5 py-2 text-[13px] text-ink">
+              <select name="role_profile_id" required className="mt-1 block w-full rounded-xl border border-border bg-white px-2.5 py-2 text-[13px] text-ink">
                 {catalog.length === 0 ? <option value="">Run the skills import first</option> : null}
                 {catalog.map((c) => (
                   <option key={c.id} value={c.id}>
@@ -716,11 +716,11 @@ export default async function NetworkPage(props: { searchParams: Promise<{ org?:
             </label>
             <label className="text-[12px] font-medium text-text-secondary">
               Company
-              <input name="company" required maxLength={120} placeholder="Portfolio company" className="mt-1 block w-full rounded-lg border border-border px-2.5 py-2 text-[13px] text-ink" />
+              <input name="company" required maxLength={120} placeholder="Portfolio company" className="mt-1 block w-full rounded-xl border border-border px-2.5 py-2 text-[13px] text-ink" />
             </label>
             <label className="text-[12px] font-medium text-text-secondary">
               Openings
-              <input name="openings" type="number" min={1} max={500} defaultValue={1} className="mt-1 block w-full rounded-lg border border-border px-2.5 py-2 text-[13px] text-ink" />
+              <input name="openings" type="number" min={1} max={500} defaultValue={1} className="mt-1 block w-full rounded-xl border border-border px-2.5 py-2 text-[13px] text-ink" />
             </label>
             <button
               disabled={usage?.rolesFull ?? false}
@@ -737,7 +737,7 @@ export default async function NetworkPage(props: { searchParams: Promise<{ org?:
           <h2 className="border-b border-border px-6 py-4 text-[16px] font-semibold text-ink">Invite members</h2>
           <form action={createInvite} className="flex gap-2 px-6 pt-5">
             <input type="hidden" name="org" value={current.id} />
-            <input name="label" maxLength={80} placeholder="Label, e.g. Portfolio founders" className="flex-1 rounded-lg border border-border px-3 py-2 text-[13px] text-ink" />
+            <input name="label" maxLength={80} placeholder="Label, e.g. Portfolio founders" className="flex-1 rounded-xl border border-border px-3 py-2 text-[13px] text-ink" />
             <button className="rounded-full bg-ink px-4 py-2 text-[13px] font-medium text-white hover:bg-ink-700">Create link</button>
           </form>
           <p className="px-6 pt-2 text-[12px] text-text-secondary">Links last 30 days. Anyone with the link can join, so share it with your members directly.</p>
@@ -760,11 +760,11 @@ export default async function NetworkPage(props: { searchParams: Promise<{ org?:
                         readOnly
                         value={`${origin}/app/network/join?code=${i.code}`}
                         aria-label="Invite link"
-                        className="flex-1 rounded-lg border border-border bg-surface px-3 py-1.5 font-mono text-[12px] text-ink"
+                        className="flex-1 rounded-xl border border-border bg-surface px-3 py-1.5 font-mono text-[12px] text-ink"
                       />
                       <form action={revokeInvite}>
                         <input type="hidden" name="id" value={i.id} />
-                        <button className="rounded-lg border border-border px-2.5 py-1.5 text-[12px] text-text-secondary hover:text-danger">Revoke</button>
+                        <button className="rounded-xl border border-border px-2.5 py-1.5 text-[12px] text-text-secondary hover:text-danger">Revoke</button>
                       </form>
                     </div>
                   </li>

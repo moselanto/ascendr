@@ -222,18 +222,18 @@ export default async function LearnPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
-          <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
-            <p className="text-[12px] font-medium text-text-secondary">Core skills to learn</p>
-            <p className="nums mt-1 text-[28px] font-semibold text-ink">{goal ? essentialGaps.length : "–"}</p>
+        <div className="grid grid-cols-3 gap-3 lg:grid-cols-1 lg:gap-4">
+          <div className="rounded-2xl border border-border bg-white p-4 shadow-card md:p-5">
+            <p className="text-[11px] font-medium leading-tight text-text-secondary md:text-[12px]">Core skills to learn</p>
+            <p className="nums mt-1 text-[24px] font-semibold text-ink md:text-[28px]">{goal ? essentialGaps.length : "–"}</p>
           </div>
-          <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
-            <p className="text-[12px] font-medium text-text-secondary">Learning steps done</p>
-            <p className="nums mt-1 text-[28px] font-semibold text-ink">{learnDone}</p>
+          <div className="rounded-2xl border border-border bg-white p-4 shadow-card md:p-5">
+            <p className="text-[11px] font-medium leading-tight text-text-secondary md:text-[12px]">Learning steps done</p>
+            <p className="nums mt-1 text-[24px] font-semibold text-ink md:text-[28px]">{learnDone}</p>
           </div>
-          <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
-            <p className="text-[12px] font-medium text-text-secondary">Community courses</p>
-            <p className="nums mt-1 text-[28px] font-semibold text-ink">{courses.length}</p>
+          <div className="rounded-2xl border border-border bg-white p-4 shadow-card md:p-5">
+            <p className="text-[11px] font-medium leading-tight text-text-secondary md:text-[12px]">Community courses</p>
+            <p className="nums mt-1 text-[24px] font-semibold text-ink md:text-[28px]">{courses.length}</p>
           </div>
         </div>
       </div>
@@ -345,7 +345,7 @@ export default async function LearnPage() {
 
         <section>
           <SectionTitle>Certificates</SectionTitle>
-          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+          <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center">
             <p className="text-[15px] font-semibold text-ink">No certificates yet</p>
             <p className="mt-1 text-[14px] text-text-secondary">
               Earned a certification on Coursera, LinkedIn or elsewhere? Log it as a win and it shows on your outcomes.
