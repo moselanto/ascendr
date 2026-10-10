@@ -3,6 +3,9 @@ import { Hero } from "@/components/home/Hero";
 import { FourQuestions } from "@/components/home/FourQuestions";
 import { CareerJourney } from "@/components/home/CareerJourney";
 import { RoleExplorer } from "@/components/home/RoleExplorer";
+import { TrustStrip } from "@/components/home/TrustStrip";
+import { NetworksSection } from "@/components/home/NetworksSection";
+import { PricingSection } from "@/components/home/PricingSection";
 import { Faq } from "@/components/home/Faq";
 import { ClosingCta } from "@/components/home/ClosingCta";
 import { SiteFooter } from "@/components/home/SiteFooter";
@@ -24,9 +27,12 @@ export default function Home({ searchParams }: { searchParams?: { role?: string 
     <main className="min-h-screen bg-bg text-text">
       <SiteHeader />
       <Hero />
+      <TrustStrip />
       <FourQuestions />
       <CareerJourney />
       <RoleExplorer selected={searchParams?.role} />
+      <NetworksSection />
+      <PricingSection />
       <Faq />
       <ClosingCta />
       <SiteFooter />

@@ -100,7 +100,7 @@ export function Hero() {
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-1 text-[13px] font-medium text-text-secondary">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
-            Career intelligence platform
+            Career intelligence for people and networks
           </span>
 
           <h1 className="mt-6 text-[42px] font-semibold leading-[1.05] tracking-[-0.035em] text-ink sm:text-[54px] lg:text-[62px]">
@@ -133,7 +133,7 @@ export function Hero() {
           <p className="mt-5 text-[14px] text-text-secondary">Free to start. No credit card required.</p>
           <p className="mt-2 text-[14px] text-text-secondary">
             Run a fund, accelerator or university?{" "}
-            <Link href="/networks" className="font-medium text-ink underline-offset-4 hover:underline">
+            <Link href="/#networks" className="font-medium text-ink underline-offset-4 hover:underline">
               See who in your network is ready for the roles you need {"→"}
             </Link>
           </p>

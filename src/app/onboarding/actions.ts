@@ -58,22 +58,36 @@ export async function completeOnboarding(formData: FormData) {
   // target_role_id stays null until the free-text title can be resolved
   // against role_profiles, which needs the ESCO seed. analyzeGap() handles a
   // null target role by returning band "unknown" rather than failing.
-  if (goal) {
-    const { data: existing } = await supabase
-      .from("career_goals")
+  // Resolve the chosen title to a real role so gap analysis works from day one.
+  let targetRoleId: string | null = null;
+  if (targetRoles[0]) {
+    const { data: role } = await supabase
+      .from("role_profiles")
       .select("id")
-      .eq("user_id", profile!.id)
-      .eq("status", "active")
+      .ilike("title", targetRoles[0])
+      .limit(1)
       .maybeSingle();
+    targetRoleId = role?.id ?? null;
+  }
 
-    if (!existing) {
-      await supabase.from("career_goals").insert({
-        user_id: profile!.id,
-        kind: goal,
-        target_title: targetRoles[0] ?? null,
-        ...(horizonMonths ? { horizon_months: horizonMonths } : {}),
-      });
-    }
+  // One active goal per member: update it if it exists, otherwise create it.
+  const goalRow = {
+    kind: goal ?? "switch",
+    target_title: targetRoles[0] ?? null,
+    target_role_id: targetRoleId,
+    ...(horizonMonths ? { horizon_months: horizonMonths } : {}),
+  };
+  const { data: existing } = await supabase
+    .from("career_goals")
+    .select("id")
+    .eq("user_id", profile!.id)
+    .eq("status", "active")
+    .limit(1)
+    .maybeSingle();
+  if (existing) {
+    await supabase.from("career_goals").update(goalRow).eq("id", existing.id);
+  } else if (goal || targetRoles[0]) {
+    await supabase.from("career_goals").insert({ user_id: profile!.id, ...goalRow });
   }
 
   // Career activation — the first of the four metrics in PRD.md section 10.
