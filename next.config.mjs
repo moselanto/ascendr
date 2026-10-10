@@ -55,7 +55,9 @@ const securityHeaders = [
   // Nothing in ASCENDR uses these, so deny them outright.
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+    // Camera and microphone are allowed for this site only: hosts use them to
+    // go live in community sessions. Third-party frames still get neither.
+    value: "camera=(self), microphone=(self), geolocation=(), interest-cohort=()",
   },
   { key: "X-DNS-Prefetch-Control", value: "on" },
   // REPORT-ONLY, on purpose.
