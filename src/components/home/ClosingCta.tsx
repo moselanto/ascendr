@@ -8,7 +8,7 @@ import { SIGNUP } from "@/components/home/links";
  */
 export function ClosingCta() {
   return (
-    <section className="bg-white px-6 pb-16 pt-16 md:pb-20 md:pt-20">
+    <section className="bg-white px-6 py-14 md:py-16">
       <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl bg-ink px-8 py-14 text-center md:px-16 md:py-16">
         <div aria-hidden className="bg-dots-light mask-radial absolute inset-0 opacity-60" />
 

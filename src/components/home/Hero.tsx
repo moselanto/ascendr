@@ -96,7 +96,7 @@ export function Hero() {
     <section className="relative overflow-hidden">
       <div aria-hidden className="bg-grid mask-fade-b pointer-events-none absolute inset-x-0 top-0 h-[520px]" />
 
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 pb-16 pt-12 md:pb-20 md:pt-16 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
+      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-6 pb-14 pt-12 md:pb-16 md:pt-14 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-ink/10 bg-white px-3 py-1 text-[13px] font-medium text-text-secondary">
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />

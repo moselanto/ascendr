@@ -16,7 +16,7 @@ const POINTS = [
 
 export function NetworksSection() {
   return (
-    <section id="networks" className="scroll-mt-20 bg-ink px-6 py-20 text-white md:py-24">
+    <section id="networks" className="scroll-mt-20 bg-ink px-6 py-14 text-white md:py-16">
       <div className="relative mx-auto max-w-6xl">
         <div aria-hidden className="bg-dots-light mask-radial pointer-events-none absolute inset-0 opacity-40" />
         <div className="relative grid items-center gap-12 lg:grid-cols-[1fr_1.05fr]">

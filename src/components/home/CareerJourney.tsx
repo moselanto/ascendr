@@ -15,7 +15,7 @@ export function CareerJourney() {
 
   return (
     <section id="journey" className="bg-white">
-      <div className="mx-auto grid max-w-6xl gap-12 px-6 py-16 md:py-20 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr]">
+      <div className="mx-auto grid max-w-6xl gap-12 px-6 py-14 md:py-16 lg:gap-16 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="lg:sticky lg:top-28 lg:self-start">
           <p className="text-[14px] font-medium text-brand-600">How it works · illustrative example</p>
           <h2 className="mt-3 text-[34px] font-semibold leading-[1.1] tracking-[-0.03em] text-ink md:text-[44px]">

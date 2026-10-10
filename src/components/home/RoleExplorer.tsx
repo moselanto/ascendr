@@ -49,7 +49,7 @@ export async function RoleExplorer({ selected }: { selected?: string }) {
   const shown = essential.slice(0, 14);
 
   return (
-    <section id="explore" className="scroll-mt-20 bg-surface px-6 py-16 md:py-20">
+    <section id="explore" className="scroll-mt-20 bg-surface px-6 py-14 md:py-16">
       <div className="mx-auto max-w-6xl">
         <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Explore a role</p>
         <h2 className="mt-2 text-[30px] font-semibold leading-[1.15] tracking-[-0.02em] text-ink md:text-[38px]">

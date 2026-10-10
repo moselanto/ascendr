@@ -43,7 +43,7 @@ export function PricingCards() {
 
 export function PricingSection() {
   return (
-    <section id="pricing" className="scroll-mt-20 bg-surface px-6 py-20 md:py-24">
+    <section id="pricing" className="scroll-mt-20 bg-surface px-6 py-14 md:py-16">
       <div className="mx-auto max-w-6xl">
         <div className="max-w-2xl">
           <p className="text-[14px] font-medium text-brand-600">Pricing</p>
