@@ -17,12 +17,15 @@ export default async function MemberProfile({ params }: { params: { id: string }
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id, full_name, handle, role, bio, verified_expert, created_at")
+    .select("*")
     .eq("id", params.id)
     .maybeSingle();
   if (profile == null) notFound();
 
   const isMe = me?.id === profile.id;
+  const extra = profile as { headline?: string | null; company?: string | null };
+  const headline = extra.headline ?? null;
+  const company = extra.company ?? null;
   const ctx = await getViewerContext(me?.id ?? "");
   const [card] = isMe ? [null] : await enrichPeople(ctx, [profile as never]);
 
@@ -74,6 +77,13 @@ export default async function MemberProfile({ params }: { params: { id: string }
                 {profile.full_name || "Member"}
                 {profile.verified_expert && <span className="rounded-full bg-brand-50 px-2 py-0.5 text-[11px] font-semibold text-brand-700">Verified expert</span>}
               </h1>
+              {(headline || company) && (
+                <p className="text-[14px] text-ink/80">
+                  {headline}
+                  {headline && company ? " \u00b7 " : ""}
+                  {company ? `at ${company}` : ""}
+                </p>
+              )}
               <p className="text-[13px] text-text-secondary">
                 {roleLabel}
                 {profile.handle ? ` \u00b7 @${profile.handle}` : ""} \u00b7 On ASCENDR since {since}

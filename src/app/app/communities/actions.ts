@@ -274,3 +274,50 @@ export async function markChannelRead(channelId: string) {
       { onConflict: "channel_id,user_id" }
     );
 }
+
+/** Leave a community. Owners cannot leave their own community. */
+export async function leaveCommunity(formData: FormData) {
+  const communityId = String(formData.get("community_id"));
+  const slug = String(formData.get("slug"));
+  const profile = await getCurrentProfile();
+  if (profile == null) redirect("/login");
+
+  const supabase = createClient();
+  const { data: m } = await supabase
+    .from("community_members")
+    .select("role")
+    .eq("community_id", communityId)
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  if (m == null) redirect(`/app/communities/${slug}`);
+  if (m.role === "owner") {
+    redirect(
+      `/app/communities/${slug}?error=${encodeURIComponent("Owners can't leave their own community.")}`
+    );
+  }
+
+  const { error } = await supabase
+    .from("community_members")
+    .delete()
+    .eq("community_id", communityId)
+    .eq("user_id", profile.id);
+  if (error) {
+    redirect(`/app/communities/${slug}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  const { data: c } = await supabase
+    .from("communities")
+    .select("member_count")
+    .eq("id", communityId)
+    .single();
+  if (c) {
+    await supabase
+      .from("communities")
+      .update({ member_count: Math.max(0, (c.member_count ?? 1) - 1) })
+      .eq("id", communityId);
+  }
+
+  revalidatePath("/app/communities");
+  revalidatePath(`/app/communities/${slug}`);
+  redirect(`/app/communities?toast=${encodeURIComponent("You left the community.")}`);
+}

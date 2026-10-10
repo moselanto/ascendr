@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import type { Profile } from "@/lib/types";
 import { updateProfile } from "./actions";
+import { signOut } from "@/app/login/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +19,8 @@ const GOAL_OPTIONS: { value: string; label: string }[] = [
 type ProfileWithGoals = Profile & {
   career_goal?: string | null;
   target_roles?: string[] | null;
+  headline?: string | null;
+  company?: string | null;
 };
 
 function initials(name: string | null | undefined) {
@@ -131,6 +134,17 @@ export default async function SettingsPage({
             <div>
               <label htmlFor="handle" className={label}>Handle</label>
               <input id="handle" name="handle" defaultValue={profile.handle ?? ""} placeholder="@yourname" className={input} />
+            </div>
+          </div>
+
+          <div className="mt-4 grid gap-4 md:grid-cols-2">
+            <div>
+              <label htmlFor="headline" className={label}>Headline</label>
+              <input id="headline" name="headline" maxLength={120} defaultValue={profile.headline ?? ""} placeholder="Product analyst moving into product management" className={input} />
+            </div>
+            <div>
+              <label htmlFor="company" className={label}>Current company</label>
+              <input id="company" name="company" maxLength={80} defaultValue={profile.company ?? ""} placeholder="Where you work today" className={input} />
             </div>
           </div>
 
@@ -290,6 +304,14 @@ export default async function SettingsPage({
             </div>
           )}
         </dl>
+        <div className="flex items-center justify-between gap-4 border-t border-border px-5 py-4">
+          <p className="text-[13px] text-text-secondary">Signed in on this device</p>
+          <form action={signOut}>
+            <button className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-danger/40 hover:text-danger">
+              Sign out
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

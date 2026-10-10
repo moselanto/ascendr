@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
-import { joinCommunity, createChannel, deleteChannel } from "../actions";
+import { joinCommunity, leaveCommunity, createChannel, deleteChannel } from "../actions";
 import ChannelChat from "./ChannelChat";
 import { AskMentorPanel } from "@/components/mentor/AskMentorPanel";
 import type { ChannelMessage, Community } from "@/lib/types";
@@ -219,9 +219,20 @@ export default async function CommunityHome({
                 </button>
               </form>
             ) : (
-              <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[12px] font-medium text-emerald-800">
-                {"\u2713"} Member
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[12px] font-medium text-emerald-800">
+                  {"\u2713"} Member
+                </span>
+                {membership?.role === "owner" ? null : (
+                  <form action={leaveCommunity}>
+                    <input type="hidden" name="community_id" value={c.id} />
+                    <input type="hidden" name="slug" value={c.slug} />
+                    <button className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-text-secondary hover:border-danger/40 hover:text-danger">
+                      Leave
+                    </button>
+                  </form>
+                )}
+              </div>
             )}
           </div>
         </div>

@@ -2,6 +2,7 @@ import { SiteHeader } from "@/components/home/SiteHeader";
 import { Hero } from "@/components/home/Hero";
 import { FourQuestions } from "@/components/home/FourQuestions";
 import { CareerJourney } from "@/components/home/CareerJourney";
+import { RoleExplorer } from "@/components/home/RoleExplorer";
 import { Faq } from "@/components/home/Faq";
 import { ClosingCta } from "@/components/home/ClosingCta";
 import { SiteFooter } from "@/components/home/SiteFooter";
@@ -18,13 +19,14 @@ export const dynamic = "force-dynamic";
  * Every section is a server component — the page ships no client JS. The FAQ
  * uses native <details> for the same reason.
  */
-export default function Home() {
+export default function Home({ searchParams }: { searchParams?: { role?: string } }) {
   return (
     <main className="min-h-screen bg-bg text-text">
       <SiteHeader />
       <Hero />
       <FourQuestions />
       <CareerJourney />
+      <RoleExplorer selected={searchParams?.role} />
       <Faq />
       <ClosingCta />
       <SiteFooter />
