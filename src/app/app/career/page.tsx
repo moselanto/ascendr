@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PendingButton } from "@/components/ui/PendingButton";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
@@ -285,7 +286,7 @@ export default async function CareerPage() {
                       <form action={markSkillHeld}>
                         <input type="hidden" name="skill_id" value={g.skillId} />
                         <input type="hidden" name="goal_id" value={goal.id} />
-                        <button className="rounded-full border border-ink/15 px-2.5 py-1 text-[11px] font-medium text-ink hover:border-ink/40">I have this</button>
+                        <PendingButton pendingLabel="Adding" className="rounded-full border border-ink/15 px-2.5 py-1 text-[11px] font-medium text-ink hover:border-ink/40">I have this</PendingButton>
                       </form>
                     </li>
                   ))}
