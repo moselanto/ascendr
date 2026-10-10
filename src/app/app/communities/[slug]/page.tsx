@@ -31,13 +31,14 @@ function initials(name: string) {
   );
 }
 
-export default async function CommunityHome({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { channel?: string; tab?: string; error?: string };
-}) {
+export default async function CommunityHome(
+  props: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ channel?: string; tab?: string; error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const profile = await getCurrentProfile();
   const supabase = createClient();
 

@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
  * Mentor Workspace — owner/moderator only.
  * Add content sources (paste text) that power this community's Mentor Clone.
  */
-export default async function MentorWorkspacePage({ params }: { params: { slug: string } }) {
+export default async function MentorWorkspacePage(props: { params: Promise<{ slug: string }> }) {
+  const params = await props.params;
   const profile = await getCurrentProfile();
   if (!profile) redirect("/login");
 

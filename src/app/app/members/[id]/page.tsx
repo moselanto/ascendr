@@ -12,7 +12,8 @@ export const dynamic = "force-dynamic";
  * Member profile. Answers, in order: who is this, why does ASCENDR think
  * they can help me, what do they know, and how do I start the conversation.
  */
-export default async function MemberProfile({ params }: { params: { id: string } }) {
+export default async function MemberProfile(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const supabase = createClient();
   const me = await getCurrentProfile();
 

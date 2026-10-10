@@ -32,11 +32,12 @@ function fmt(dt: string | null) {
   });
 }
 
-export default async function LiveSessionRoom({
-  params,
-}: {
-  params: { slug: string; sessionId: string };
-}) {
+export default async function LiveSessionRoom(
+  props: {
+    params: Promise<{ slug: string; sessionId: string }>;
+  }
+) {
+  const params = await props.params;
   const profile = await getCurrentProfile();
   const supabase = createClient();
 

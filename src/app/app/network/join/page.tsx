@@ -13,7 +13,8 @@ const KIND_LABEL: Record<string, string> = {
   other: "Network",
 };
 
-export default async function JoinNetworkPage({ searchParams }: { searchParams: { code?: string; error?: string } }) {
+export default async function JoinNetworkPage(props: { searchParams: Promise<{ code?: string; error?: string }> }) {
+  const searchParams = await props.searchParams;
   const code = (searchParams.code ?? "").trim();
   const supabase = createClient();
   const { data } = code ? await supabase.rpc("org_invite_preview", { p_code: code }) : { data: null };

@@ -4,7 +4,8 @@ import { getCurrentProfile } from "@/lib/data";
 import { resolveNotificationTarget, type NotifRow } from "@/lib/notifications";
 
 /** Open a notification: mark it read, then go to what it is about. */
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(req: Request, props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const origin = new URL(req.url).origin;
   const profile = await getCurrentProfile();
   if (profile == null) return NextResponse.redirect(new URL("/login", origin));

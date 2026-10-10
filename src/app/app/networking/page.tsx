@@ -37,11 +37,12 @@ const secondarySm =
   "rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40";
 const sectionTitle = "text-[12px] font-semibold uppercase tracking-[0.14em] text-text-secondary";
 
-export default async function NetworkingPage({
-  searchParams,
-}: {
-  searchParams: { dm?: string };
-}) {
+export default async function NetworkingPage(
+  props: {
+    searchParams: Promise<{ dm?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const me = await getCurrentProfile();
   const supabase = createClient();
   const myId = me!.id;

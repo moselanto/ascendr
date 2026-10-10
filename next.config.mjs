@@ -83,9 +83,6 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
 
-  // Next 14 needs this flag for src/instrumentation.ts (Sentry, M-2).
-  experimental: { instrumentationHook: true },
-
   // Removes "X-Powered-By: Next.js". Minor, but there is no reason to
   // advertise the framework and version to a scanner.
   poweredByHeader: false,

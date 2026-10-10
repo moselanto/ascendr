@@ -36,11 +36,12 @@ function cleanQuery(raw: string | string[] | undefined): string {
   return v.replace(/[,()*%\\:"']/g, " ").replace(/\s+/g, " ").trim().slice(0, 80);
 }
 
-export default async function AdminMembersPage({
-  searchParams,
-}: {
-  searchParams?: { q?: string | string[] };
-}) {
+export default async function AdminMembersPage(
+  props: {
+    searchParams?: Promise<{ q?: string | string[] }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const q = cleanQuery(searchParams?.q);
   const admin = tryAdminClient();
 

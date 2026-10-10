@@ -7,11 +7,12 @@ export const dynamic = "force-dynamic";
 
 type HostedCommunity = { name: string; slug: string };
 
-export default async function CreateHubPage({
-  searchParams,
-}: {
-  searchParams: { error?: string };
-}) {
+export default async function CreateHubPage(
+  props: {
+    searchParams: Promise<{ error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
   const supabase = createClient();
 

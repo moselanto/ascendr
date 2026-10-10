@@ -1,4 +1,4 @@
-import { headers } from "next/headers";
+import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import { redirect } from "next/navigation";
 
 /**
@@ -9,7 +9,7 @@ import { redirect } from "next/navigation";
  */
 export function backWithToast(message: string, fallback = "/app"): never {
   let path = fallback;
-  const ref = headers().get("referer");
+  const ref = (/* Next 15: synchronous access kept on purpose (temporary); see PR notes. */ headers() as unknown as UnsafeUnwrappedHeaders).get("referer");
   if (ref) {
     try {
       const u = new URL(ref);

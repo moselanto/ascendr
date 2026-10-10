@@ -27,7 +27,7 @@ export async function startCheckout(formData: FormData) {
   const email = user?.email;
   if (email == null) backWithToast("Your account has no email address for billing", "/app/plans");
 
-  const origin = headers().get("origin") ?? undefined;
+  const origin = (await headers()).get("origin") ?? undefined;
   const res = await paystack<{ authorization_url: string; reference: string }>("/transaction/initialize", {
     method: "POST",
     body: {

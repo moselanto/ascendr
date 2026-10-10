@@ -20,11 +20,12 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]["key"];
 
-export default async function AIStudioPage({
-  searchParams,
-}: {
-  searchParams: { tab?: string };
-}) {
+export default async function AIStudioPage(
+  props: {
+    searchParams: Promise<{ tab?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const tab: TabKey = (TABS.some((t) => t.key === searchParams.tab)
     ? searchParams.tab
     : "coaches") as TabKey;
