@@ -9,8 +9,8 @@ import type { ChannelMessage, Community } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 type Channel = { id: string; name: string; kind: string; position: number };
-type JoinedProfile = { id: string; full_name: string | null; handle: string | null; avatar_url: string | null; xp: number | null };
-type MemberRow = { user_id: string; role: string; profiles: JoinedProfile | JoinedProfile[] | null };
+type JoinedProfile = { id: string; full_name: string | null; handle: string | null; avatar_url: string | null };
+type MemberRow = { user_id: string; role: string; xp: number | null; profiles: JoinedProfile | JoinedProfile[] | null };
 
 // Top-level tabs shown on every community. `discussion` is the default view.
 const TABS: { key: string; label: string }[] = [
@@ -108,7 +108,7 @@ export default async function CommunityHome(
   if (isMember && (tab === "members" || tab === "leaderboard")) {
     const { data: rows } = await supabase
       .from("community_members")
-      .select("user_id, role, profiles:user_id(id, full_name, handle, avatar_url, xp)")
+      .select("user_id, role, xp, profiles:user_id(id, full_name, handle, avatar_url)")
       .eq("community_id", c.id)
       .eq("status", "active");
     members = (rows ?? [])
@@ -123,7 +123,7 @@ export default async function CommunityHome(
           full_name: p?.full_name || "Member",
           handle: p?.handle ?? null,
           avatar_url: p?.avatar_url ?? null,
-          xp: p?.xp ?? 0,
+          xp: r.xp ?? 0,
         };
       })
       .filter((m) => m.id);

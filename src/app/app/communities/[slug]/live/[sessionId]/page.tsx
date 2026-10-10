@@ -166,22 +166,49 @@ export default async function LiveSessionRoom(
       {/* Two-column live layout: stage + controls (left), Q&A/Chat rail (right) */}
       <div className="grid gap-5 lg:grid-cols-[1fr_360px]">
         <div className="flex flex-col gap-4">
-          <LiveStage
-            hostName={hostDisplay}
-            hostInitials={initialsOf(hostDisplay)}
-            isHost={isHost}
-            isLive={session.status === "live"}
-            watching={0}
-          />
-
-          {/* Interaction controls row (matches the screenshot: Raise hand · React · Poll) */}
-          <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-white p-3 shadow-card">
-            <LiveInteractions
-              sessionId={session.id}
-              meId={profile!.id}
-              meName={profile!.full_name || "Member"}
+          {session.status === "ended" ? (
+            // An ended session is not a room: no "Waiting for host", REC badge
+            // or Raise hand. Show the recording when there is one.
+            <div className="rounded-2xl border border-border bg-white p-6 shadow-card md:p-8">
+              <p className="text-[16px] font-semibold text-ink">This session has ended</p>
+              {session.recording_url ? (
+                <>
+                  <p className="mt-1 text-[14px] text-text-secondary">Watch the recording below. Questions and chat from the session are on the right.</p>
+                  <a
+                    href={session.recording_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+                  >
+                    Watch replay
+                  </a>
+                </>
+              ) : (
+                <p className="mt-1 text-[14px] text-text-secondary">
+                  No recording was saved for this session. Questions and chat from the session are on the right.
+                </p>
+              )}
+            </div>
+          ) : (
+            <>
+            <LiveStage
+              hostName={hostDisplay}
+              hostInitials={initialsOf(hostDisplay)}
+              isHost={isHost}
+              isLive={session.status === "live"}
+              watching={0}
             />
-          </div>
+
+            {/* Interaction controls row (matches the screenshot: Raise hand · React · Poll) */}
+            <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-border bg-white p-3 shadow-card">
+              <LiveInteractions
+                sessionId={session.id}
+                meId={profile!.id}
+                meName={profile!.full_name || "Member"}
+              />
+            </div>
+            </>
+          )}
 
           <div className="grid gap-3 sm:grid-cols-3">
             {[

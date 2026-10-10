@@ -75,7 +75,7 @@ export default async function AdminContentPage() {
       .limit(6),
     admin
       .from("feed_posts")
-      .select("id, kind, body, created_at, profiles(full_name, handle)", { count: "exact" })
+      .select("id, kind, body, created_at, profiles:author_id(full_name, handle)", { count: "exact" })
       .order("created_at", { ascending: false })
       .limit(6),
     admin

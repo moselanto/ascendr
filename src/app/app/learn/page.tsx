@@ -115,11 +115,15 @@ export default async function LearnPage() {
   const roleLower = roleTitle.toLowerCase();
 
   // Learning paths by role: real requirements from role_profiles (ESCO).
-  const [{ data: roleRows }, { data: reqRows }] = await Promise.all([
-    supabase.from("role_profiles").select("id, title").order("title"),
-    supabase.from("role_required_skills").select("role_id, importance, weight, skills(preferred_label)"),
-  ]);
-  const reqs = (reqRows ?? []) as unknown as RoleReq[];
+  // Requirements are loaded per role: one query for every role hits the API's
+  // 1,000-row cap and silently drops rows, which showed wrong skill counts.
+  const { data: roleRows } = await supabase.from("role_profiles").select("id, title").order("title");
+  const reqLists = await Promise.all(
+    ((roleRows ?? []) as { id: string }[]).map((r) =>
+      supabase.from("role_required_skills").select("role_id, importance, weight, skills(preferred_label)").eq("role_id", r.id)
+    )
+  );
+  const reqs = reqLists.flatMap((res) => (res.data ?? []) as unknown as RoleReq[]);
   const rolePaths = ((roleRows ?? []) as { id: string; title: string }[])
     .map((r) => {
       const mine = reqs.filter((q) => q.role_id === r.id);
