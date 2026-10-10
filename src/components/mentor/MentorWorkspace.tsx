@@ -3,7 +3,17 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Source = { id: string; title: string; status: string; created_at: string };
+type Source = {
+  id: string;
+  title: string;
+  status: string;
+  created_at: string;
+  total_chunks?: number | null;
+  done_chunks?: number | null;
+  error?: string | null;
+};
+
+type Progress = { status: string; total: number; done: number; error?: string };
 
 export function MentorWorkspace({
   communityId,
@@ -18,6 +28,30 @@ export function MentorWorkspace({
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const [progress, setProgress] = useState<Record<string, Progress>>({});
+
+  // Embeds the rest of a source batch by batch (migration 0025). Each call does
+  // a few seconds of work, so large files never hit the request time limit.
+  async function finish(sourceId: string, start?: Progress) {
+    let p: Progress = start ?? { status: "processing", total: 0, done: 0 };
+    setProgress((m) => ({ ...m, [sourceId]: p }));
+    for (let i = 0; i < 400 && p.status === "processing"; i++) {
+      try {
+        const res = await fetch("/api/ai/mentor/ingest/process", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ source_id: sourceId }),
+        });
+        const data = (await res.json()) as Progress & { error?: string };
+        p = { status: data.status ?? "failed", total: data.total ?? p.total, done: data.done ?? p.done, error: data.error };
+      } catch {
+        p = { ...p, status: "failed", error: "Network error. Resume to continue." };
+      }
+      setProgress((m) => ({ ...m, [sourceId]: p }));
+    }
+    router.refresh();
+    return p;
+  }
 
   function show(kind: "ok" | "err", text: string) {
     setMsg({ kind, text });
@@ -28,13 +62,19 @@ export function MentorWorkspace({
     const data = await res.json();
     if (!res.ok) {
       show("err", data.error || "Could not add source.");
-    } else {
-      show("ok", `Added "${data.title}" (${data.chunks} chunks embedded).`);
-      setTitle("");
-      setContent("");
-      if (fileRef.current) fileRef.current.value = "";
-      router.refresh();
+      return;
     }
+    setTitle("");
+    setContent("");
+    if (fileRef.current) fileRef.current.value = "";
+    router.refresh();
+    let p: Progress = { status: data.status, total: data.total, done: data.done, error: data.error };
+    if (p.status === "processing") {
+      show("ok", `Adding "${data.title}". You can keep working while it finishes.`);
+      p = await finish(data.source_id, p);
+    }
+    if (p.status === "ready") show("ok", `Added "${data.title}" (${p.total} sections ready).`);
+    else if (p.status === "failed") show("err", p.error || "Could not finish this source. Use Resume to try again.");
   }
 
   // Paste-text submit (JSON).
@@ -162,18 +202,46 @@ export function MentorWorkspace({
           </div>
         ) : (
           <ul className="divide-y divide-border rounded-2xl border border-border bg-white p-0 shadow-card">
-            {initialSources.map((s) => (
-              <li key={s.id} className="flex items-center justify-between gap-3 px-5 py-4">
-                <span className="truncate text-[14px] font-medium text-ink">{s.title}</span>
-                <span
-                  className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize ${
-                    s.status === "ready" ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"
-                  }`}
-                >
-                  {s.status}
-                </span>
-              </li>
-            ))}
+            {initialSources.map((s) => {
+              const live = progress[s.id];
+              const status = live?.status ?? s.status;
+              const total = live?.total || s.total_chunks || 0;
+              const done = live?.done ?? s.done_chunks ?? 0;
+              const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+              const running = live?.status === "processing";
+              const err = live?.error ?? s.error;
+              return (
+                <li key={s.id} className="px-5 py-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="truncate text-[14px] font-medium text-ink">{s.title}</span>
+                    <div className="flex shrink-0 items-center gap-2">
+                      {status !== "ready" && !running ? (
+                        <button
+                          type="button"
+                          onClick={() => finish(s.id)}
+                          className="rounded-full border border-ink/15 px-3 py-1 text-[12px] font-medium text-ink hover:border-ink/40"
+                        >
+                          Resume
+                        </button>
+                      ) : null}
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[12px] font-medium ${
+                          status === "ready" ? "bg-emerald-50 text-emerald-800" : status === "failed" ? "bg-danger/10 text-danger" : "bg-amber-50 text-amber-800"
+                        }`}
+                      >
+                        {status === "ready" ? "Ready" : status === "failed" ? "Stopped" : total > 0 ? `Processing ${pct}%` : "Processing"}
+                      </span>
+                    </div>
+                  </div>
+                  {status === "processing" && total > 0 ? (
+                    <div className="mt-2 h-1.5 rounded-full bg-surface">
+                      <div className="h-1.5 rounded-full bg-accent transition-all" style={{ width: `${pct}%` }} />
+                    </div>
+                  ) : null}
+                  {status === "failed" && err ? <p className="mt-1.5 text-[12px] text-danger">{err}</p> : null}
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>

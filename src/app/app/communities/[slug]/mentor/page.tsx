@@ -35,7 +35,7 @@ export default async function MentorWorkspacePage({ params }: { params: { slug: 
 
   const { data: sources } = await supabase
     .from("ai_sources")
-    .select("id, title, status, created_at")
+    .select("*")
     .eq("community_id", community.id)
     .order("created_at", { ascending: false });
 

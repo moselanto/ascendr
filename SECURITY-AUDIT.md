@@ -17,7 +17,7 @@ Status as of 10 October 2026 (re-audit after networks, storage and billing shipp
 | Severity | Count | Status |
 |---|---|---|
 | Critical | 1 | Resolved (C-1) |
-| High | 3 | 2 resolved (H-2, H-3), 1 open (H-1) |
+| High | 3 | 3 resolved (H-1, H-2, H-3) |
 | Medium | 6 | 1 resolved (M-1), 5 open |
 | Low | 5 | Open |
 
@@ -98,7 +98,7 @@ logic is not a substitute for a provider-side limit.
 
 ### H-1 — Ingestion runs on the request path
 
-**Status:** Open
+**Status:** Resolved in 0025. Upload saves chunks without embeddings; `/api/ai/mentor/ingest/process` embeds 64 per call with progress, failure reason and resume.
 **Affected:** `src/app/api/ai/mentor/ingest/route.ts`
 
 Chunking, embedding and batch insertion happen synchronously inside the HTTP
@@ -331,7 +331,7 @@ fundraising push.
 
 | Order | Item | Severity | Effort |
 |---|---|---|---|
-| 1 | H-1 async ingestion | High | 2-3 days |
+| 1 | ~~H-1 async ingestion~~ Done in 0025 | High | Done |
 | 2 | M-2 Sentry and alerting | Medium | ~1 day |
 | 3 | M-4 ingestion validation | Medium | 1-2 days |
 | 4 | M-3 auth throttling | Medium | ~1 day |

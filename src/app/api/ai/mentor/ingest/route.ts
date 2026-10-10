@@ -2,9 +2,12 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
-import { AI_CONFIGURED, embed, chunkText } from "@/lib/ai";
+import { AI_CONFIGURED, chunkText } from "@/lib/ai";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { processSourceBatch } from "@/lib/ingest";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 // Plain-text file types we can parse with zero extra dependencies.
 const TEXT_EXTS = [".txt", ".md", ".markdown", ".csv", ".text"];
@@ -14,8 +17,9 @@ const TEXT_EXTS = [".txt", ".md", ".markdown", ".csv", ".text"];
  * Accepts EITHER:
  *   - application/json: { community_id, title, content }   (paste text)
  *   - multipart/form-data: community_id, title?, file       (upload .txt/.md/.csv)
- * Owner/moderator only. Chunks + embeds into ai_chunks for the community's
- * Mentor Clone. Returns { ok, chunks, title }.
+ * Owner/moderator only. Saves the chunks, embeds the first batch, and returns
+ * { ok, source_id, title, status, total, done }. The client then calls
+ * /api/ai/mentor/ingest/process until status is "ready" (migration 0025).
  */
 export async function POST(req: Request) {
   const profile = await getCurrentProfile();
@@ -104,6 +108,9 @@ export async function POST(req: Request) {
   const quota = await consumeQuota(profile.id, "ai:mentor-ingest", await getTier(profile.id));
   if (!quota.allowed) return quotaExceededResponse(quota, "ai:mentor-ingest");
 
+  const chunks = chunkText(content);
+  if (chunks.length === 0) return NextResponse.json({ error: "There is no text to add." }, { status: 400 });
+
   // Record the source (with original text for reference).
   const { data: source, error: srcErr } = await supabase
     .from("ai_sources")
@@ -114,40 +121,37 @@ export async function POST(req: Request) {
       title,
       content,
       status: "processing",
+      total_chunks: chunks.length,
+      done_chunks: 0,
     })
     .select("id")
     .single();
   if (srcErr || !source) {
-    return NextResponse.json({ error: srcErr?.message || "Could not create source" }, { status: 500 });
+    const hint = /total_chunks|done_chunks/.test(srcErr?.message ?? "") ? " Run migration 0025 in Supabase." : "";
+    return NextResponse.json({ error: (srcErr?.message || "Could not create source") + hint }, { status: 500 });
   }
 
-  // Chunk + embed.
-  const chunks = chunkText(content);
-  const vectors = await embed(chunks);
-  if (vectors.length !== chunks.length) {
-    await supabase.from("ai_sources").update({ status: "processing" }).eq("id", source.id);
-    return NextResponse.json({ error: "Embedding failed. Check your OpenAI key/quota." }, { status: 502 });
-  }
-
-  const rows = chunks.map((content, i) => ({
+  // Save every chunk now, without embeddings. This is fast (no AI calls), so
+  // the upload can never time out; embeddings are filled in batch by batch.
+  const admin = createAdminClient();
+  const rows = chunks.map((text, i) => ({
     source_id: source.id,
     community_id: communityId,
     owner_id: profile.id,
     source_title: title,
     chunk_index: i,
-    content,
-    embedding: vectors[i],
+    content: text,
   }));
-
-  // Insert in batches to stay within payload limits.
-  const BATCH = 50;
+  const BATCH = 200;
   for (let i = 0; i < rows.length; i += BATCH) {
-    const { error } = await supabase.from("ai_chunks").insert(rows.slice(i, i + BATCH));
+    const { error } = await admin.from("ai_chunks").insert(rows.slice(i, i + BATCH));
     if (error) {
+      await admin.from("ai_sources").update({ status: "failed", error: error.message }).eq("id", source.id);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
   }
 
-  await supabase.from("ai_sources").update({ status: "ready" }).eq("id", source.id);
-  return NextResponse.json({ ok: true, chunks: rows.length, title });
+  // Embed the first batch straight away; the browser asks for the rest.
+  const progress = await processSourceBatch(source.id);
+  return NextResponse.json({ ok: true, source_id: source.id, title, ...progress });
 }
