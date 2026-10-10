@@ -82,6 +82,20 @@ not backed by real data. This has already had to be removed once.
 
 ---
 
+### 2.8 Consent before exposure
+
+Network admins may only see members with `share_career_data = true`, and only through the `SECURITY DEFINER` functions in 0013 and 0016. Never query `user_skills`, `career_goals` or `career_outcomes` for other members directly. An introduction never reaches a company before the member has consented.
+
+### 2.9 Billing state is server-only
+
+`subscriptions` is written only by the service role: the checkout action, the checkout callback and the Paystack webhook. Never add an insert or update policy for it, never trust a plan sent from the browser, and always verify the webhook signature.
+
+### 2.10 No placeholders in the product
+
+Do not ship "coming soon" tabs, dummy numbers or sample people in signed-in pages. If a feature is not built, leave it out. The only demo data allowed is the clearly labelled public demo at `/networks`.
+
+---
+
 ## 3. Codebase conventions
 
 ### 3.1 Identity — the most common mistake
@@ -124,7 +138,7 @@ create policy "<t>_write_own" on <t>
 
 ### 3.3 Migrations
 
-- Sequential, zero-padded, never edited once merged: `0012_<topic>.sql`
+- Sequential, zero-padded, never edited once merged. The next file is `0018_<topic>.sql`
 - Idempotent (`if not exists`, `on conflict do nothing`) — they are applied by
   hand in the Supabase SQL editor and get re-run
 - Additive by default. A destructive change needs its own PR and a stated
@@ -224,7 +238,8 @@ install it.
 
 A change is complete when:
 
-- [ ] `npm run build` and `npm run lint` pass
+- [ ] `npx tsc --noEmit -p . --noUnusedLocals --noUnusedParameters`, `npm run lint` and `npm run build` pass
+- [ ] No `any`, no unused imports, no commented-out code, no stray backslashes before `!` in generated files
 - [ ] RLS policies exist for any new table holding user data
 - [ ] Types in `src/lib/types.ts` match the schema
 - [ ] New AI routes consume quota

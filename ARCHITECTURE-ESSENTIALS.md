@@ -72,12 +72,17 @@ Current backing:
 | Node | Tables | State |
 |---|---|---|
 | Person | `profiles`, `profile_privacy` | Built |
-| Skills | `skills`, `user_skills` | Schema built, needs ESCO seed |
+| Skills | `skills`, `user_skills`, `role_profiles`, `role_required_skills` | Built, seeded from ESCO v1.2 |
 | Goals | `career_goals`, `career_plans` | Built |
 | Knowledge | `ai_sources`, `ai_chunks` | Built (RAG with citations) |
 | Relationships | `communities`, `community_members`, connections, `live_sessions` | Built |
-| Opportunities | — | **Not built** |
-| Outcomes | `career_actions`, `career_outcomes` | Schema built |
+| Opportunities | `saved_opportunities`, `organization_roles` | Built (matching, tracker, network roles) |
+| Outcomes | `career_actions`, `career_outcomes` | Built (ledger; network-confirmed steps are `partner_confirmed`) |
+
+Around the graph sit two newer layers:
+
+- **Networks** (`organizations`, `organization_roles`, `org_readiness_snapshots`, `org_pathway_invites`, `org_introductions`): readiness maps, trends, pathways and consented introductions for funds, accelerators and universities. Admins only reach member data through `SECURITY DEFINER` functions that honour each member's sharing switch.
+- **Billing** (`subscriptions`): Paystack plans in KES. `getTier()` turns the active plan into daily AI limits.
 
 The graph is a **projection over these tables**, not a separate store. Do not
 introduce a graph database or parallel node/edge tables that need dual writes.
@@ -89,27 +94,32 @@ introduce a graph database or parallel node/edge tables that need dual writes.
 ```
 src/
   app/
-    page.tsx              Public landing (~19KB, needs extraction)
-    login/, onboarding/   Auth flows
-    auth/callback/        OAuth handler
-    app/                  Authenticated product
+    page.tsx              Public homepage (composed from components/home)
+    login/, onboarding/   Auth and goal capture
+    networks/             Public networks demo
+    auth/callback/        Email confirmation handler
+    api/ai/               Metered OpenAI route handlers
+    api/paystack/webhook/ Signed billing webhook
+    app/                  Signed-in product
       page.tsx              Dashboard
-      ai/                   Coach, career plan, interview, resume
-      communities/[slug]/   Channels, live sessions, mentor clone
-      feed/, learn/, live/, members/, networking/, settings/
-      *-actions.ts          Server Actions
-    api/ai/               OpenAI route handlers
-  components/mentor/      Shared mentor UI
+      career/ learn/ opportunities/ outcomes/ ai/
+      members/ mentors/ networking/ communities/
+      network/              Network intelligence (organisations)
+      notifications/ search/ settings/ plans/ billing/ admin/
+      *-actions.ts, */actions.ts   Server actions
+  components/             home, app, people, mentor, networks, ui
   lib/
     ai.ts                 All model access
     data.ts               getCurrentProfile()
-    usage.ts              Quota enforcement
-    career/gap.ts         Skill gap engine
-    supabase/             client / server / middleware
+    usage.ts              Plans, daily limits, getTier()
+    billing.ts            Paystack helpers
+    career/               gap.ts, roadmap.ts, outcomes.ts
+    notifications.ts      Deep links, timeAgo()
+    supabase/             client / server / middleware / admin
     types.ts              Hand-written domain types
-    xp.ts
-  middleware.ts           Session refresh
-supabase/migrations/      0001–0011, applied in order
+  middleware.ts           Session refresh and /app guard
+supabase/migrations/      0001-0017, applied in order
+scripts/seed-esco.mjs     ESCO import
 ```
 
 ---
@@ -183,12 +193,11 @@ OPENAI_API_KEY                 # optional; AI degrades gracefully without it
 
 Read `SECURITY-AUDIT.md` before touching these:
 
-- Mentor ingestion chunks and embeds **on the request path** — large sources
-  time out and strand `ai_sources.status = 'processing'`
-- RAG similarity floor is `0.2`, loose enough to pass weak matches as grounded
-- No `error.tsx` / `loading.tsx` / `not-found.tsx` anywhere
-- No security headers in `next.config.mjs`
-- No tests, no CI
+- Mentor ingestion chunks and embeds **on the request path**: large sources can time out and strand `ai_sources.status = 'processing'`
+- Plan caps (network members, open roles) are shown on the plans page but not enforced
+- Readiness snapshots are kept after a member stops sharing
+- Types in `lib/types.ts` are hand-written, not generated from the schema
+- No automated tests or CI; run the four checks in `README.md` before merging
 
 ---
 

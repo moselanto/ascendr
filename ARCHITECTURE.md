@@ -165,6 +165,12 @@ read only in server modules and route handlers.
 | 0009 | `live_polls` | `live_polls`, `live_poll_votes` |
 | 0010 | `live_chat_presence_ai_studio` | Live chat, presence, AI studio |
 | 0011 | `career_graph` | **Career Intelligence foundation** (see 5.3) |
+| 0012 | `saved_opportunities` | Saved-opportunity tracker |
+| 0013 | `networks` | Organisations, invites, open roles; admin-only readiness, skill supply and overview functions (see 5.5) |
+| 0014 | `profile_headline_company` | `headline`, `company` on profiles |
+| 0015 | `profile_photos` | Public `avatars` storage bucket with per-user folder policies; `cover_url`, `location`, `website` |
+| 0016 | `network_pilot` | Readiness snapshots and trend, development pathways, consented introductions (see 5.5) |
+| 0017 | `billing` | `subscriptions` for Paystack plans (see 9) |
 
 Applied in order via the Supabase SQL editor. All idempotent.
 
@@ -231,6 +237,31 @@ similarity over the real tables. Revisit only if traversal depth exceeds three
 hops at scale.
 
 ---
+
+### 5.5 Networks and the pilot workflow (0013, 0016)
+
+An **organisation** (VC fund, accelerator, university, association) has admins and members. Members choose whether to share career data with it (`organization_members.share_career_data`), and can switch it off at any time.
+
+| Table | Purpose |
+|---|---|
+| `organizations`, `organization_members`, `organization_invites` | Tenancy, membership and invite links |
+| `organization_roles` | Roles the network is hiring for, each pointing at a `role_profiles` row |
+| `org_readiness_snapshots` | One row per role, member and day: readiness band, matched and essential skill counts |
+| `org_pathway_invites` | Admin invites a member to work toward a role; accepting makes it the member's active `career_goals` row |
+| `org_introductions` | `proposed` > member `consented` or `declined` > `introduced` > `interviewing` > `hired`, or `closed` |
+
+**Access model.** Admins never read member rows directly. Every admin read and every write goes through a `SECURITY DEFINER` function that first checks `is_org_admin()` (or that the caller is the member), and only ever includes members who are sharing:
+
+- Reads: `org_overview`, `org_members_list`, `org_readiness`, `org_skill_supply`, `org_readiness_trend`, `org_readiness_movers`, `org_pipeline`, `my_network_requests`
+- Writes: `create_organization`, `accept_org_invite`, `set_org_sharing`, `capture_org_readiness`, `org_invite_pathway`, `respond_pathway`, `org_propose_intro`, `respond_intro`, `org_advance_intro`
+
+**Readiness bands** come from `org_readiness`: weighted essential-skill coverage of 75% or more is `strong` (shown as "Ready now"), 40% or more is `partial` ("Within 90 days"), otherwise `stretch` ("Developing"). No model is involved.
+
+**Confirmed outcomes.** When an admin records `introduced`, `interviewing` or `hired`, `org_advance_intro` writes a `career_outcomes` row with `verification = 'partner_confirmed'`, which feeds `org_overview` and the member's ledger. Every step also sends a notification.
+
+### 5.6 Storage (0015)
+
+Bucket `avatars` is public-read, limited to 5 MB JPEG, PNG or WebP. Authenticated users may insert, update and delete only under a folder named after their `auth.uid()`. The browser crops and resizes before upload (`settings/PhotoUploader.tsx`); `savePhoto` rejects any URL outside the member's own folder.
 
 ## 6. Application structure
 
@@ -408,8 +439,26 @@ sustained on a single route.
 Buckets: `ai:coach`, `ai:career-plan`, `ai:career-plan-step`, `ai:interview`,
 `ai:resume-review`, `ai:mentor-ask`, `ai:mentor-ingest`.
 
-`getTier()` is stubbed to `free` until `subscriptions` exists — one function to
-change when billing arrives.
+**Plans.** `getTier()` reads the member's `subscriptions` row. `active`, `non_renewing` and `past_due` keep the paid tier until `current_period_end`; anything else is `free`. If the table is missing it returns `free`.
+
+| Bucket (per day) | Free | Starter | Pro |
+|---|---|---|---|
+| `ai:coach` | 25 | 100 | 200 |
+| `ai:interview` | 5 | 20 | 50 |
+| `ai:resume-review` | 3 | 12 | 30 |
+| `ai:career-plan` | 3 | 10 | 25 |
+| `ai:mentor-ask` | 20 | 75 | 150 |
+
+`LIMITS` in `src/lib/usage.ts` is the single source for these numbers; the plans and billing pages read it directly.
+
+**Billing (0017).** Paystack, KES, monthly card subscriptions (Starter KES 13,000, Pro KES 26,000; Custom is sales-led).
+
+1. `startCheckout` (server action) initialises a Paystack transaction with the plan code and `metadata.profile_id`, writes a `pending` row, and redirects to Paystack.
+2. `/app/billing/callback` verifies the transaction server-side and activates the plan only if the metadata matches the signed-in member.
+3. `/api/paystack/webhook` verifies the HMAC-SHA512 signature (constant-time) and syncs `charge.success`, `subscription.create`, `subscription.not_renew`, `subscription.disable` and `invoice.payment_failed`.
+4. `subscriptions` has no insert or update policy: only the service role writes billing state.
+
+Without the `PAYSTACK_*` variables, upgrade buttons record a `pro_interest` analytics event instead of charging. Member and role caps per plan are product terms and are not yet enforced.
 
 Fails **open** on infrastructure error, with logging. A broken quota table
 should reduce the cost ceiling, not take the product down.
@@ -422,9 +471,10 @@ should reduce the cost ceiling, not take the product down.
 |---|---|---|---|
 | Supabase | Database, auth, realtime, storage | Keys | Live |
 | OpenAI | Chat + embeddings | API key | Live, optional |
-| ESCO | Skills + occupations taxonomy | None | Planned — Phase 1 |
+| ESCO v1.2 | Skills + occupations taxonomy | None | Live (`scripts/seed-esco.mjs` or SQL import) |
 | Greenhouse / Lever / Ashby / SmartRecruiters | Public job boards | None | Planned — Phase 3 |
-| Stripe | Billing | Keys | Planned — Phase 6 |
+| Paystack | Subscriptions in KES (cards) | Secret key + signed webhook | Live (test mode until the business is registered) |
+| Supabase Storage | Profile photos and covers | RLS on `storage.objects` | Live |
 | LinkedIn | — | — | **Prohibited** |
 
 ### On LinkedIn
@@ -477,19 +527,19 @@ the Supabase CLI with linked environments is tracked work.
 
 ## 13. Known technical debt
 
-Detail and remediation in `SECURITY-AUDIT.md`.
+Detail and remediation in `SECURITY-AUDIT.md`. Status as of 10 October 2026.
 
-| Issue | Impact |
+| Issue | Status |
 |---|---|
-| Ingestion embeds on the request path | Timeouts strand `status: processing` |
-| RAG threshold `0.2` | Weak matches presented as grounded |
-| No `error.tsx` / `loading.tsx` / `not-found.tsx` | White screen on any thrown error |
-| No security headers | Missing CSP, HSTS, frame options |
-| No tests, no CI | Nothing blocks a broken build |
-| `src/app/page.tsx` ~19 KB | Single file; thin component layer |
-| Hand-written types | Drift risk against schema |
-| Manual migrations | No linked environments or rollback |
-| Next.js 14 | Upgrade to 15 after Phase 2 |
+| Ingestion embeds on the request path | Open |
+| RAG similarity threshold | Fixed: raised from `0.2` (see `lib/ai.ts`) |
+| No `error.tsx` / `loading.tsx` / `not-found.tsx` | Fixed: app and root boundaries plus per-route loading states |
+| No security headers | Fixed: HSTS, frame, referrer and permissions headers; CSP in report-only |
+| No tests, no CI | Open |
+| Plan caps (members, roles) not enforced | Open |
+| Hand-written types | Open: drift risk against schema; generate from Supabase next |
+| Manual migrations | Open: no linked environments or rollback |
+| Next.js 14 | Upgrade to 15 when the pilot is stable |
 
 ---
 

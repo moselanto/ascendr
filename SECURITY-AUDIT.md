@@ -12,8 +12,36 @@ performed.**
 
 ## Summary
 
+Status as of 10 October 2026 (re-audit after networks, storage and billing shipped).
+
 | Severity | Count | Status |
 |---|---|---|
+| Critical | 1 | Resolved (C-1) |
+| High | 3 | 2 resolved (H-2, H-3), 1 open (H-1) |
+| Medium | 6 | 1 resolved (M-1), 5 open |
+| Low | 5 | Open |
+
+The authorization model remains the strongest part of the system. RLS is enabled on every sensitive table, policies are centralised behind `SECURITY DEFINER` helpers, and `ai_chunks` is deliberately unexposed to enforce per-mentor isolation.
+
+### Changes since the original audit
+
+| Finding | Status | Evidence |
+|---|---|---|
+| C-1 AI endpoints unmetered | **Resolved** | Every route in `src/app/api/ai/*` calls `consumeQuota()` with the member's plan tier before any model call |
+| H-2 Weak RAG threshold | **Resolved** | Similarity floor raised from `0.2` in `src/lib/ai.ts` |
+| H-3 No security headers | **Resolved** | `next.config.mjs` sets HSTS, frame, referrer, content-type and permissions headers; CSP runs report-only |
+| M-1 No error boundaries | **Resolved** | `app/error.tsx`, `app/global-error.tsx`, `app/not-found.tsx`, `app/app/error.tsx`, loading states per route |
+
+### New surfaces reviewed
+
+| Surface | Controls | Residual risk |
+|---|---|---|
+| Networks (0013, 0016) | All admin reads and writes go through `SECURITY DEFINER` functions that check `is_org_admin()` or the caller's own identity; only members with `share_career_data = true` are included; introductions require member consent | A member who stops sharing still appears in historic `org_readiness_snapshots`; add a purge on opt-out |
+| Storage (0015) | Public-read `avatars` bucket; writes restricted to the caller's `auth.uid()` folder; 5 MB, image MIME types only; server rejects URLs outside the member's folder | Public URLs are guessable only by path; do not store anything private in this bucket |
+| Billing (0017) | No card data handled; checkout callback verifies the transaction server-side and matches `metadata.profile_id` to the signed-in member; webhook verified with HMAC-SHA512 and constant-time comparison; `subscriptions` writable by the service role only | Webhook has no replay window or event-id de-duplication; events are idempotent upserts, so impact is low |
+| Notifications deep links | `/app/notifications/[id]` loads only the caller's own notification and redirects to internal paths | None found |
+
+---|---|---|
 | Critical | 1 | Open |
 | High | 3 | 1 mitigated, 2 open |
 | Medium | 6 | Open |
@@ -303,19 +331,15 @@ fundraising push.
 
 | Order | Item | Severity | Effort |
 |---|---|---|---|
-| 1 | C-1 quotas + OpenAI spend cap | Critical | Written; wire into routes |
-| 2 | H-2 retrieval threshold | High | Hours |
-| 3 | H-3 security headers | High | Hours |
-| 4 | M-1 error boundaries | Medium | Hours |
-| 5 | M-2 Sentry + analytics | Medium | ~1 day |
-| 6 | H-1 async ingestion | High | 2–3 days |
-| 7 | M-4 ingestion validation | Medium | 1–2 days |
-| 8 | M-3 auth throttling | Medium | ~1 day |
-| 9 | M-6 migration workflow | Medium | 2–3 days |
-| 10 | L-1, L-2 CI and scanning | Low | 2–3 days |
-
-Items 1–5 constitute Phase 0 in `PRD.md` and should complete before any
-marketing or fundraising activity drives traffic.
+| 1 | H-1 async ingestion | High | 2-3 days |
+| 2 | M-2 Sentry and alerting | Medium | ~1 day |
+| 3 | M-4 ingestion validation | Medium | 1-2 days |
+| 4 | M-3 auth throttling | Medium | ~1 day |
+| 5 | Snapshot purge when a member stops sharing | Medium | Hours |
+| 6 | Webhook replay protection (event-id de-duplication) | Low | Hours |
+| 7 | CSP from report-only to enforcing, with nonces | Medium | 1 day |
+| 8 | M-6 migration workflow | Medium | 2-3 days |
+| 9 | L-1, L-2 CI and scanning | Low | 2-3 days |
 
 ---
 
@@ -323,9 +347,9 @@ marketing or fundraising activity drives traffic.
 
 Repeat this audit when any of the following ships:
 
-- `organizations` and org-scoped RLS (Phase 5) — a new tenancy boundary is the
-  highest-risk change on the roadmap
-- Stripe and `subscriptions` (Phase 6) — payment data
+- Any change to the network functions in 0013 or 0016 (tenancy boundary)
+- Any change to billing: checkout, callback, webhook or `subscriptions`
+- Moving Paystack from test to live keys
 - Opportunity ingestion (Phase 3) — third-party HTML entering the render path
 - Any change to `src/lib/supabase/middleware.ts` or the policy set
 - Any new `dangerouslySetInnerHTML`

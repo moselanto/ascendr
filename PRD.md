@@ -7,6 +7,25 @@ Supersedes: `docs/ASCENDR_Global_Product_Strategy_Master_PRD.md`
 
 ---
 
+## 0. Positioning update (October 2026)
+
+A competitive study (Getro, now part of Findem; Eightfold AI; Gloat; Fuel50; MentorcliQ; PeopleGrove; Andela) found that every individual ASCENDR feature exists somewhere, but no product sells the whole loop to a network owner:
+
+**identify people who could become qualified > develop them > measure readiness over time > broker consented introductions > verify the outcome.**
+
+ASCENDR therefore leads with **career intelligence for professional networks**: the readiness layer for VC funds, accelerators and universities, with the member experience below as the engine that keeps profiles accurate. It integrates with job data (Getro, Consider) rather than competing with job boards.
+
+The initial customer is a VC fund or accelerator with real portfolio hiring. The first commercial step is a 90-day pilot: 3-5 roles, one cohort of 30-100 members.
+
+| Pilot metric | Target |
+|---|---|
+| Invited members who share and set a goal | 60% or more |
+| Members with a development action within 7 days | 40% or more |
+| Developing members moving up at least one readiness band in 90 days | 25% or more |
+| Consented introductions | 1 or more per open role |
+| Interviews from introductions | 30% or more |
+| Verified hires | 1 or more across the cohort |
+
 ## 1. Positioning
 
 **ASCENDR is the career intelligence platform that understands where you are,
@@ -234,17 +253,16 @@ Built into the architecture from the start: `usage_counters` and
 `consume_quota()` ship in Phase 0 as abuse control and become plan enforcement
 in Phase 6. One mechanism, not two.
 
-### Consumer (hypotheses to validate, not fixed prices)
+### Plans (live, billed in KES through Paystack)
 
-| Tier | Target | Includes |
-|---|---|---|
-| Free | $0 | Career profile, basic AI coach, communities, basic networking, limited roadmap |
-| Pro | $15–25/mo | Advanced career intelligence, full roadmap, resume optimization, interview prep, advanced matching, learning paths |
-| Premium | $39–79/mo | Premium AI, mentor access, expert communities, priority matching, interview simulations |
+| Plan | Price | For | Includes |
+|---|---|---|---|
+| Free | KES 0 | Getting started | One target role, gap analysis, roadmap, communities, messaging, daily AI limits |
+| Starter | KES 13,000 / month | Small networks, serious job seekers | Higher AI limits, network of up to 50 members, 3 open roles, pathways |
+| Pro | KES 26,000 / month | Funds and accelerators | Highest AI limits, up to 250 members, unlimited roles, readiness trend, consented introductions, outcome reporting |
+| Custom | Sales-led | Universities, large networks | Unlimited members, custom roles and skills, SSO, onboarding, invoicing |
 
-These figures are US-anchored. If the beachhead market is East Africa — which
-`communities.price_kes` suggests — they require revalidation against local
-willingness to pay before they appear anywhere public.
+Daily AI limits per plan live in `src/lib/usage.ts`. Member and role caps are not yet enforced in code.
 
 ### B2B (the long-term engine)
 
