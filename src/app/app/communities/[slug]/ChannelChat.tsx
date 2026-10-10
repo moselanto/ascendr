@@ -9,7 +9,8 @@ type MsgWithReactions = ChannelMessage & {
   reactions?: { emoji: string; user_id: string }[];
 };
 
-const EMOJIS = ["👍", "🎉", "🔥", "❤️"];
+// Quick reactions as plain unicode glyphs (stored as the reaction value).
+const EMOJIS = ["\u2191", "\u2605", "\u2713", "\u2665"];
 
 export default function ChannelChat({
   channelId,
@@ -131,12 +132,12 @@ export default function ChannelChat({
 
   return (
     <>
-      <div className="flex items-center gap-2 border-b border-border px-5 py-2 text-caption text-text-secondary">
+      <div className="flex items-center gap-2 border-b border-border bg-surface px-5 py-2 text-[12px] text-text-secondary">
         <span className="inline-block h-2 w-2 rounded-full bg-accent" />
         {onlineCount} online in #{channelName}
       </div>
 
-      <div className="flex flex-col gap-4 p-5 max-h-[440px] overflow-auto">
+      <div className="flex max-h-[480px] flex-col gap-5 overflow-auto px-5 py-5">
         {messages.length ? (
           messages.map((m) => {
             const counts = (m.reactions ?? []).reduce<Record<string, number>>((acc, r) => {
@@ -146,33 +147,35 @@ export default function ChannelChat({
             const mine = new Set((m.reactions ?? []).filter((r) => r.user_id === meId).map((r) => r.emoji));
             return (
               <div key={m.id} className="group flex gap-3">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand-100 text-brand-700 text-caption font-bold">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
                   {(m.profiles?.full_name || "M").slice(0, 1).toUpperCase()}
                 </div>
-                <div className="min-w-0">
-                  <div className="text-small">
-                    <span className="font-semibold">{m.profiles?.full_name || "Member"}</span>
-                    <span className="text-text-secondary"> · {new Date(m.created_at).toLocaleString()}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[14px]">
+                    <span className="font-semibold text-ink">{m.profiles?.full_name || "Member"}</span>
+                    <span className="text-[12px] text-text-secondary"> · {new Date(m.created_at).toLocaleString()}</span>
                   </div>
-                  <p className="text-body whitespace-pre-wrap break-words">{m.body}</p>
-                  <div className="mt-1 flex items-center gap-1.5">
+                  <p className="mt-0.5 whitespace-pre-wrap break-words text-[14px] text-ink">{m.body}</p>
+                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                     {Object.entries(counts).map(([emoji, n]) => (
                       <button
                         key={emoji}
                         onClick={() => toggleReaction(m.id, emoji, communityId, slug)}
-                        className={`rounded-full border px-2 py-0.5 text-caption ${
-                          mine.has(emoji) ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
+                        className={`rounded-full border px-2 py-0.5 text-[12px] ${
+                          mine.has(emoji)
+                            ? "border-brand-600 bg-brand-50 text-brand-700"
+                            : "border-border text-text-secondary hover:border-ink/40"
                         }`}
                       >
                         {emoji} {n}
                       </button>
                     ))}
-                    <div className="opacity-0 group-hover:opacity-100 transition flex gap-1">
+                    <div className="flex gap-1 opacity-0 transition group-hover:opacity-100">
                       {EMOJIS.filter((e) => !(e in counts)).map((e) => (
                         <button
                           key={e}
                           onClick={() => toggleReaction(m.id, e, communityId, slug)}
-                          className="rounded-full px-1.5 py-0.5 text-caption hover:bg-bg"
+                          className="rounded-full border border-transparent px-2 py-0.5 text-[12px] text-text-secondary hover:border-border hover:bg-surface"
                           aria-label={`React ${e}`}
                         >
                           {e}
@@ -185,12 +188,15 @@ export default function ChannelChat({
             );
           })
         ) : (
-          <p className="text-center text-text-secondary py-6">No messages yet. Say hello and start the conversation.</p>
+          <div className="py-8 text-center">
+            <div className="text-[15px] font-semibold text-ink">No messages yet</div>
+            <p className="mt-1 text-[14px] text-text-secondary">Start the conversation in #{channelName}.</p>
+          </div>
         )}
         <div ref={bottomRef} />
       </div>
 
-      <div className="h-5 px-5 text-caption text-text-secondary italic">{typingLabel}</div>
+      <div className="h-5 px-5 text-[12px] italic text-text-secondary">{typingLabel}</div>
 
       <form action={sendMessage} className="flex gap-2 border-t border-border p-4">
         <input type="hidden" name="channel_id" value={channelId} />
@@ -202,9 +208,11 @@ export default function ChannelChat({
           autoComplete="off"
           onChange={handleTyping}
           placeholder={`Message #${channelName}…`}
-          className="flex-1 rounded-full border border-border px-4 py-2.5 text-body"
+          className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink"
         />
-        <button className="rounded-full bg-ink px-5 py-2.5 text-small font-semibold text-white">Send</button>
+        <button className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">
+          Send
+        </button>
       </form>
     </>
   );

@@ -42,8 +42,8 @@ type Participant = {
 };
 
 const STATUS_PILL: Record<string, string> = {
-  answered: "bg-[#ecfdf5] text-[#047857]",
-  pinned: "bg-[#fef3c7] text-[#92400e]",
+  answered: "bg-emerald-50 text-emerald-800",
+  pinned: "bg-amber-50 text-amber-800",
 };
 
 type Tab = "qa" | "chat" | "participants";
@@ -317,15 +317,15 @@ export default function LiveRail({
           <button
             key={t.key}
             onClick={() => setTab(t.key)}
-            className={`flex-1 border-b-2 px-2 py-2.5 text-small font-semibold ${
+            className={`flex-1 border-b-2 px-2 py-2.5 text-[14px] font-medium ${
               tab === t.key
-                ? "border-ink text-brand-600"
-                : "border-transparent text-text-secondary hover:text-text-brand-600"
+                ? "border-ink text-ink"
+                : "border-transparent text-text-secondary hover:text-ink"
             }`}
           >
             {t.label}
             {typeof t.count === "number" && t.count > 0 && (
-              <span className="ml-1 text-caption text-text-secondary">{t.count}</span>
+              <span className="ml-1 text-[12px] text-text-secondary">{t.count}</span>
             )}
           </button>
         ))}
@@ -336,45 +336,53 @@ export default function LiveRail({
         <div className="flex min-h-0 flex-1 flex-col">
           <ul className="flex-1 space-y-2 overflow-auto py-3">
             {orderedQuestions.length === 0 && (
-              <li className="px-1 text-small text-text-secondary">No questions yet — be the first to ask.</li>
+              <li className="px-1 text-[14px] text-text-secondary">No questions yet. Be the first to ask.</li>
             )}
             {orderedQuestions.map((q) => (
               <li
                 key={q.id}
-                className={`flex gap-3 rounded-md border bg-card px-3 py-2.5 ${
-                  q.status === "pinned" ? "border-[#f59e0b]" : "border-border"
+                className={`flex gap-3 rounded-xl border px-3 py-3 ${
+                  q.status === "pinned" ? "border-amber-800/20 bg-amber-50" : "border-border bg-white"
                 }`}
               >
                 <button
                   onClick={() => vote(q)}
-                  className={`flex flex-col items-center rounded-full border px-2 py-1 text-caption font-bold ${
-                    q.voted ? "border-ink bg-[#eef2ff] text-brand-600" : "border-border text-text-secondary"
+                  className={`flex flex-col items-center rounded-lg border px-2 py-1 text-[12px] font-semibold ${
+                    q.voted
+                      ? "border-brand-600 bg-brand-50 text-brand-700"
+                      : "border-border text-text-secondary hover:border-ink/40"
                   }`}
                   aria-pressed={q.voted}
                 >
-                  <span aria-hidden>▲</span>
+                  <span aria-hidden>{"\u25B2"}</span>
                   <span>{q.votes}</span>
                 </button>
                 <div className="flex-1">
-                  <p className={`text-small ${q.status === "answered" ? "text-text-secondary line-through" : ""}`}>
+                  <p className={`text-[14px] ${q.status === "answered" ? "text-text-secondary line-through" : "text-ink"}`}>
                     {q.body}
                   </p>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="text-caption text-text-secondary">
+                    <span className="text-[12px] text-text-secondary">
                       {q.anonymous ? "Anonymous" : q.author_name}
                     </span>
                     {q.status !== "open" && (
-                      <span className={`rounded-full px-2 py-0.5 text-caption font-semibold capitalize ${STATUS_PILL[q.status] ?? ""}`}>
+                      <span className={`rounded-full px-2 py-0.5 text-[12px] font-medium capitalize ${STATUS_PILL[q.status] ?? ""}`}>
                         {q.status}
                       </span>
                     )}
                   </div>
                   {isMod && (
                     <div className="mt-2 flex gap-3">
-                      <button onClick={() => markQuestion(q, q.status === "answered" ? "open" : "answered")} className="text-caption font-semibold text-brand-600">
+                      <button
+                        onClick={() => markQuestion(q, q.status === "answered" ? "open" : "answered")}
+                        className="text-[12px] font-medium text-ink hover:underline"
+                      >
                         {q.status === "answered" ? "Reopen" : "Mark answered"}
                       </button>
-                      <button onClick={() => markQuestion(q, q.status === "pinned" ? "open" : "pinned")} className="text-caption font-semibold text-[#92400e]">
+                      <button
+                        onClick={() => markQuestion(q, q.status === "pinned" ? "open" : "pinned")}
+                        className="text-[12px] font-medium text-amber-800 hover:underline"
+                      >
                         {q.status === "pinned" ? "Unpin" : "Pin"}
                       </button>
                     </div>
@@ -389,19 +397,19 @@ export default function LiveRail({
               value={qBody}
               onChange={(e) => setQBody(e.target.value)}
               placeholder="Ask a question…"
-              className="w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
             />
             <div className="mt-2 flex items-center justify-between">
-              <label className="flex items-center gap-1.5 text-caption text-text-secondary">
+              <label className="flex items-center gap-1.5 text-[12px] font-medium text-text-secondary">
                 <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
                 Ask anonymously
               </label>
               <button
                 type="submit"
                 disabled={!qBody.trim()}
-                className="rounded-full bg-ink px-4 py-1.5 text-small font-semibold text-white disabled:opacity-50"
+                className="rounded-full bg-ink px-3 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
               >
-                Submit a question
+                Submit question
               </button>
             </div>
           </form>
@@ -411,32 +419,32 @@ export default function LiveRail({
       {/* ============ CHAT ============ */}
       {tab === "chat" && (
         <div className="flex min-h-0 flex-1 flex-col">
-          <div className="flex-1 space-y-2.5 overflow-auto py-3">
+          <div className="flex-1 space-y-3 overflow-auto py-3">
             {chat.length === 0 && (
-              <p className="px-1 text-small text-text-secondary">Say hi — the chat is quiet so far.</p>
+              <p className="px-1 text-[14px] text-text-secondary">The chat is quiet so far. Say hi.</p>
             )}
             {chat.map((m) => {
               const mine = m.author_id === meId;
               return (
                 <div key={m.id} className="group flex flex-col">
                   <div className="flex items-baseline gap-2">
-                    <span className={`text-caption font-semibold ${mine ? "text-brand-600" : "text-text-brand-600"}`}>
+                    <span className={`text-[12px] font-semibold ${mine ? "text-brand-700" : "text-ink"}`}>
                       {mine ? "You" : m.author_name}
                     </span>
-                    <span className="text-caption text-text-secondary">
+                    <span className="text-[12px] text-text-secondary">
                       {new Date(m.created_at).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}
                     </span>
                     {(mine || isMod) && !m.id.startsWith("tmp-") && (
                       <button
                         onClick={() => removeChat(m)}
-                        className="ml-auto text-caption text-text-secondary opacity-0 group-hover:opacity-100 hover:text-danger"
+                        className="ml-auto text-[12px] text-text-secondary opacity-0 hover:text-danger group-hover:opacity-100"
                         title="Delete"
                       >
-                        ✕
+                        {"\u2715"}
                       </button>
                     )}
                   </div>
-                  <p className="text-small">{m.body}</p>
+                  <p className="text-[14px] text-ink">{m.body}</p>
                 </div>
               );
             })}
@@ -448,12 +456,12 @@ export default function LiveRail({
               value={chatBody}
               onChange={(e) => setChatBody(e.target.value)}
               placeholder="Message the room…"
-              className="flex-1 rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+              className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
             />
             <button
               type="submit"
               disabled={!chatBody.trim()}
-              className="rounded-full bg-ink px-4 py-2 text-small font-semibold text-white disabled:opacity-50"
+              className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
             >
               Send
             </button>
@@ -465,24 +473,24 @@ export default function LiveRail({
       {tab === "participants" && (
         <div className="flex min-h-0 flex-1 flex-col overflow-auto py-3">
           <div className="mb-2 flex items-center justify-between px-1">
-            <span className="text-caption font-bold uppercase tracking-wide text-text-secondary">
+            <span className="text-[12px] font-semibold uppercase tracking-[0.14em] text-text-secondary">
               In the room
             </span>
-            <span className="flex items-center gap-1 text-caption text-text-secondary">
+            <span className="flex items-center gap-1.5 text-[12px] text-text-secondary">
               <span className="inline-block h-2 w-2 rounded-full bg-accent" />
               {presentCount} present
             </span>
           </div>
 
           {raisedHands.length > 0 && (
-            <div className="mb-2 rounded-md border border-[#f59e0b] bg-[#fffbeb] px-3 py-2">
-              <span className="text-caption font-semibold text-[#92400e]">
+            <div className="mb-2 rounded-xl bg-amber-50 px-3 py-2.5">
+              <span className="text-[12px] font-semibold text-amber-800">
                 Raised hands ({raisedHands.length})
               </span>
               <div className="mt-1 flex flex-col gap-1">
                 {raisedHands.map((p) => (
-                  <span key={p.user_id} className="text-small text-[#92400e]">
-                    {p.user_id === meId ? "You" : p.full_name} \u00b7 hand raised
+                  <span key={p.user_id} className="text-[14px] text-amber-800">
+                    {"\u2191"} {p.user_id === meId ? "You" : p.full_name}
                   </span>
                 ))}
               </div>
@@ -491,24 +499,31 @@ export default function LiveRail({
 
           <ul className="space-y-1">
             {participants.map((p) => (
-              <li key={p.user_id} className="flex items-center gap-2.5 rounded-full px-1 py-1.5">
-                <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-ink text-caption font-bold text-white">
+              <li key={p.user_id} className="flex items-center gap-2.5 rounded-lg px-1 py-1.5">
+                <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-brand-100 text-[12px] font-semibold text-brand-700">
                   {(p.full_name || "M").slice(0, 1).toUpperCase()}
-                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-accent" />
+                  <span className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-accent" />
                 </span>
-                <span className="text-small font-semibold">
+                <span className="text-[14px] font-semibold text-ink">
                   {p.user_id === meId ? "You" : p.full_name}
                 </span>
-                {p.hand_raised && <span title="Hand raised" className="rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">Hand</span>}
+                {p.hand_raised && (
+                  <span
+                    title="Hand raised"
+                    className="rounded-full bg-amber-50 px-2 py-0.5 text-[12px] font-medium text-amber-800"
+                  >
+                    Hand up
+                  </span>
+                )}
                 {p.role !== "viewer" && (
-                  <span className="ml-auto rounded-full bg-[#eef2ff] px-2 py-0.5 text-caption font-semibold capitalize text-brand-600">
+                  <span className="ml-auto rounded-full bg-brand-50 px-2 py-0.5 text-[12px] font-medium capitalize text-brand-700">
                     {p.role}
                   </span>
                 )}
               </li>
             ))}
             {participants.length === 0 && (
-              <li className="px-1 text-small text-text-secondary">No one here yet.</li>
+              <li className="px-1 text-[14px] text-text-secondary">No one here yet.</li>
             )}
           </ul>
         </div>

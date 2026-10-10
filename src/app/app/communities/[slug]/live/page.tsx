@@ -25,9 +25,9 @@ function fmt(dt: string | null) {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  live: "bg-danger/10 text-danger",
-  scheduled: "bg-[#eef2ff] text-brand-600",
-  ended: "bg-bg text-text-secondary",
+  live: "bg-emerald-50 text-emerald-800",
+  scheduled: "bg-brand-50 text-brand-700",
+  ended: "bg-surface text-text-secondary",
 };
 
 export default async function LiveSessionsPage({
@@ -58,13 +58,15 @@ export default async function LiveSessionsPage({
 
   if (!isMember) {
     return (
-      <div className="max-w-3xl mx-auto rounded-md border border-border bg-card p-10 text-center text-text-secondary">
-        Join {community.name} to see its live sessions.
-        <div className="mt-4">
-          <Link href={`/app/communities/${community.slug}`} className="text-brand-600 font-semibold">
-            ← Back to community
-          </Link>
-        </div>
+      <div className="mx-auto max-w-3xl rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+        <div className="text-[15px] font-semibold text-ink">Members only</div>
+        <p className="mt-1 text-[14px] text-text-secondary">Join {community.name} to see its live sessions.</p>
+        <Link
+          href={`/app/communities/${community.slug}`}
+          className="mt-4 inline-block rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+        >
+          Back to community
+        </Link>
       </div>
     );
   }
@@ -83,22 +85,29 @@ export default async function LiveSessionsPage({
   const past = sessions.filter((s) => !upcoming.includes(s));
 
   return (
-    <div className="max-w-3xl mx-auto">
-      <div className="flex items-center gap-3 flex-wrap">
+    <div className="mx-auto max-w-4xl">
+      <Link
+        href={`/app/communities/${community.slug}`}
+        className="text-[13px] font-medium text-text-secondary hover:text-ink"
+      >
+        {"\u2190"} {community.name}
+      </Link>
+
+      {/* Page head */}
+      <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-[22px] font-semibold tracking-tight text-ink">Live Sessions</h1>
-          <p className="text-small text-text-secondary">{community.name}</p>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Live sessions</p>
+          <h1 className="mt-1.5 text-[28px] font-semibold tracking-[-0.02em] text-ink md:text-[32px]">
+            Learn it <em className="accent-serif">in the room</em>
+          </h1>
+          <p className="mt-1 text-[15px] text-text-secondary">
+            AMAs, workshops and office hours in {community.name}.
+          </p>
         </div>
-        <Link
-          href={`/app/communities/${community.slug}`}
-          className="ml-auto text-small text-brand-600 font-semibold"
-        >
-          ← Community
-        </Link>
       </div>
 
       {searchParams.error && (
-        <div className="mt-4 rounded-full border border-danger/30 bg-danger/10 px-4 py-2 text-small text-danger">
+        <div className="mt-5 rounded-lg border border-danger/30 bg-danger/10 px-3 py-2.5 text-[14px] text-danger">
           {searchParams.error}
         </div>
       )}
@@ -106,36 +115,47 @@ export default async function LiveSessionsPage({
       {isMod && (
         <form
           action={scheduleSession}
-          className="mt-5 rounded-md border border-border bg-card p-5 grid gap-3 sm:grid-cols-[1fr_auto_auto] items-end"
+          className="mt-6 grid items-end gap-4 rounded-2xl border border-border bg-white p-5 shadow-card sm:grid-cols-[1fr_auto_auto] md:p-6"
         >
           <input type="hidden" name="community_id" value={community.id} />
           <input type="hidden" name="slug" value={community.slug} />
-          <div>
-            <label className="block text-caption font-semibold text-text-secondary">Title</label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="session-title" className="text-[12px] font-medium text-text-secondary">
+              Title
+            </label>
             <input
+              id="session-title"
               name="title"
               required
               placeholder="e.g. Live AMA: breaking into product"
-              className="mt-1 w-full rounded-full border border-border px-3 py-2 text-small"
+              className="w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink"
             />
           </div>
-          <div>
-            <label className="block text-caption font-semibold text-text-secondary">When</label>
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor="session-when" className="text-[12px] font-medium text-text-secondary">
+              When
+            </label>
             <input
+              id="session-when"
               type="datetime-local"
               name="scheduled_at"
               required
-              className="mt-1 rounded-full border border-border px-3 py-2 text-small"
+              className="rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink"
             />
           </div>
-          <button className="rounded-full bg-ink px-4 py-2 text-small font-semibold text-white">
-            Schedule (+20 XP)
+          <button className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">
+            Schedule session
           </button>
         </form>
       )}
 
-      <Section title="Upcoming & live" sessions={upcoming} slug={community.slug} empty="No upcoming sessions yet." />
-      <Section title="Past sessions" sessions={past} slug={community.slug} empty="No past sessions." />
+      <Section
+        title="Upcoming and live"
+        sessions={upcoming}
+        slug={community.slug}
+        empty={isMod ? "Schedule one above to bring members together." : "Check back soon for the next session."}
+      />
+      <Section title="Past sessions" sessions={past} slug={community.slug} empty="Ended sessions will be listed here." />
     </div>
   );
 }
@@ -152,34 +172,41 @@ function Section({
   empty: string;
 }) {
   return (
-    <div className="mt-6">
-      <h2 className="mb-2 text-small font-bold uppercase tracking-wide text-text-secondary">{title}</h2>
+    <section className="mt-8">
+      <h2 className="mb-3 text-[15px] font-semibold text-ink">{title}</h2>
       {sessions.length === 0 ? (
-        <p className="text-small text-text-secondary">{empty}</p>
+        <div className="rounded-2xl border border-dashed border-border bg-white p-8 text-center">
+          <div className="text-[14px] font-semibold text-ink">Nothing here yet</div>
+          <p className="mt-1 text-[14px] text-text-secondary">{empty}</p>
+        </div>
       ) : (
-        <ul className="space-y-2">
+        <ul className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-white p-0 shadow-card">
           {sessions.map((s) => (
             <li key={s.id}>
               <Link
                 href={`/app/communities/${slug}/live/${s.id}`}
-                className="flex items-center gap-3 rounded-md border border-border bg-card px-4 py-3 hover:border-ink/40"
+                className="flex items-center gap-4 px-5 py-4 transition hover:bg-surface"
               >
-                <div>
-                  <div className="font-semibold">{s.title}</div>
-                  <div className="text-caption text-text-secondary">{fmt(s.scheduled_at)}</div>
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface text-[12px] font-semibold text-ink">
+                  {"\u25C9"}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[14px] font-semibold text-ink">{s.title}</div>
+                  <div className="text-[12px] text-text-secondary">{fmt(s.scheduled_at)}</div>
                 </div>
                 <span
-                  className={`ml-auto rounded-full px-2.5 py-0.5 text-caption font-semibold capitalize ${
-                    STATUS_STYLE[s.status] ?? "bg-bg text-text-secondary"
+                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[12px] font-medium capitalize ${
+                    STATUS_STYLE[s.status] ?? "bg-surface text-text-secondary"
                   }`}
                 >
-                  {s.status === "live" ? "● Live" : s.status}
+                  {s.status === "live" && <span className="h-1.5 w-1.5 rounded-full bg-accent" />}
+                  {s.status}
                 </span>
               </Link>
             </li>
           ))}
         </ul>
       )}
-    </div>
+    </section>
   );
 }

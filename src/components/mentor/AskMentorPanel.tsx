@@ -52,23 +52,23 @@ export function AskMentorPanel({
   }
 
   return (
-    <div className="rounded-xl border border-[#E2E8F0] bg-white">
-      <div className="border-b border-[#E2E8F0] px-4 py-3">
-        <h3 className="text-sm font-semibold text-[#0F172A]">Ask {mentorName}&apos;s AI</h3>
-        <p className="text-xs text-[#64748B]">
+    <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-card">
+      <div className="border-b border-border px-5 py-4">
+        <h3 className="text-[15px] font-semibold text-ink">Ask {mentorName}&apos;s AI</h3>
+        <p className="text-[12px] text-text-secondary">
           Grounded in {mentorName}&apos;s own content. Answers cite their sources.
         </p>
       </div>
 
-      <div className="max-h-[360px] space-y-4 overflow-y-auto px-4 py-4">
+      <div className="max-h-[360px] space-y-4 overflow-y-auto px-5 py-4">
         {turns.length === 0 ? (
           <div className="space-y-2">
-            <p className="text-sm text-[#64748B]">Try asking:</p>
+            <p className="text-[12px] font-medium text-text-secondary">Try asking:</p>
             {SUGGESTIONS.map((s) => (
               <button
                 key={s}
                 onClick={() => ask(s)}
-                className="block w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-left text-sm text-[#0F172A] hover:border-[#4F46E5]"
+                className="block w-full rounded-lg border border-border px-3 py-2.5 text-left text-[14px] text-ink hover:border-ink/40"
               >
                 {s}
               </button>
@@ -78,21 +78,19 @@ export function AskMentorPanel({
           turns.map((t, i) => (
             <div key={i} className={t.role === "user" ? "text-right" : "text-left"}>
               <div
-                className={`inline-block max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                  t.role === "user"
-                    ? "bg-[#4F46E5] text-white"
-                    : "bg-[#F8FAFC] text-[#0F172A] border border-[#E2E8F0]"
+                className={`inline-block max-w-[85%] rounded-2xl px-3 py-2 text-[14px] ${
+                  t.role === "user" ? "bg-ink text-white" : "border border-border bg-surface text-ink"
                 }`}
               >
                 <p className="whitespace-pre-wrap">{t.content}</p>
                 {t.role === "assistant" && t.citations && t.citations.length > 0 && (
-                  <div className="mt-2 border-t border-[#E2E8F0] pt-2">
-                    <p className="text-xs font-medium text-[#64748B]">Sources</p>
+                  <div className="mt-2 border-t border-border pt-2">
+                    <p className="text-[12px] font-medium text-text-secondary">Sources</p>
                     <ul className="mt-1 space-y-0.5">
                       {t.citations.map((c, idx) => (
-                        <li key={idx} className="text-xs text-[#64748B]">
+                        <li key={idx} className="text-[12px] text-text-secondary">
                           [{idx + 1}] {c.source_title} · part {c.chunk_index + 1}{" "}
-                          <span className="text-[#10B981]">{Math.round(c.similarity * 100)}% match</span>
+                          <span className="text-emerald-800">{Math.round(c.similarity * 100)}% match</span>
                         </li>
                       ))}
                     </ul>
@@ -101,7 +99,7 @@ export function AskMentorPanel({
                 {t.role === "assistant" && t.grounded === false && (
                   <a
                     href="?ask_mentor=1"
-                    className="mt-2 inline-block rounded-lg bg-[#10B981] px-3 py-1.5 text-xs font-medium text-white"
+                    className="mt-2 inline-block rounded-full bg-ink px-3 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700"
                   >
                     Ask the real {mentorName}
                   </a>
@@ -110,7 +108,7 @@ export function AskMentorPanel({
             </div>
           ))
         )}
-        {busy && <p className="text-sm text-[#64748B]">{mentorName}&apos;s AI is thinking…</p>}
+        {busy && <p className="text-[14px] text-text-secondary">{mentorName}&apos;s AI is thinking…</p>}
       </div>
 
       <form
@@ -118,18 +116,18 @@ export function AskMentorPanel({
           e.preventDefault();
           ask(input);
         }}
-        className="flex gap-2 border-t border-[#E2E8F0] p-3"
+        className="flex gap-2 border-t border-border p-4"
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={`Ask ${mentorName}'s AI…`}
-          className="flex-1 rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#4F46E5]"
+          className="flex-1 rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
         <button
           type="submit"
           disabled={busy || !input.trim()}
-          className="rounded-lg bg-[#4F46E5] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+          className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
         >
           Ask
         </button>

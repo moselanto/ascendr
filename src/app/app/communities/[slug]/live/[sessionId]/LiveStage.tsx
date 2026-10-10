@@ -149,10 +149,15 @@ export default function LiveStage({
     }
   }
 
+  const smallBtn =
+    "rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40";
+
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
-      {/* Stage */}
-      <div className="relative flex aspect-video items-center justify-center bg-[radial-gradient(circle_at_50%_40%,#1e293b,#0f172a)] text-white">
+    <div className="overflow-hidden rounded-2xl border border-border bg-white shadow-card">
+      {/* Stage (the page's one dark feature panel) */}
+      <div className="relative flex aspect-video items-center justify-center overflow-hidden bg-ink text-white">
+        <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
+
         {/* Host webcam video (only visible while broadcasting) */}
         <video
           ref={videoRef}
@@ -165,65 +170,58 @@ export default function LiveStage({
 
         {/* Avatar fallback when no live video is showing */}
         {!broadcasting && (
-          <div className="text-center">
-            <div className="mx-auto mb-2.5 flex h-16 w-16 items-center justify-center rounded-full bg-ink text-[22px] font-bold">
+          <div className="relative text-center">
+            <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full bg-brand-100 text-[20px] font-semibold text-brand-700">
               {hostInitials}
             </div>
-            <div className="font-bold">{hostName}</div>
-            <div className="text-small opacity-70">
+            <div className="text-[15px] font-semibold">{hostName}</div>
+            <div className="text-[13px] text-white/70">
               {isLive ? "Host · presenting" : isHost ? "Ready to go live" : "Waiting for host"}
             </div>
           </div>
         )}
 
         {(isLive || broadcasting) && (
-          <span className="absolute left-3 top-3 rounded-full bg-danger px-2.5 py-1 text-caption font-semibold text-white">
-            ● LIVE
+          <span className="absolute left-3 top-3 flex items-center gap-1.5 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+            LIVE
           </span>
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-caption font-semibold text-white">
-          ⦿ REC
+        <span className="absolute right-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">
+          {"\u25C9"} REC
         </span>
-        <span className="absolute bottom-3 left-3 rounded-full bg-white/15 px-2.5 py-1 text-caption font-semibold text-white">
+        <span className="absolute bottom-3 left-3 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">
           {watching} watching
         </span>
       </div>
 
       {/* Host broadcast controls */}
       {isHost && (
-        <div className="flex flex-wrap items-center gap-2 border-b border-border px-3.5 py-3">
+        <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
           {!broadcasting ? (
             <button
               onClick={startBroadcast}
-              className="rounded-full bg-danger px-4 py-2 text-small font-semibold text-white hover:opacity-95"
+              className="flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
             >
-              ● Go live from your camera
+              <span className="h-2 w-2 rounded-full bg-accent" />
+              Go live from your camera
             </button>
           ) : (
             <>
-              <button
-                onClick={toggleCam}
-                className="rounded-full border border-border px-3 py-2 text-small font-semibold hover:border-ink/40"
-              >
+              <button onClick={toggleCam} className={smallBtn}>
                 {camOn ? "Camera on" : "Camera off"}
               </button>
-              <button
-                onClick={toggleMic}
-                className="rounded-full border border-border px-3 py-2 text-small font-semibold hover:border-ink/40"
-              >
+              <button onClick={toggleMic} className={smallBtn}>
                 {micOn ? "Mic on" : "Mic off"}
               </button>
               {!recording ? (
-                <button
-                  onClick={startRecording}
-                  className="rounded-full border border-border px-3 py-2 text-small font-semibold hover:border-ink/40"
-                >
-                  ⦿ Record
+                <button onClick={startRecording} className={smallBtn}>
+                  {"\u25C9"} Record
                 </button>
               ) : (
                 <button
                   onClick={stopRecording}
-                  className="flex items-center gap-1.5 rounded-full border border-danger px-3 py-2 text-small font-semibold text-danger"
+                  className="flex items-center gap-1.5 rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-danger hover:border-ink/40"
                 >
                   <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-danger" />
                   Stop recording
@@ -231,7 +229,7 @@ export default function LiveStage({
               )}
               <button
                 onClick={stopBroadcast}
-                className="ml-auto rounded-full border border-danger px-3 py-2 text-small font-semibold text-danger hover:bg-[#fef2f2]"
+                className="ml-auto rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-danger hover:border-ink/40"
               >
                 Stop camera
               </button>
@@ -242,23 +240,23 @@ export default function LiveStage({
 
       {/* Recording ready — download the captured file */}
       {recordingUrl && (
-        <div className="flex flex-wrap items-center gap-3 border-b border-border bg-[#ecfdf5] px-3.5 py-3 text-small text-[#047857]">
+        <div className="flex flex-wrap items-center gap-3 border-b border-border bg-emerald-50 px-4 py-3 text-[14px] text-emerald-800">
           <span className="font-semibold">Recording ready</span>
           <a
             href={recordingUrl}
             download={`ascendr-live-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.webm`}
-            className="rounded-full bg-accent px-3 py-1.5 font-semibold text-white hover:opacity-95"
+            className="rounded-full bg-ink px-3 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700"
           >
-            ⬇ Download recording
+            Download recording
           </a>
-          <span className="text-caption text-text-secondary">
-            Saved locally in your browser — download to keep it.
+          <span className="text-[12px] text-text-secondary">
+            Saved locally in your browser. Download to keep it.
           </span>
         </div>
       )}
 
       {error && (
-        <div className="border-b border-border bg-[#fef2f2] px-3.5 py-2 text-caption text-danger">
+        <div className="border-b border-border bg-danger/10 px-4 py-2 text-[12px] text-danger">
           {error}
         </div>
       )}

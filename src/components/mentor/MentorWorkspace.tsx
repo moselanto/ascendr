@@ -29,7 +29,7 @@ export function MentorWorkspace({
     if (!res.ok) {
       show("err", data.error || "Could not add source.");
     } else {
-      show("ok", `Added "${data.title}" — ${data.chunks} chunks embedded.`);
+      show("ok", `Added "${data.title}" (${data.chunks} chunks embedded).`);
       setTitle("");
       setContent("");
       if (fileRef.current) fileRef.current.value = "";
@@ -79,41 +79,50 @@ export function MentorWorkspace({
 
   return (
     <div className="space-y-8">
-      <form onSubmit={submitText} className="rounded-xl border border-[#E2E8F0] bg-white p-5">
-        <label className="block text-sm font-medium text-[#0F172A]">Source title</label>
+      <form onSubmit={submitText} className="rounded-2xl border border-border bg-white p-5 shadow-card md:p-6">
+        <h2 className="text-[17px] font-semibold text-ink">Add a source</h2>
+        <p className="mt-0.5 text-[14px] text-text-secondary">Paste text or upload a file.</p>
+
+        <label htmlFor="source-title" className="mt-5 block text-[12px] font-medium text-text-secondary">
+          Source title
+        </label>
         <input
+          id="source-title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g. My interview prep framework"
-          className="mt-1 w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#4F46E5]"
+          className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
 
-        <label className="mt-4 block text-sm font-medium text-[#0F172A]">Content</label>
+        <label htmlFor="source-content" className="mt-4 block text-[12px] font-medium text-text-secondary">
+          Content
+        </label>
         <textarea
+          id="source-content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
           rows={10}
           placeholder="Paste a playbook, FAQ answers, a talk transcript, or your written advice. The more specific, the better the clone."
-          className="mt-1 w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-sm outline-none focus:border-[#4F46E5]"
+          className="mt-1.5 w-full rounded-lg border border-border px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
         />
 
         <div className="mt-4 flex flex-wrap items-center gap-3">
           <button
             type="submit"
             disabled={busy || !content.trim()}
-            className="rounded-lg bg-[#4F46E5] px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-50"
           >
             {busy ? "Embedding…" : "Add to my AI clone"}
           </button>
 
-          <span className="text-sm text-[#64748B]">or</span>
+          <span className="text-[14px] text-text-secondary">or</span>
 
           {/* File upload — uses the title field above as the source title if set */}
           <button
             type="button"
             disabled={busy}
             onClick={() => fileRef.current?.click()}
-            className="rounded-lg border border-[#4F46E5] px-4 py-2 text-sm font-medium text-[#4F46E5] disabled:opacity-50"
+            className="rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40 disabled:opacity-50"
           >
             Upload a file
           </button>
@@ -126,32 +135,39 @@ export function MentorWorkspace({
           />
 
           {msg && (
-            <span className={`text-sm ${msg.kind === "ok" ? "text-[#10B981]" : "text-[#EF4444]"}`}>
+            <span
+              className={`rounded-full px-2.5 py-1 text-[12px] font-medium ${
+                msg.kind === "ok" ? "bg-emerald-50 text-emerald-800" : "bg-danger/10 text-danger"
+              }`}
+            >
               {msg.text}
             </span>
           )}
         </div>
 
-        <p className="mt-2 text-xs text-[#64748B]">
-          Upload supports .txt, .md, and .csv files (up to 2 MB). For PDFs, copy the text and paste it
-          for now — PDF parsing is coming next.
+        <p className="mt-3 text-[12px] text-text-secondary">
+          Upload supports .txt, .md, and .csv files (up to 2 MB). For PDFs, copy the text and paste it for now. PDF
+          parsing is coming next.
         </p>
       </form>
 
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-[#0F172A]">Your sources</h2>
+        <h2 className="mb-3 text-[15px] font-semibold text-ink">Your sources</h2>
         {initialSources.length === 0 ? (
-          <p className="text-sm text-[#64748B]">No sources yet. Add your first one above.</p>
+          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <div className="text-[15px] font-semibold text-ink">No sources yet</div>
+            <p className="mt-1 text-[14px] text-text-secondary">
+              Add your first source above to start training your clone.
+            </p>
+          </div>
         ) : (
-          <ul className="divide-y divide-[#E2E8F0] rounded-xl border border-[#E2E8F0] bg-white">
+          <ul className="divide-y divide-border rounded-2xl border border-border bg-white p-0 shadow-card">
             {initialSources.map((s) => (
-              <li key={s.id} className="flex items-center justify-between px-4 py-3">
-                <span className="text-sm text-[#0F172A]">{s.title}</span>
+              <li key={s.id} className="flex items-center justify-between gap-3 px-5 py-4">
+                <span className="truncate text-[14px] font-medium text-ink">{s.title}</span>
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${
-                    s.status === "ready"
-                      ? "bg-[#10B981]/10 text-[#10B981]"
-                      : "bg-[#F59E0B]/10 text-[#F59E0B]"
+                  className={`rounded-full px-2.5 py-1 text-[12px] font-medium capitalize ${
+                    s.status === "ready" ? "bg-emerald-50 text-emerald-800" : "bg-amber-50 text-amber-800"
                   }`}
                 >
                   {s.status}

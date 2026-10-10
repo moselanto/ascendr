@@ -5,6 +5,17 @@ import type { Community } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
+function initials(name: string) {
+  return (
+    name
+      .split(" ")
+      .map((w) => w[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase() || "C"
+  );
+}
+
 export default async function CommunitiesPage() {
   const profile = await getCurrentProfile();
   const supabase = createClient();
@@ -28,6 +39,7 @@ export default async function CommunitiesPage() {
   const unread = new Set<string>();
   const list = (communities as Community[] | null) ?? [];
   const joinedList = list.filter((c) => joined.has(c.id));
+  const discoverList = list.filter((c) => !joined.has(c.id));
 
   if (joinedList.length) {
     const ids = joinedList.map((c) => c.id);
@@ -80,49 +92,130 @@ export default async function CommunitiesPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="flex items-center justify-between">
-        <h1 className="text-[22px] font-semibold tracking-tight text-ink">Communities</h1>
-        <Link href="/app/communities/new" className="rounded-full bg-ink px-4 py-2.5 text-small font-semibold text-white">
-          + Create community
-        </Link>
+    <div className="mx-auto max-w-5xl">
+      {/* Page head */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Communities</p>
+          <h1 className="mt-1.5 text-[28px] font-semibold tracking-[-0.02em] text-ink md:text-[32px]">
+            Grow with <em className="accent-serif">your people</em>
+          </h1>
+          <p className="mt-1 text-[15px] text-text-secondary">
+            Join spaces built around careers, skills and mentors. Talk in channels, show up to live sessions.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/app/communities/new"
+            className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+          >
+            Create community
+          </Link>
+        </div>
       </div>
 
-      <div className="mt-5 grid gap-4 sm:grid-cols-2">
-        {list.length ? (
-          list.map((c) => (
-            <Link
-              key={c.id}
-              href={`/app/communities/${c.slug}`}
-              className="relative rounded-md border border-border bg-card p-5 hover:shadow-sm transition"
-            >
-              {unread.has(c.id) && (
-                <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-danger px-2 py-0.5 text-[10px] font-bold text-white">
-                  ● New
+      {/* My communities */}
+      <section className="mt-8">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[15px] font-semibold text-ink">Your communities</h2>
+          <span className="text-[12px] text-text-secondary">{joinedList.length} joined</span>
+        </div>
+        {joinedList.length ? (
+          <div className="divide-y divide-border rounded-2xl border border-border bg-white p-0 shadow-card">
+            {joinedList.map((c) => (
+              <Link
+                key={c.id}
+                href={`/app/communities/${c.slug}`}
+                className="flex items-center gap-4 px-5 py-4 transition hover:bg-surface"
+              >
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface text-[12px] font-semibold text-ink">
+                  {initials(c.name)}
                 </span>
-              )}
-              <div className="h-20 -mx-5 -mt-5 mb-4 rounded-t-md bg-ink" />
-              <div className="font-bold text-h4">{c.name}</div>
-              <p className="text-small text-text-secondary mt-1 line-clamp-2">
-                {c.description || "A community on ASCENDR."}
-              </p>
-              <div className="mt-3 flex items-center justify-between text-caption text-text-secondary">
-                <span>{c.member_count} members</span>
-                {joined.has(c.id) ? (
-                  <span className="rounded-full bg-[#ecfdf5] px-2 py-0.5 font-semibold text-[#047857]">Joined</span>
+                <div className="min-w-0 flex-1">
+                  <div className="truncate text-[14px] font-semibold text-ink">{c.name}</div>
+                  <p className="truncate text-[13px] text-text-secondary">
+                    {c.description || "A community on ASCENDR."}
+                  </p>
+                </div>
+                <span className="hidden text-[12px] text-text-secondary sm:inline">{c.member_count} members</span>
+                {unread.has(c.id) ? (
+                  <span className="flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-600" />
+                    New
+                  </span>
                 ) : (
-                  <span className="rounded-full bg-[#eef2ff] px-2 py-0.5 font-semibold text-brand-600">Open</span>
+                  <span className="text-[14px] text-text-secondary" aria-hidden>
+                    {"\u2192"}
+                  </span>
                 )}
-              </div>
-            </Link>
-          ))
+              </Link>
+            ))}
+          </div>
         ) : (
-          <div className="sm:col-span-2 rounded-md border border-dashed border-border bg-card p-10 text-center text-text-secondary">
-            No communities yet.{" "}
-            <Link href="/app/communities/new" className="text-brand-600 font-semibold">Create the first one</Link>.
+          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <div className="text-[15px] font-semibold text-ink">You have not joined a community yet</div>
+            <p className="mt-1 text-[14px] text-text-secondary">
+              Pick one below to start talking with people on the same path, or start your own.
+            </p>
+            <Link
+              href="/app/communities/new"
+              className="mt-4 inline-block rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40"
+            >
+              Create a community
+            </Link>
           </div>
         )}
-      </div>
+      </section>
+
+      {/* Discovery */}
+      <section className="mt-10">
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-[15px] font-semibold text-ink">Discover</h2>
+          <span className="text-[12px] text-text-secondary">{discoverList.length} open to join</span>
+        </div>
+        {discoverList.length ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {discoverList.map((c) => (
+              <Link
+                key={c.id}
+                href={`/app/communities/${c.slug}`}
+                className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-card transition hover:shadow-lift md:p-6"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface text-[12px] font-semibold text-ink">
+                  {initials(c.name)}
+                </span>
+                <div className="mt-4 text-[15px] font-semibold text-ink">{c.name}</div>
+                <p className="mt-1 line-clamp-2 flex-1 text-[13px] text-text-secondary">
+                  {c.description || "A community on ASCENDR."}
+                </p>
+                <div className="mt-4 flex items-center justify-between text-[12px] text-text-secondary">
+                  <span>{c.member_count} members</span>
+                  <span className="rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
+                    View {"\u2192"}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+            <div className="text-[15px] font-semibold text-ink">
+              {list.length ? "You are in every community" : "No communities yet"}
+            </div>
+            <p className="mt-1 text-[14px] text-text-secondary">
+              {list.length
+                ? "New communities will show up here as people create them."
+                : "Be the first to start one and invite people who share your goals."}
+            </p>
+            <Link
+              href="/app/communities/new"
+              className="mt-4 inline-block rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700"
+            >
+              Create the first one
+            </Link>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

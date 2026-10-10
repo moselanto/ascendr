@@ -39,20 +39,55 @@ export default async function MentorWorkspacePage({ params }: { params: { slug: 
     .eq("community_id", community.id)
     .order("created_at", { ascending: false });
 
+  const sourceCount = (sources ?? []).length;
+  const readyCount = (sources ?? []).filter((s) => s.status === "ready").length;
+
   return (
-    <div className="mx-auto max-w-3xl">
-      <div className="mb-6">
-        <h1 className="text-[22px] font-semibold tracking-tight text-ink">Mentor Workspace</h1>
-        <p className="mt-1 text-small text-text-secondary">
-          Add your knowledge — frameworks, FAQs, playbooks, transcripts. ASCENDR turns it into your
-          AI clone so members get grounded answers in your voice, with citations, even when you are away.
-        </p>
+    <div className="mx-auto max-w-4xl">
+      <Link
+        href={`/app/communities/${community.slug}`}
+        className="text-[13px] font-medium text-text-secondary hover:text-ink"
+      >
+        {"\u2190"} {community.name}
+      </Link>
+
+      {/* Page head */}
+      <div className="mt-3 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">Mentor workspace</p>
+          <h1 className="mt-1.5 text-[28px] font-semibold tracking-[-0.02em] text-ink md:text-[32px]">
+            Train your <em className="accent-serif">AI clone</em>
+          </h1>
+          <p className="mt-1 max-w-2xl text-[15px] text-text-secondary">
+            Add frameworks, FAQs, playbooks and transcripts. Members get grounded answers in your voice, with
+            citations, even when you are away.
+          </p>
+        </div>
       </div>
-      <MentorWorkspace communityId={community.id} initialSources={sources ?? []} />
+
+      {/* Feature panel */}
+      <div className="relative mt-6 overflow-hidden rounded-2xl bg-ink p-6 text-white">
+        <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
+        <div className="relative flex flex-wrap items-center gap-8">
+          <div>
+            <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/70">Sources</div>
+            <div className="mt-1 text-[28px] font-semibold">{sourceCount}</div>
+          </div>
+          <div>
+            <div className="text-[12px] font-semibold uppercase tracking-[0.14em] text-white/70">Ready</div>
+            <div className="mt-1 flex items-center gap-2 text-[28px] font-semibold">
+              <span className="h-2 w-2 rounded-full bg-accent" />
+              {readyCount}
+            </div>
+          </div>
+          <p className="max-w-sm text-[14px] text-white/70">
+            The more specific your sources, the better your clone answers. Members can always escalate to you.
+          </p>
+        </div>
+      </div>
+
       <div className="mt-6">
-        <Link href={`/app/communities/${community.slug}`} className="text-small text-brand-600 font-semibold">
-          ← Back to {community.name}
-        </Link>
+        <MentorWorkspace communityId={community.id} initialSources={sources ?? []} />
       </div>
     </div>
   );

@@ -119,45 +119,49 @@ export default function PollPanel({
   const sorted = [...polls].sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 
   return (
-    <div className="mt-5">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-small font-bold uppercase tracking-wide text-text-secondary">Polls</h2>
+    <div>
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="text-[15px] font-semibold text-ink">Polls</h2>
         {canModerate && (
           <button
             type="button"
             onClick={() => setShowCreate((s) => !s)}
-            className="rounded-full border border-border px-2.5 py-1 text-caption font-semibold text-brand-600 hover:border-ink/40"
+            className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40"
           >
-            {showCreate ? "Cancel" : "＋ New poll"}
+            {showCreate ? "Cancel" : "+ New poll"}
           </button>
         )}
       </div>
 
       {canModerate && showCreate && (
-        <form action={handleCreate} className="mb-3 rounded-md border border-border bg-card p-3">
+        <form action={handleCreate} className="mb-4 rounded-xl border border-border bg-surface p-4">
           <input type="hidden" name="session_id" value={sessionId} />
           <input type="hidden" name="slug" value={slug} />
+          <label htmlFor="poll-question" className="text-[12px] font-medium text-text-secondary">
+            Question
+          </label>
           <input
+            id="poll-question"
             name="question"
             required
             placeholder="Poll question"
-            className="w-full rounded-full border border-border px-3 py-2 text-small outline-none focus:border-ink/30"
+            className="mt-1.5 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-[14px] text-ink outline-none focus:border-ink/40"
           />
-          <div className="mt-2 flex flex-col gap-1.5">
+          <div className="mt-3 flex flex-col gap-2">
             {[0, 1, 2, 3].map((i) => (
               <input
                 key={i}
                 name={`option_${i}`}
                 placeholder={`Option ${i + 1}${i < 2 ? " (required)" : " (optional)"}`}
                 required={i < 2}
-                className="w-full rounded-full border border-border px-3 py-1.5 text-small outline-none focus:border-ink/30"
+                className="w-full rounded-lg border border-border bg-white px-3 py-2 text-[14px] text-ink outline-none focus:border-ink/40"
               />
             ))}
           </div>
           <button
             type="submit"
             disabled={pending}
-            className="mt-2 w-full rounded-full bg-ink px-3 py-2 text-small font-semibold text-white disabled:opacity-60"
+            className="mt-3 w-full rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700 disabled:opacity-60"
           >
             {pending ? "Creating…" : "Launch poll"}
           </button>
@@ -165,28 +169,28 @@ export default function PollPanel({
       )}
 
       {sorted.length === 0 && (
-        <p className="text-small text-text-secondary">
-          No polls yet{canModerate ? " — create one to gather the room." : "."}
+        <p className="text-[14px] text-text-secondary">
+          No polls yet{canModerate ? ". Create one to gather the room." : "."}
         </p>
       )}
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         {sorted.map((poll) => {
           const pollVotes = votes.filter((v) => v.poll_id === poll.id);
           const total = pollVotes.length;
           const myVote = pollVotes.find((v) => v.user_id === meId)?.option_index;
           const closed = poll.status === "closed";
           return (
-            <div key={poll.id} className="rounded-md border border-border bg-card p-3">
+            <div key={poll.id} className="rounded-xl border border-border bg-white p-4">
               <div className="flex items-start justify-between gap-2">
-                <div className="text-small font-bold">{poll.question}</div>
+                <div className="text-[14px] font-semibold text-ink">{poll.question}</div>
                 {closed && (
-                  <span className="flex-none rounded-full bg-bg px-2 py-0.5 text-caption text-text-secondary">
+                  <span className="flex-none rounded-full bg-surface px-2 py-0.5 text-[12px] font-medium text-text-secondary">
                     closed
                   </span>
                 )}
               </div>
-              <div className="mt-2 flex flex-col gap-1.5">
+              <div className="mt-3 flex flex-col gap-2">
                 {poll.options.map((opt, i) => {
                   const count = pollVotes.filter((v) => v.option_index === i).length;
                   const pct = total ? Math.round((count / total) * 100) : 0;
@@ -197,27 +201,27 @@ export default function PollPanel({
                       type="button"
                       disabled={closed || pending}
                       onClick={() => handleVote(poll.id, i)}
-                      className={`relative overflow-hidden rounded-full border px-3 py-1.5 text-left text-small transition ${
-                        mine ? "border-ink" : "border-border hover:border-ink/40"
+                      className={`relative overflow-hidden rounded-lg border px-3 py-2 text-left text-[14px] text-ink transition ${
+                        mine ? "border-brand-600" : "border-border hover:border-ink/40"
                       } ${closed ? "cursor-default" : ""}`}
                     >
                       <span
-                        className="absolute inset-y-0 left-0 bg-[#eef2ff]"
+                        className="absolute inset-y-0 left-0 bg-brand-50"
                         style={{ width: `${pct}%` }}
                         aria-hidden
                       />
                       <span className="relative flex items-center justify-between gap-2">
-                        <span className={mine ? "font-semibold text-brand-600" : ""}>
-                          {mine ? "✓ " : ""}
+                        <span className={mine ? "font-semibold text-brand-700" : ""}>
+                          {mine ? "\u2713 " : ""}
                           {opt}
                         </span>
-                        <span className="text-caption text-text-secondary">{pct}%</span>
+                        <span className="text-[12px] text-text-secondary">{pct}%</span>
                       </span>
                     </button>
                   );
                 })}
               </div>
-              <div className="mt-1.5 flex items-center justify-between text-caption text-text-secondary">
+              <div className="mt-2 flex items-center justify-between text-[12px] text-text-secondary">
                 <span>
                   {total} vote{total === 1 ? "" : "s"}
                 </span>
@@ -225,7 +229,7 @@ export default function PollPanel({
                   <button
                     type="button"
                     onClick={() => handleClose(poll.id)}
-                    className="font-semibold hover:text-text"
+                    className="font-medium hover:text-ink"
                   >
                     Close poll
                   </button>
