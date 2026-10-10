@@ -213,6 +213,8 @@ rate limits are enabled in project settings.
 
 ### M-4 — Ingestion accepts unvalidated content
 
+**Status:** Resolved. `lib/ingest-validate.ts` inspects file bytes (binary signatures, NUL bytes, undecodable text) and rejects instruction-like text with the exact phrase; `askMentorClone` fences excerpts in `<source>` tags, strips tag-like text, and tells the model to treat them as data.
+
 File type is checked by **filename extension only** and content is read as
 text without inspection. A file named `.txt` containing anything at all is
 chunked, embedded and stored, then later returned to users as mentor-grounded
@@ -333,7 +335,7 @@ fundraising push.
 |---|---|---|---|
 | 1 | ~~H-1 async ingestion~~ Done in 0025 | High | Done |
 | 2 | M-2 Sentry and alerting | Medium | ~1 day |
-| 3 | M-4 ingestion validation | Medium | 1-2 days |
+| 3 | ~~M-4 ingestion validation~~ Done | Medium | Done |
 | 4 | M-3 auth throttling | Medium | ~1 day |
 | 5 | ~~Snapshot purge when a member stops sharing~~ Done in 0020 | Medium | Done |
 | 6 | ~~Webhook replay protection (event-id de-duplication)~~ Done in 0021 | Low | Done |

@@ -5,6 +5,7 @@ import { consumeQuota, getTier, quotaExceededResponse } from "@/lib/usage";
 import { AI_CONFIGURED, chunkText } from "@/lib/ai";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { processSourceBatch } from "@/lib/ingest";
+import { checkFileBytes, checkText } from "@/lib/ingest-validate";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -71,7 +72,11 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: "File too large (max 2 MB of text)." }, { status: 413 });
       }
 
-      content = (await file.text()).trim();
+      // Inspect the bytes, not just the extension (SECURITY-AUDIT M-4).
+      const bytes = new Uint8Array(await file.arrayBuffer());
+      const fileCheck = checkFileBytes(bytes);
+      if (fileCheck.ok === false) return NextResponse.json({ error: fileCheck.error }, { status: 415 });
+      content = new TextDecoder("utf-8").decode(bytes).trim();
       title = (givenTitle || name).slice(0, 120);
       sourceType = "file";
     } else {
@@ -82,6 +87,11 @@ export async function POST(req: Request) {
     }
   } catch {
     return NextResponse.json({ error: "Could not read request body." }, { status: 400 });
+  }
+
+  if (communityId && content) {
+    const textCheck = checkText(content);
+    if (textCheck.ok === false) return NextResponse.json({ error: textCheck.error }, { status: 422 });
   }
 
   if (!communityId || !content) {
