@@ -18,7 +18,7 @@ export default function Loading() {
           <div className="h-10 w-32 rounded-full bg-border" />
         </div>
       </div>
-      <span className="sr-only">Loading{"\u2026"}</span>
+      <span className="sr-only">Loading{"…"}</span>
     </main>
   );
 }

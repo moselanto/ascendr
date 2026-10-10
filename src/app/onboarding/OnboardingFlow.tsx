@@ -190,7 +190,7 @@ export default function OnboardingFlow({ roles, firstName }: { roles: string[]; 
             disabled={submitting}
             className="ml-auto rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-ink-700 disabled:opacity-60"
           >
-            {submitting ? "Saving\u2026" : "Finish"}
+            {submitting ? "Saving…" : "Finish"}
           </button>
         ) : (
           <button

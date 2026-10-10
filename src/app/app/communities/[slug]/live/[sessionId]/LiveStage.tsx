@@ -188,7 +188,7 @@ export default function LiveStage({
           </span>
         )}
         <span className="absolute right-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">
-          {"\u25C9"} REC
+          {"◉"} REC
         </span>
         <span className="absolute bottom-3 left-3 rounded-full bg-white/15 px-2.5 py-1 text-[12px] font-semibold text-white">
           {watching} watching
@@ -216,7 +216,7 @@ export default function LiveStage({
               </button>
               {!recording ? (
                 <button onClick={startRecording} className={smallBtn}>
-                  {"\u25C9"} Record
+                  {"◉"} Record
                 </button>
               ) : (
                 <button

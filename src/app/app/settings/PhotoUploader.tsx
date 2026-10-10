@@ -128,7 +128,7 @@ export default function PhotoUploader({
             disabled={busy != null}
             className="rounded-full bg-white/90 px-3 py-1.5 text-[12px] font-medium text-ink shadow-card backdrop-blur hover:bg-white disabled:opacity-60"
           >
-            {busy === "cover" ? "Uploading\u2026" : shownCover ? "Change cover" : "Add cover photo"}
+            {busy === "cover" ? "Uploading…" : shownCover ? "Change cover" : "Add cover photo"}
           </button>
           {shownCover && (
             <button
@@ -159,7 +159,7 @@ export default function PhotoUploader({
           <Avatar name={name} url={shownAvatar} size={104} className="border-4 border-white shadow-card" />
           {busy === "avatar" && (
             <span className="absolute inset-1 flex items-center justify-center rounded-full bg-ink/50 text-[12px] font-medium text-white">
-              Uploading{"\u2026"}
+              Uploading{"…"}
             </span>
           )}
         </div>

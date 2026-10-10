@@ -40,7 +40,7 @@ export default function AppLoading() {
         </div>
       </div>
 
-      <span className="sr-only">Loading{"\u2026"}</span>
+      <span className="sr-only">Loading{"…"}</span>
     </div>
   );
 }

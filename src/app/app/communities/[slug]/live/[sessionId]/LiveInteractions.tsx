@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 type FloatingReaction = { id: number; emoji: string; left: number };
 
 // Quick reactions as plain unicode glyphs (broadcast only, never persisted).
-const REACTIONS = ["\u2191", "\u2665", "\u2605", "\u2713", "+1"];
+const REACTIONS = ["↑", "♥", "★", "✓", "+1"];
 
 /**
  * Ephemeral live-room interactions: Raise hand and React.
@@ -110,7 +110,7 @@ export default function LiveInteractions({
             : "border-ink/15 bg-white text-ink hover:border-ink/40"
         }`}
       >
-        {handRaised ? "\u2713 Hand raised" : "Raise hand"}
+        {handRaised ? "✓ Hand raised" : "Raise hand"}
         {handCount > 0 && (
           <span className="ml-1.5 rounded-full bg-ink px-1.5 text-[12px] font-semibold text-white">
             {handCount}

@@ -43,7 +43,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
           name="q"
           defaultValue={q}
           autoFocus
-          placeholder="Try \u201cproduct\u201d, a name, or a company"
+          placeholder="Try “product”, a name, or a company"
           aria-label="Search"
           className="w-full rounded-full border border-border bg-white px-5 py-3 text-[15px] text-ink shadow-card outline-none focus:border-ink/30"
         />
@@ -54,7 +54,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
         <p className="text-[14px] text-text-secondary">Search by name, skill words in bios, company names, community topics or a target role.</p>
       ) : total === 0 ? (
         <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
-          <p className="text-[15px] font-semibold text-ink">Nothing matches \u201c{q}\u201d</p>
+          <p className="text-[15px] font-semibold text-ink">Nothing matches “{q}”</p>
           <p className="mt-1 text-[14px] text-text-secondary">Try a shorter word, or browse mentors and communities directly.</p>
           <div className="mt-5 flex justify-center gap-2">
             <Link href="/app/mentors" className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">Browse mentors</Link>
@@ -69,7 +69,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
               <div className="flex flex-wrap gap-2">
                 {Rl.map((r) => (
                   <Link key={r.id} href="/onboarding" className="rounded-full border border-border bg-white px-4 py-2 text-[13px] font-medium capitalize text-ink shadow-card hover:border-ink/30">
-                    {r.title} <span className="text-text-secondary">\u00b7 set as goal</span>
+                    {r.title} <span className="text-text-secondary">· set as goal</span>
                   </Link>
                 ))}
               </div>

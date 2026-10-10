@@ -167,7 +167,7 @@ export default async function OpportunitiesPage() {
               </p>
               {topGap && (
                 <Link href="/app/career#roadmap" className="text-[13px] font-medium text-ink hover:underline">
-                  Close this gap \u2192
+                  Close this gap →
                 </Link>
               )}
             </div>
@@ -205,8 +205,8 @@ export default async function OpportunitiesPage() {
                         </div>
                         <p className="text-[13px] text-text-secondary">
                           {j.company}
-                          {j.location ? ` \u00b7 ${j.location}` : ""}
-                          {j.remote ? " \u00b7 Remote" : ""}
+                          {j.location ? ` · ${j.location}` : ""}
+                          {j.remote ? " · Remote" : ""}
                         </p>
                         {paths.length > 0 && (
                           <p className="mt-2 flex flex-wrap items-center gap-1.5 text-[12px] text-ink/80">
@@ -238,7 +238,7 @@ export default async function OpportunitiesPage() {
                           </form>
                         ) : null}
                         <a href={j.url} target="_blank" rel="noopener noreferrer" className="text-[12px] font-medium text-text-secondary hover:text-ink">
-                          View role \u2197
+                          View role ↗
                         </a>
                       </div>
                     </div>
@@ -276,7 +276,7 @@ export default async function OpportunitiesPage() {
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-[14px] font-medium text-ink">{s.title}</p>
                             <p className="truncate text-[12px] text-text-secondary">
-                              {s.company} \u00b7 updated {daysAgo(s.updated_at)}
+                              {s.company} · updated {daysAgo(s.updated_at)}
                             </p>
                           </div>
                           <form action={moveOpportunity} className="flex items-center gap-1.5">
@@ -299,7 +299,7 @@ export default async function OpportunitiesPage() {
                           <form action={removeOpportunity}>
                             <input type="hidden" name="id" value={s.id} />
                             <button aria-label={`Remove ${s.title}`} className="px-1 text-[14px] text-text-secondary hover:text-danger">
-                              \u00d7
+                              ×
                             </button>
                           </form>
                         </li>
@@ -309,7 +309,7 @@ export default async function OpportunitiesPage() {
               ))}
               {counts.interviewing > 0 && (
                 <Link href="/app/career" className="block rounded-2xl bg-ink px-5 py-4 text-[14px] text-white hover:bg-ink-700">
-                  Interviewing? Log it as a win so it counts as an outcome \u2192
+                  Interviewing? Log it as a win so it counts as an outcome →
                 </Link>
               )}
             </div>

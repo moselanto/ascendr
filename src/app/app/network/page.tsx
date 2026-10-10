@@ -91,7 +91,7 @@ const BANDS = [
 ] as const;
 
 function pct(n: number, d: number) {
-  return d > 0 ? `${Math.round((n / d) * 100)}%` : "\u2013";
+  return d > 0 ? `${Math.round((n / d) * 100)}%` : "–";
 }
 
 function MigrationNotice() {
@@ -260,7 +260,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                           ? `${q.org_name} invited you to work toward ${q.role_title} at ${q.company}`
                           : `${q.org_name} would like to introduce you to ${q.company} for ${q.role_title}`}
                       </p>
-                      {q.note && <p className="mt-0.5 text-[13px] text-text-secondary">{"\u201C"}{q.note}{"\u201D"}</p>}
+                      {q.note && <p className="mt-0.5 text-[13px] text-text-secondary">{"“"}{q.note}{"”"}</p>}
                       {q.kind === "pathway" && pending && (
                         <p className="mt-0.5 text-[12px] text-text-secondary">Accepting makes this role your career goal and builds your roadmap.</p>
                       )}
@@ -363,7 +363,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
         <div>
           <p className="text-[18px] font-semibold text-ink">{current.name}</p>
           <p className="text-[12px] text-text-secondary">
-            {KIND_LABEL[current.kind] ?? "Network"} \u00b7 {ov.members} members \u00b7 {ov.sharing} sharing career data
+            {KIND_LABEL[current.kind] ?? "Network"} · {ov.members} members · {ov.sharing} sharing career data
           </p>
         </div>
       </div>
@@ -373,7 +373,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
         {[
           { label: "Career activation", value: pct(ov.activated, ov.sharing), note: `${ov.activated} of ${ov.sharing} set a goal` },
           { label: "Action within 7 days", value: pct(ov.acted_7d, ov.sharing), note: `${ov.acted_7d} members acted this week` },
-          { label: "Outcomes, last 90 days", value: String(ov.outcomes_90d), note: `${ov.interviews_90d} interviews \u00b7 ${ov.hires_90d} offers or hires` },
+          { label: "Outcomes, last 90 days", value: String(ov.outcomes_90d), note: `${ov.interviews_90d} interviews · ${ov.hires_90d} offers or hires` },
           { label: "Introductions, 90 days", value: String(ov.intros_90d), note: "warm paths that happened" },
         ].map((k) => (
           <div key={k.label} className="bg-white p-5">
@@ -440,7 +440,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                     <li key={`${m.member_id}-${m.role_title}-${m.company}`} className="text-[13px] text-ink">
                       <span className="font-medium">{m.member_name ?? "Member"}</span>{" "}
                       <span className="text-text-secondary">
-                        {BAND_NAME[m.from_band] ?? m.from_band} {"\u2192"} {BAND_NAME[m.to_band] ?? m.to_band} for {m.role_title} at {m.company}
+                        {BAND_NAME[m.from_band] ?? m.from_band} {"→"} {BAND_NAME[m.to_band] ?? m.to_band} for {m.role_title} at {m.company}
                       </span>
                     </li>
                   ))}
@@ -453,7 +453,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
             <div className="border-b border-border px-5 py-4">
               <h2 className="text-[17px] font-semibold tracking-tight text-ink">Talent pipeline</h2>
               <p className="text-[12px] text-text-secondary">
-                {pathways.filter((p) => p.status === "accepted").length} on pathways {"\u00b7"} {intros.filter((p) => p.status === "consented").length} ready to introduce {"\u00b7"} {intros.filter((p) => p.status === "hired").length} hired
+                {pathways.filter((p) => p.status === "accepted").length} on pathways {"·"} {intros.filter((p) => p.status === "consented").length} ready to introduce {"·"} {intros.filter((p) => p.status === "hired").length} hired
               </p>
             </div>
             {pipeline.length === 0 ? (
@@ -471,7 +471,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                         <div className="min-w-0">
                           <p className="truncate text-[13px] font-medium text-ink">{p.member_name ?? "Member"}</p>
                           <p className="truncate text-[12px] text-text-secondary">
-                            {p.kind === "pathway" ? "Pathway" : "Intro"} {"\u00b7"} {p.role_title} at {p.company}
+                            {p.kind === "pathway" ? "Pathway" : "Intro"} {"·"} {p.role_title} at {p.company}
                           </p>
                         </div>
                         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium ${STATUS_TONE[p.status] ?? ""}`}>{STATUS_LABEL[p.status] ?? p.status}</span>
@@ -535,7 +535,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                         <span className="text-text-secondary">{b.label.toLowerCase()}</span>
                       </span>
                     ))}
-                    <span className="text-text-secondary">\u00b7 {g.openings} opening{g.openings === 1 ? "" : "s"}</span>
+                    <span className="text-text-secondary">· {g.openings} opening{g.openings === 1 ? "" : "s"}</span>
                   </div>
                 </div>
                 <div className="grid gap-3 p-4 lg:grid-cols-3">
@@ -554,7 +554,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                                   {r.member_name ?? "Member"}
                                 </Link>
                                 <p className="text-[12px] text-text-secondary">
-                                  {r.matched} of {r.essential} core skills{r.goal_match ? " \u00b7 targeting this role" : ""}
+                                  {r.matched} of {r.essential} core skills{r.goal_match ? " · targeting this role" : ""}
                                 </p>
                                 {(r.missing ?? []).length > 0 && (
                                   <p className="mt-1 text-[12px] text-ink/70">Missing: {(r.missing ?? []).slice(0, 3).join(", ")}</p>
@@ -633,7 +633,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                     <span aria-hidden className="absolute -top-1 h-5 w-0.5 bg-danger" style={{ left: `${(s.demand / maxSupply) * 100}%` }} />
                   </div>
                   <span className={`col-span-2 text-[12px] sm:col-span-1 sm:text-right ${short ? "text-danger" : "text-emerald-700"}`}>
-                    {short ? `Short by ${s.demand - s.have}` : "Covered"} \u00b7 {s.have}/{s.demand}
+                    {short ? `Short by ${s.demand - s.have}` : "Covered"} · {s.have}/{s.demand}
                   </span>
                 </li>
               );
@@ -656,7 +656,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-medium text-ink">{rp?.title ?? "Role"}</p>
                       <p className="text-[12px] text-text-secondary">
-                        {r.company} \u00b7 {r.openings} opening{r.openings === 1 ? "" : "s"}
+                        {r.company} · {r.openings} opening{r.openings === 1 ? "" : "s"}
                       </p>
                     </div>
                     <form action={removeOrgRole}>

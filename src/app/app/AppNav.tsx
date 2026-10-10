@@ -17,37 +17,37 @@ export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Workspace",
     items: [
-      { href: "/app", label: "Home", icon: "\u25F3" },
-      { href: "/app/career", label: "Career intelligence", icon: "\u2197" },
-      { href: "/app/opportunities", label: "Opportunities", icon: "\u25C8" },
-      { href: "/app/outcomes", label: "Outcomes ledger", icon: "\u2713" },
-      { href: "/app/ai", label: "AI career coach", icon: "\u2726" },
+      { href: "/app", label: "Home", icon: "◳" },
+      { href: "/app/career", label: "Career intelligence", icon: "↗" },
+      { href: "/app/opportunities", label: "Opportunities", icon: "◈" },
+      { href: "/app/outcomes", label: "Outcomes ledger", icon: "✓" },
+      { href: "/app/ai", label: "AI career coach", icon: "✦" },
     ],
   },
   {
     label: "Network",
     items: [
-      { href: "/app/members", label: "Member directory", icon: "\u2687" },
-      { href: "/app/mentors", label: "Mentors & experts", icon: "\u2605" },
-      { href: "/app/networking", label: "Professional network", icon: "\u21C4" },
-      { href: "/app/communities", label: "Communities", icon: "\u25CE" },
-      { href: "/app/network", label: "Network intelligence", icon: "\u25A3" },
+      { href: "/app/members", label: "Member directory", icon: "⚇" },
+      { href: "/app/mentors", label: "Mentors & experts", icon: "★" },
+      { href: "/app/networking", label: "Professional network", icon: "⇄" },
+      { href: "/app/communities", label: "Communities", icon: "◎" },
+      { href: "/app/network", label: "Network intelligence", icon: "▣" },
     ],
   },
   {
     label: "Grow",
     items: [
-      { href: "/app/learn", label: "Learning paths", icon: "\u25A6" },
-      { href: "/app/live", label: "Live sessions", icon: "\u25C9" },
-      { href: "/app/feed", label: "Community feed", icon: "\u25A4" },
-      { href: "/app/communities/new", label: "Create", icon: "\uFF0B" },
+      { href: "/app/learn", label: "Learning paths", icon: "▦" },
+      { href: "/app/live", label: "Live sessions", icon: "◉" },
+      { href: "/app/feed", label: "Community feed", icon: "▤" },
+      { href: "/app/communities/new", label: "Create", icon: "＋" },
     ],
   },
 ];
 
 export const ADMIN_GROUP: NavGroup = {
   label: "Admin",
-  items: [{ href: "/app/admin/metrics", label: "Platform metrics", icon: "\u25A4" }],
+  items: [{ href: "/app/admin/metrics", label: "Platform metrics", icon: "▤" }],
 };
 
 export function isActive(pathname: string, href: string) {
@@ -137,9 +137,9 @@ export function AppSidebar({
               Go further, <span className="accent-serif text-brand-200">faster.</span>
             </p>
             <ul className="mt-2 space-y-1 text-[12px] text-white/70">
-              <li>{"\u2713"} 8x more AI coaching</li>
-              <li>{"\u2713"} 10x interview practice</li>
-              <li>{"\u2713"} Run your own talent network</li>
+              <li>{"✓"} 8x more AI coaching</li>
+              <li>{"✓"} 10x interview practice</li>
+              <li>{"✓"} Run your own talent network</li>
             </ul>
             <p className="mt-2.5 text-[12px] text-white/60">
               From <span className="font-semibold text-white">KES 13,000</span>/month
@@ -148,7 +148,7 @@ export function AppSidebar({
               href="/app/plans"
               className="mt-3.5 flex w-full items-center justify-center gap-1.5 rounded-full bg-white px-3 py-2 text-[12px] font-semibold text-ink transition-colors hover:bg-brand-50"
             >
-              See plans <span aria-hidden>{"\u2192"}</span>
+              See plans <span aria-hidden>{"→"}</span>
             </Link>
           </div>
         </div>
@@ -244,7 +244,7 @@ export function MobileNav({
           aria-expanded={open}
           className={`relative flex flex-col items-center gap-0.5 py-2 ${moreActive || open ? "text-ink" : "text-text-secondary"}`}
         >
-          <span className={`flex h-7 w-10 items-center justify-center rounded-full text-[15px] ${moreActive || open ? "bg-ink text-white" : ""}`}>{"\u2261"}</span>
+          <span className={`flex h-7 w-10 items-center justify-center rounded-full text-[15px] ${moreActive || open ? "bg-ink text-white" : ""}`}>{"≡"}</span>
           <span className="text-[10px] font-medium leading-tight">More</span>
           {(communitiesUnread || messagesUnread) && <span className="absolute right-4 top-1.5 h-2 w-2 rounded-full bg-danger" />}
         </button>

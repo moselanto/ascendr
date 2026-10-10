@@ -353,7 +353,7 @@ export default function LiveRail({
                   }`}
                   aria-pressed={q.voted}
                 >
-                  <span aria-hidden>{"\u25B2"}</span>
+                  <span aria-hidden>{"▲"}</span>
                   <span>{q.votes}</span>
                 </button>
                 <div className="flex-1">
@@ -439,7 +439,7 @@ export default function LiveRail({
                         className="ml-auto text-[12px] text-text-secondary opacity-0 hover:text-danger group-hover:opacity-100"
                         title="Delete"
                       >
-                        {"\u2715"}
+                        {"✕"}
                       </button>
                     )}
                   </div>
@@ -489,7 +489,7 @@ export default function LiveRail({
               <div className="mt-1 flex flex-col gap-1">
                 {raisedHands.map((p) => (
                   <span key={p.user_id} className="text-[14px] text-amber-800">
-                    {"\u2191"} {p.user_id === meId ? "You" : p.full_name}
+                    {"↑"} {p.user_id === meId ? "You" : p.full_name}
                   </span>
                 ))}
               </div>

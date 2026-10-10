@@ -90,7 +90,7 @@ export default async function LiveSessionsPage({
         href={`/app/communities/${community.slug}`}
         className="text-[13px] font-medium text-text-secondary hover:text-ink"
       >
-        {"\u2190"} {community.name}
+        {"←"} {community.name}
       </Link>
 
       {/* Page head */}
@@ -188,7 +188,7 @@ function Section({
                 className="flex items-center gap-4 px-5 py-4 transition hover:bg-surface"
               >
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface text-[12px] font-semibold text-ink">
-                  {"\u25C9"}
+                  {"◉"}
                 </span>
                 <div className="min-w-0 flex-1">
                   <div className="truncate text-[14px] font-semibold text-ink">{s.title}</div>

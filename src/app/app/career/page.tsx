@@ -212,7 +212,7 @@ export default async function CareerPage() {
             <>
               <p className="nums mt-5 text-[44px] font-semibold leading-none tracking-tight text-ink">
                 {matchedCount}
-                <span className="text-[18px] font-normal text-text-secondary"> of {essentialTotal || "\u2013"} core skills</span>
+                <span className="text-[18px] font-normal text-text-secondary"> of {essentialTotal || "–"} core skills</span>
               </p>
               {essentialTotal > 0 && (
                 <div className="mt-4 flex gap-1" aria-hidden>
@@ -255,7 +255,7 @@ export default async function CareerPage() {
                         } hover:border-danger`}
                       >
                         {h.label}
-                        {h.evidence === "self_reported" ? " \u00d7" : ""}
+                        {h.evidence === "self_reported" ? " ×" : ""}
                       </button>
                     </form>
                   ))}
@@ -314,7 +314,7 @@ export default async function CareerPage() {
         <section className="rounded-2xl border border-border bg-white shadow-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h2 className="text-[16px] font-semibold text-ink">People who can help</h2>
-            <Link href="/app/members" className="text-[13px] font-medium text-text-secondary hover:text-ink">See all \u2192</Link>
+            <Link href="/app/members" className="text-[13px] font-medium text-text-secondary hover:text-ink">See all →</Link>
           </div>
           {people.length === 0 ? (
             <p className="px-6 py-8 text-center text-[13px] text-text-secondary">As mentors join, the ones closest to {String(roleTitle)} appear here.</p>
@@ -345,7 +345,7 @@ export default async function CareerPage() {
         <section className="rounded-2xl border border-border bg-white shadow-card">
           <div className="flex items-center justify-between border-b border-border px-6 py-4">
             <h2 className="text-[16px] font-semibold text-ink">Communities to join</h2>
-            <Link href="/app/communities" className="text-[13px] font-medium text-text-secondary hover:text-ink">Browse \u2192</Link>
+            <Link href="/app/communities" className="text-[13px] font-medium text-text-secondary hover:text-ink">Browse →</Link>
           </div>
           {rankedCommunities.length === 0 ? (
             <p className="px-6 py-8 text-center text-[13px] text-text-secondary">No public communities yet.</p>
@@ -360,7 +360,7 @@ export default async function CareerPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-semibold text-ink">{c.name}</p>
                       <p className="truncate text-[12px] text-text-secondary">
-                        {c.hits.length > 0 ? `Related to ${c.hits.join(", ")}` : "Popular on ASCENDR"} \u00b7 {c.member_count ?? 0} members
+                        {c.hits.length > 0 ? `Related to ${c.hits.join(", ")}` : "Popular on ASCENDR"} · {c.member_count ?? 0} members
                       </p>
                     </div>
                   </Link>
@@ -400,14 +400,14 @@ export default async function CareerPage() {
                     <p className="truncate text-[14px] font-semibold text-ink">{j.title}</p>
                     <p className="truncate text-[12px] text-text-secondary">
                       {j.company}
-                      {j.location ? ` \u00b7 ${j.location}` : ""}
-                      {j.remote ? " \u00b7 Remote" : ""}
+                      {j.location ? ` · ${j.location}` : ""}
+                      {j.remote ? " · Remote" : ""}
                     </p>
                   </div>
                   {j.seniority === "senior" && (
                     <span className="rounded-full border border-border px-2 py-0.5 text-[11px] text-text-secondary">Senior</span>
                   )}
-                  <span className="text-[13px] text-text-secondary">\u2197</span>
+                  <span className="text-[13px] text-text-secondary">↗</span>
                 </a>
               </li>
             ))}
@@ -431,7 +431,7 @@ export default async function CareerPage() {
                   <div>
                     <p className="text-[14px] font-medium text-ink">{outcomeLabel(o.kind)}</p>
                     <p className="text-[12px] text-text-secondary">
-                      {[o.title, o.organization, o.occurred_on].filter(Boolean).join(" \u00b7 ")}
+                      {[o.title, o.organization, o.occurred_on].filter(Boolean).join(" · ")}
                     </p>
                   </div>
                 </div>

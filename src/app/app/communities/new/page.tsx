@@ -49,7 +49,7 @@ export default async function CreateHubPage({
           href="/app/communities"
           className="self-start rounded-full border border-ink/15 bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:border-ink/40 md:self-auto"
         >
-          {"\u2190"} All communities
+          {"←"} All communities
         </Link>
       </div>
 
@@ -132,7 +132,7 @@ export default async function CreateHubPage({
                         className="flex items-center justify-between rounded-lg bg-white/10 px-3 py-2 text-[14px] font-medium text-white hover:bg-white/15"
                       >
                         <span className="truncate">{c.name}</span>
-                        <span aria-hidden>{"\u2192"}</span>
+                        <span aria-hidden>{"→"}</span>
                       </Link>
                     </li>
                   ))}
@@ -150,14 +150,14 @@ export default async function CreateHubPage({
             className="rounded-2xl border border-border bg-white p-5 shadow-card transition hover:shadow-lift md:p-6"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-surface text-[12px] font-semibold text-ink">
-              {"\u270E"}
+              {"✎"}
             </span>
             <h2 className="mt-4 text-[17px] font-semibold text-ink">Share a post</h2>
             <p className="mt-1 text-[14px] text-text-secondary">
               Post a win, a question or a resource to your feed.
             </p>
             <span className="mt-4 inline-block text-[14px] font-medium text-ink">
-              Go to feed {"\u2192"}
+              Go to feed {"→"}
             </span>
           </Link>
         </div>

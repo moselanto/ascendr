@@ -40,7 +40,7 @@ export default function LoginPage({
         <div className="flex items-center justify-between">
           <Logo />
           <Link href="/" className="text-[13px] font-medium text-text-secondary hover:text-ink">
-            {"\u2190"} Back to home
+            {"←"} Back to home
           </Link>
         </div>
 

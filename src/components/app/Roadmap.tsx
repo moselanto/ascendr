@@ -97,7 +97,7 @@ export function Roadmap({
                               step.done ? "border-ink bg-ink text-white" : "border-border bg-white hover:border-ink"
                             }`}
                           >
-                            {step.done ? "\u2713" : ""}
+                            {step.done ? "✓" : ""}
                           </button>
                           <div className="flex-1">
                             <p className={`text-[14px] ${step.done ? "text-text-secondary line-through" : "text-text"}`}>

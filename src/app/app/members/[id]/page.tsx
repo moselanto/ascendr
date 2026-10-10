@@ -68,7 +68,7 @@ export default async function MemberProfile({ params }: { params: { id: string }
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <Link href={profile.role === "mentor" ? "/app/mentors" : "/app/members"} className="text-[13px] font-medium text-text-secondary hover:text-ink">
-        \u2190 Back to people
+        ← Back to people
       </Link>
 
       {/* Header */}
@@ -98,23 +98,23 @@ export default async function MemberProfile({ params }: { params: { id: string }
               {(headline || company) && (
                 <p className="text-[14px] text-ink/80">
                   {headline}
-                  {headline && company ? " \u00b7 " : ""}
+                  {headline && company ? " · " : ""}
                   {company ? `at ${company}` : ""}
                 </p>
               )}
               {(location || website) && (
                 <p className="mt-0.5 flex flex-wrap items-center gap-x-3 text-[13px] text-text-secondary">
-                  {location && <span>{"\u25C9"} {location}</span>}
+                  {location && <span>{"◉"} {location}</span>}
                   {website && websiteLabel && (
                     <a href={website} target="_blank" rel="noopener noreferrer nofollow" className="font-medium text-brand-600 hover:text-brand-700">
-                      {websiteLabel} {"\u2197"}
+                      {websiteLabel} {"↗"}
                     </a>
                   )}
                 </p>
               )}
               <p className="text-[13px] text-text-secondary">
                 {roleLabel}
-                {profile.handle ? ` \u00b7 @${profile.handle}` : ""} \u00b7 On ASCENDR since {since}
+                {profile.handle ? ` · @${profile.handle}` : ""} · On ASCENDR since {since}
               </p>
             </div>
           </div>
@@ -163,7 +163,7 @@ export default async function MemberProfile({ params }: { params: { id: string }
               <ul className="mt-4 space-y-2.5">
                 {starters.map((s) => (
                   <li key={s} className="rounded-xl bg-surface px-4 py-3 text-[14px] leading-relaxed text-ink">
-                    \u201c{s}\u201d
+                    “{s}”
                   </li>
                 ))}
               </ul>
@@ -180,7 +180,7 @@ export default async function MemberProfile({ params }: { params: { id: string }
                     className={`rounded-full border px-3 py-1 text-[12px] ${s.gap ? "border-brand-200 bg-brand-50 font-medium text-brand-700" : "border-border bg-surface text-text-secondary"}`}
                   >
                     {s.label}
-                    {s.gap ? " \u00b7 your gap" : ""}
+                    {s.gap ? " · your gap" : ""}
                   </span>
                 ))}
               </div>

@@ -145,7 +145,7 @@ export default async function CommunitiesPage() {
                   </span>
                 ) : (
                   <span className="text-[14px] text-text-secondary" aria-hidden>
-                    {"\u2192"}
+                    {"→"}
                   </span>
                 )}
               </Link>
@@ -191,7 +191,7 @@ export default async function CommunitiesPage() {
                 <div className="mt-4 flex items-center justify-between text-[12px] text-text-secondary">
                   <span>{c.member_count} members</span>
                   <span className="rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
-                    View {"\u2192"}
+                    View {"→"}
                   </span>
                 </div>
               </Link>

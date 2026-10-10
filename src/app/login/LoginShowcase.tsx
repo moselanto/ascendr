@@ -133,7 +133,7 @@ export default function LoginShowcase({ variant = "panel" }: { variant?: "panel"
                 key={p}
                 className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-2 text-[13px] text-white/90 backdrop-blur"
               >
-                <span aria-hidden className="text-accent">{"\u2713"}</span>
+                <span aria-hidden className="text-accent">{"✓"}</span>
                 {p}
               </li>
             ))}

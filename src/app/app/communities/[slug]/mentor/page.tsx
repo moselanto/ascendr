@@ -48,7 +48,7 @@ export default async function MentorWorkspacePage({ params }: { params: { slug: 
         href={`/app/communities/${community.slug}`}
         className="text-[13px] font-medium text-text-secondary hover:text-ink"
       >
-        {"\u2190"} {community.name}
+        {"←"} {community.name}
       </Link>
 
       {/* Page head */}

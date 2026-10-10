@@ -193,7 +193,7 @@ export default async function OutcomesPage({ searchParams }: { searchParams: { k
                     <div className="min-w-0 flex-1">
                       <p className="text-[14px] font-semibold text-ink">{outcomeLabel(o.kind)}</p>
                       <p className="text-[13px] text-text-secondary">
-                        {[o.title, o.organization].filter(Boolean).join(" \u00b7 ") || "No details"}
+                        {[o.title, o.organization].filter(Boolean).join(" · ") || "No details"}
                       </p>
                       <div className="mt-1.5 flex items-center gap-2">
                         <span className={`rounded-full px-2 py-0.5 text-[11px] font-medium ${v.tone}`}>{v.label}</span>

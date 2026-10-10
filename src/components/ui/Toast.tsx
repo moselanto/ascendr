@@ -40,7 +40,7 @@ export default function Toast() {
       className="pointer-events-none fixed inset-x-0 bottom-24 z-50 flex justify-center px-4 md:bottom-8"
     >
       <div className="pointer-events-auto inline-flex items-center gap-2 rounded-full bg-ink px-4 py-2.5 text-[13px] text-white shadow-lift">
-        <span aria-hidden>{"\u2713"}</span>
+        <span aria-hidden>{"✓"}</span>
         <span>{visible}</span>
       </div>
     </div>

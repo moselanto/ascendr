@@ -34,7 +34,7 @@ function fmtWhen(dt: string | null) {
 }
 
 function fmtDay(dt: string | null) {
-  if (!dt) return { day: "\u2014", month: "TBD" };
+  if (!dt) return { day: "—", month: "TBD" };
   const d = new Date(dt);
   return {
     day: String(d.getDate()),

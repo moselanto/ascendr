@@ -159,7 +159,7 @@ export default async function CommunityHome({
   return (
     <div className="mx-auto max-w-6xl">
       <Link href="/app/communities" className="text-[13px] font-medium text-text-secondary hover:text-ink">
-        {"\u2190"} All communities
+        {"←"} All communities
       </Link>
 
       {/* Header band */}
@@ -217,7 +217,7 @@ export default async function CommunityHome({
             ) : (
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-[12px] font-medium text-emerald-800">
-                  {"\u2713"} Member
+                  {"✓"} Member
                 </span>
                 {membership?.role === "owner" ? null : (
                   <form action={leaveCommunity}>
@@ -320,7 +320,7 @@ export default async function CommunityHome({
                             title={`Delete #${ch.name}`}
                             className="text-[12px] text-text-secondary hover:text-danger"
                           >
-                            {"\u2715"}
+                            {"✕"}
                           </button>
                         </form>
                       )}

@@ -107,7 +107,7 @@ const FAQ = [
   { q: "We're a university. Which plan fits?", a: "Custom. We set up your programs, cohorts and skill frameworks, and connect your sign-in system." },
 ];
 
-const check = <span aria-hidden className="text-accent">{"\u2713"}</span>;
+const check = <span aria-hidden className="text-accent">{"✓"}</span>;
 
 export const dynamic = "force-dynamic";
 

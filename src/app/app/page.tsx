@@ -59,7 +59,7 @@ function SectionTitle({ title, href, cta }: { title: string; href?: string; cta?
       <h2 className="text-[17px] font-semibold tracking-tight text-ink">{title}</h2>
       {href && (
         <Link href={href} className="text-[13px] font-medium text-text-secondary hover:text-ink">
-          {cta ?? "See all"} \u2192
+          {cta ?? "See all"} →
         </Link>
       )}
     </div>
@@ -242,7 +242,7 @@ export default async function HomePage() {
           <div aria-hidden className="bg-dots-light absolute inset-0 opacity-50" />
           <div className="relative">
             <span className="inline-flex rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/80">
-              {goal ? `Your goal \u00b7 ${BAND[analysis?.band ?? "unknown"]}` : "No goal yet"}
+              {goal ? `Your goal · ${BAND[analysis?.band ?? "unknown"]}` : "No goal yet"}
             </span>
             <h2 className="mt-5 text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] md:text-[36px]">
               {goal ? (
@@ -263,7 +263,7 @@ export default async function HomePage() {
                 <div>
                   <p className="nums text-[26px] font-semibold leading-none">
                     {analysis?.matched.length ?? 0}
-                    <span className="text-[14px] font-normal text-white/50"> of {essentialTotal || "\u2013"}</span>
+                    <span className="text-[14px] font-normal text-white/50"> of {essentialTotal || "–"}</span>
                   </p>
                   <p className="mt-1.5 text-[12px] text-white/60">Core skills matched</p>
                 </div>
@@ -291,7 +291,7 @@ export default async function HomePage() {
             {next.why}
           </p>
           <Link href={next.href} className="mt-5 inline-flex w-fit items-center gap-2 rounded-full bg-ink px-5 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">
-            {next.cta} <span aria-hidden>\u2192</span>
+            {next.cta} <span aria-hidden>→</span>
           </Link>
           <div className="mt-auto pt-6">
             <div className="flex justify-between border-t border-border pt-4 text-[12px]">
@@ -338,7 +338,7 @@ export default async function HomePage() {
                       c.done ? "bg-accent text-white" : "border border-border bg-white"
                     }`}
                   >
-                    {c.done ? "\u2713" : ""}
+                    {c.done ? "✓" : ""}
                   </span>
                   <span>
                     <span className={`block text-[13px] font-medium ${c.done ? "text-text-secondary line-through" : "text-ink"}`}>{c.label}</span>
@@ -354,7 +354,7 @@ export default async function HomePage() {
       {/* Metrics */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <Metric label="Career actions" value={actionsMonth} note={`${actionsWeek} in the last 7 days`} />
-        <Metric label="Roadmap progress" value={roadmapTotal ? `${roadmapDone}/${roadmapTotal}` : "\u2013"} note={roadmapTotal ? "steps completed" : "appears once you have gaps"} />
+        <Metric label="Roadmap progress" value={roadmapTotal ? `${roadmapDone}/${roadmapTotal}` : "–"} note={roadmapTotal ? "steps completed" : "appears once you have gaps"} />
         <Metric label="Connections" value={connections} note="accepted in your network" />
         <Metric label="Wins logged" value={wins} note="interviews, intros, offers" />
       </div>
@@ -381,14 +381,14 @@ export default async function HomePage() {
                       <div className="flex-1">
                         <p className="text-[15px] font-medium text-ink">{s.title}</p>
                         <p className="mt-0.5 text-[13px] text-text-secondary">
-                          {s.kind === "learn" ? "Learning" : s.kind === "practice" ? "Practice" : "People"} \u00b7 {s.skill}
+                          {s.kind === "learn" ? "Learning" : s.kind === "practice" ? "Practice" : "People"} · {s.skill}
                         </p>
                       </div>
                       <Link
                         href={s.kind === "people" ? "/app/members" : s.kind === "learn" ? "/app/learn" : "/app/career#roadmap"}
                         className="text-[13px] font-medium text-text-secondary hover:text-ink"
                       >
-                        Open \u2192
+                        Open →
                       </Link>
                     </form>
                   </li>
@@ -421,7 +421,7 @@ export default async function HomePage() {
                         <Link href={`/app/members/${p.author_id}`} className="font-semibold text-ink hover:underline">
                           {p.profiles?.full_name || "Member"}
                         </Link>
-                        <span className="text-text-secondary"> \u00b7 {timeAgo(p.created_at)}</span>
+                        <span className="text-text-secondary"> · {timeAgo(p.created_at)}</span>
                       </p>
                       <p className="mt-0.5 line-clamp-2 text-[14px] text-ink/80">{p.body}</p>
                     </div>
@@ -477,10 +477,10 @@ export default async function HomePage() {
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[14px] font-semibold text-ink">{j.title}</p>
                         <p className="truncate text-[12px] text-text-secondary">
-                          {j.company} \u00b7 {j.remote ? "Remote" : j.location}
+                          {j.company} · {j.remote ? "Remote" : j.location}
                         </p>
                       </div>
-                      <span className="text-[12px] text-text-secondary">\u2197</span>
+                      <span className="text-[12px] text-text-secondary">↗</span>
                     </a>
                   </li>
                 ))}

@@ -139,7 +139,7 @@ export default function PostCard({
           className="ml-auto text-[12px] font-medium text-text-secondary hover:text-ink"
         >
           <span className="nums">{comments.length}</span> {comments.length === 1 ? "comment" : "comments"}{" "}
-          {showComments ? "\u25B4" : "\u25BE"}
+          {showComments ? "▴" : "▾"}
         </button>
       </div>
 

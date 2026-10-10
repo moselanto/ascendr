@@ -121,7 +121,7 @@ export async function PeopleDirectory({ q, mode }: { q: string; mode: "all" | "m
 
       <section>
         <h2 className="mb-3 text-[17px] font-semibold tracking-tight text-ink">
-          {q ? `Results for \u201c${q}\u201d` : mode === "mentors" ? "All mentors & experts" : "Everyone"}
+          {q ? `Results for “${q}”` : mode === "mentors" ? "All mentors & experts" : "Everyone"}
           <span className="ml-2 text-[13px] font-normal text-text-secondary">{people.length}</span>
         </h2>
         {people.length === 0 ? (
@@ -146,7 +146,7 @@ export async function PeopleDirectory({ q, mode }: { q: string; mode: "all" | "m
                     </p>
                     <p className="text-[12px] text-text-secondary">
                       {ROLE_LABEL[p.role] ?? p.role}
-                      {p.handle ? ` \u00b7 @${p.handle}` : ""}
+                      {p.handle ? ` · @${p.handle}` : ""}
                     </p>
                   </div>
                 </Link>

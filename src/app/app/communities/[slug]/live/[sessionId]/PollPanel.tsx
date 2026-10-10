@@ -212,7 +212,7 @@ export default function PollPanel({
                       />
                       <span className="relative flex items-center justify-between gap-2">
                         <span className={mine ? "font-semibold text-brand-700" : ""}>
-                          {mine ? "\u2713 " : ""}
+                          {mine ? "✓ " : ""}
                           {opt}
                         </span>
                         <span className="text-[12px] text-text-secondary">{pct}%</span>

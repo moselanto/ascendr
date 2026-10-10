@@ -317,7 +317,7 @@ export default async function SettingsPage({
           )}
         </dl>
         <div className="flex items-center justify-between gap-4 border-t border-border px-5 py-4">
-          <Link href="/app/billing" className="text-[13px] font-medium text-brand-600 hover:text-brand-700">Plan and billing {"\u2192"}</Link>
+          <Link href="/app/billing" className="text-[13px] font-medium text-brand-600 hover:text-brand-700">Plan and billing {"→"}</Link>
           <form action={signOut}>
             <button className="rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-danger/40 hover:text-danger">
               Sign out

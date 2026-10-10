@@ -10,7 +10,7 @@ type MsgWithReactions = ChannelMessage & {
 };
 
 // Quick reactions as plain unicode glyphs (stored as the reaction value).
-const EMOJIS = ["\u2191", "\u2605", "\u2713", "\u2665"];
+const EMOJIS = ["↑", "★", "✓", "♥"];
 
 export default function ChannelChat({
   channelId,

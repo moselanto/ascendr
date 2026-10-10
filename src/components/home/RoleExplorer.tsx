@@ -114,7 +114,7 @@ export async function RoleExplorer({ selected }: { selected?: string }) {
                 href={SIGNUP}
                 className="mt-5 inline-flex items-center gap-2 rounded-full bg-white px-5 py-2.5 text-[14px] font-medium text-ink hover:bg-brand-50"
               >
-                Check my gap <span aria-hidden>{"\u2192"}</span>
+                Check my gap <span aria-hidden>{"→"}</span>
               </Link>
             </div>
           </div>

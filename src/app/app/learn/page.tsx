@@ -182,7 +182,7 @@ export default async function LearnPage() {
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <Link href="/app/career#roadmap" className="inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
-                    Mark done on roadmap {"\u2192"}
+                    Mark done on roadmap {"→"}
                   </Link>
                   <a
                     href={`https://www.coursera.org/search?query=${encodeURIComponent(nextLearn.skill)}`}
@@ -207,7 +207,7 @@ export default async function LearnPage() {
                 <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">Nothing to learn on your roadmap right now</h2>
                 <p className="mt-1 text-[14px] text-white/70">Either your learning steps are done, or your goal isn&apos;t matched to a role yet.</p>
                 <Link href="/app/career" className="mt-5 inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
-                  Open career plan {"\u2192"}
+                  Open career plan {"→"}
                 </Link>
               </>
             ) : (
@@ -215,7 +215,7 @@ export default async function LearnPage() {
                 <h2 className="mt-2 text-[22px] font-semibold tracking-[-0.01em]">Set a goal to get a learning plan</h2>
                 <p className="mt-1 text-[14px] text-white/70">ASCENDR turns the skills your target role needs into steps you can learn in order.</p>
                 <Link href="/onboarding" className="mt-5 inline-flex rounded-full bg-white px-4 py-2.5 text-[14px] font-medium text-ink hover:bg-white/90">
-                  Set my goal {"\u2192"}
+                  Set my goal {"→"}
                 </Link>
               </>
             )}
@@ -225,7 +225,7 @@ export default async function LearnPage() {
         <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
           <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
             <p className="text-[12px] font-medium text-text-secondary">Core skills to learn</p>
-            <p className="nums mt-1 text-[28px] font-semibold text-ink">{goal ? essentialGaps.length : "\u2013"}</p>
+            <p className="nums mt-1 text-[28px] font-semibold text-ink">{goal ? essentialGaps.length : "–"}</p>
           </div>
           <div className="rounded-2xl border border-border bg-white p-5 shadow-card">
             <p className="text-[12px] font-medium text-text-secondary">Learning steps done</p>
@@ -243,7 +243,7 @@ export default async function LearnPage() {
         <SectionTitle
           action={
             <Link href="/app/search" className="text-[13px] font-medium text-brand-600 hover:text-brand-700">
-              Search roles {"\u2192"}
+              Search roles {"→"}
             </Link>
           }
         >
@@ -268,7 +268,7 @@ export default async function LearnPage() {
                 </div>
                 <h3 className="mt-4 text-[16px] font-semibold capitalize text-ink">{r.title}</h3>
                 <p className="mt-0.5 text-[13px] text-text-secondary">
-                  {r.essential} essential {"\u00b7"} {r.optional} nice-to-have skills
+                  {r.essential} essential {"·"} {r.optional} nice-to-have skills
                 </p>
                 {r.top.length > 0 && (
                   <ul className="mt-3 flex flex-wrap gap-1.5">
@@ -280,7 +280,7 @@ export default async function LearnPage() {
                 <div className="mt-auto pt-5">
                   {r.isGoal ? (
                     <Link href="/app/career#roadmap" className="inline-flex rounded-full bg-ink px-3 py-1.5 text-[12px] font-medium text-white hover:bg-ink-700">
-                      Continue my path {"\u2192"}
+                      Continue my path {"→"}
                     </Link>
                   ) : (
                     <Link href="/onboarding" className="inline-flex rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40">
