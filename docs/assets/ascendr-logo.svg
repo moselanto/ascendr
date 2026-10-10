@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="64" viewBox="0 0 320 64" fill="none" role="img" aria-label="ASCENDR">
+  <rect x="0" y="4" width="56" height="56" rx="15" fill="#0B1220"/>
+  <rect x="13" y="34" width="7" height="13" rx="2.5" fill="#B69EFD"/>
+  <rect x="24.5" y="25" width="7" height="22" rx="2.5" fill="#8359FB"/>
+  <rect x="36" y="16" width="7" height="31" rx="2.5" fill="#4000F9"/>
+  <text x="72" y="44" font-family="Inter, 'Instrument Sans', Helvetica, Arial, sans-serif" font-size="30" font-weight="600" letter-spacing="4" fill="#0B1220">ASCENDR</text>
+</svg>
