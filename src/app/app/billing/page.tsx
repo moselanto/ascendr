@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { getTier, LIMITS } from "@/lib/usage";
 import { ANNUAL_PRICE_KES, PLAN_LABEL, PLAN_PRICE_KES, formatKes, isPaidPlan } from "@/lib/billing";
-import { manageSubscription, cancelSubscription, startCheckout } from "./actions";
+import { manageSubscription, cancelSubscription, startCheckout, redeemSponsorCode } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Billing | ASCENDR" };
@@ -126,6 +126,23 @@ export default async function BillingPage() {
           </div>
         </section>
       )}
+
+      <section className="rounded-2xl border border-border bg-white p-5 shadow-card">
+        <h2 className="text-[16px] font-semibold text-ink">Have a sponsor code?</h2>
+        <p className="mt-1 text-[13px] text-text-secondary">If an employer, foundation or programme gave you a code, enter it to unlock Plus at no cost.</p>
+        <form action={redeemSponsorCode} className="mt-4 flex flex-wrap gap-2">
+          <input
+            name="code"
+            required
+            minLength={6}
+            maxLength={32}
+            autoComplete="off"
+            placeholder="e.g. ACME-7K2Q9"
+            className="min-w-0 flex-1 rounded-xl border border-border px-3 py-2.5 text-[14px] uppercase tracking-wide text-ink outline-none focus:border-ink/40"
+          />
+          <button className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">Redeem</button>
+        </form>
+      </section>
 
       <p className="text-center text-[12px] text-text-secondary">Payments are processed securely by Paystack. ASCENDR never stores your card details.</p>
     </div>

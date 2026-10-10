@@ -83,3 +83,27 @@ export async function cancelSubscription() {
   await upsertSubscription({ user_id: profile.id, plan: sub.plan, status: "non_renewing" });
   backWithToast("Subscription cancelled. You keep your plan until the end of this period", "/app/billing");
 }
+
+const SPONSOR_MESSAGES: Record<string, string> = {
+  ok: "Code accepted. Plus is now active on your account",
+  invalid: "That code wasn't recognised. Check it and try again",
+  expired: "That code has expired",
+  already: "You've already used this code",
+  full: "All seats on this code have been taken",
+  has_plan: "You already have Starter or Pro, which includes everything in Plus",
+  not_signed_in: "Sign in to use a sponsor code",
+};
+
+/** Redeem a sponsor code for Plus (migration 0024). */
+export async function redeemSponsorCode(formData: FormData) {
+  const code = String(formData.get("code") ?? "").trim().toUpperCase().slice(0, 32);
+  if (code.length < 6) backWithToast("Enter the full sponsor code", "/app/billing");
+  const profile = await getCurrentProfile();
+  if (profile == null) redirect("/login?next=/app/billing");
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("redeem_sponsor_code", { p_code: code });
+  if (error) backWithToast(/function|does not exist/i.test(error.message) ? "Sponsor codes aren't switched on yet" : `Could not use the code: ${error.message}`, "/app/billing");
+  const result = String(data ?? "invalid");
+  if (result === "ok") await track("pro_interest", { userId: profile.id, props: { plan: "plus", step: "sponsor_redeemed" } });
+  backWithToast(SPONSOR_MESSAGES[result] ?? SPONSOR_MESSAGES.invalid, "/app/billing");
+}
