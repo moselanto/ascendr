@@ -22,7 +22,8 @@ export const dynamic = "force-dynamic";
  * Every section is a server component — the page ships no client JS. The FAQ
  * uses native <details> for the same reason.
  */
-export default function Home({ searchParams }: { searchParams?: { role?: string } }) {
+export default async function Home(props: { searchParams?: Promise<{ role?: string }> }) {
+  const searchParams = await props.searchParams;
   return (
     <main className="min-h-screen bg-bg text-text">
       <SiteHeader />

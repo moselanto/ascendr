@@ -36,11 +36,12 @@ const sectionEyebrow = "text-[12px] font-semibold uppercase tracking-[0.14em] te
 const secondaryBtn =
   "inline-block rounded-full border border-ink/15 bg-white px-3 py-1.5 text-[12px] font-medium text-ink hover:border-ink/40";
 
-export default async function SettingsPage({
-  searchParams,
-}: {
-  searchParams: { saved?: string; error?: string };
-}) {
+export default async function SettingsPage(
+  props: {
+    searchParams: Promise<{ saved?: string; error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const base = await getCurrentProfile();
   if (!base) redirect("/login");
   const profile = base as ProfileWithGoals;

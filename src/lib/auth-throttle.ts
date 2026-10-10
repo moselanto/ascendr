@@ -1,5 +1,5 @@
 import crypto from "crypto";
-import { headers } from "next/headers";
+import { headers, type UnsafeUnwrappedHeaders } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /**
@@ -20,7 +20,7 @@ const RULES = {
 } as const;
 
 function clientIp(): string {
-  const h = headers();
+  const h = (/* Next 15: synchronous access kept on purpose (temporary); see PR notes. */ headers() as unknown as UnsafeUnwrappedHeaders);
   const fwd = h.get("x-forwarded-for");
   if (fwd) return fwd.split(",")[0].trim();
   return h.get("x-real-ip") ?? "unknown";

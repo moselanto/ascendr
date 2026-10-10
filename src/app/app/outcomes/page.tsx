@@ -35,7 +35,8 @@ function monthKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
 }
 
-export default async function OutcomesPage({ searchParams }: { searchParams: { kind?: string } }) {
+export default async function OutcomesPage(props: { searchParams: Promise<{ kind?: string }> }) {
+  const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
   const me = profile?.id ?? "";
   const supabase = createClient();

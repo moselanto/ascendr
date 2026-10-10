@@ -107,7 +107,8 @@ function MigrationNotice() {
   );
 }
 
-export default async function NetworkPage({ searchParams }: { searchParams: { org?: string } }) {
+export default async function NetworkPage(props: { searchParams: Promise<{ org?: string }> }) {
+  const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
   const me = profile?.id ?? "";
   const supabase = createClient();

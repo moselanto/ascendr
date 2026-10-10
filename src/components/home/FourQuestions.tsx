@@ -1,7 +1,8 @@
+import type React from "react";
 import Link from "next/link";
 import { SIGNUP } from "@/components/home/links";
 
-type Q = { n: string; question: string; answer: string; body: string; icon: JSX.Element };
+type Q = { n: string; question: string; answer: string; body: string; icon: React.JSX.Element };
 
 const stroke = { fill: "none", stroke: "currentColor", strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 

@@ -51,7 +51,7 @@ export async function signup(formData: FormData) {
   // If email confirmation is on, send the confirmation link through
   // /auth/callback carrying the return path. When the origin is unknown we
   // leave Supabase's default (site URL) in place, exactly as before.
-  const origin = headers().get("origin");
+  const origin = (await headers()).get("origin");
   const emailRedirectTo = origin
     ? `${origin}/auth/callback?next=${encodeURIComponent(next ?? "/onboarding")}`
     : undefined;

@@ -19,7 +19,8 @@ function pct(n: number, d: number) {
   return d > 0 ? `${Math.round((n / d) * 100)}%` : "n/a";
 }
 
-export default async function NetworkReportPage({ searchParams }: { searchParams: { org?: string } }) {
+export default async function NetworkReportPage(props: { searchParams: Promise<{ org?: string }> }) {
+  const searchParams = await props.searchParams;
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login");
   const org = String(searchParams.org ?? "");

@@ -30,13 +30,14 @@ const STATUS_STYLE: Record<string, string> = {
   ended: "bg-surface text-text-secondary",
 };
 
-export default async function LiveSessionsPage({
-  params,
-  searchParams,
-}: {
-  params: { slug: string };
-  searchParams: { error?: string };
-}) {
+export default async function LiveSessionsPage(
+  props: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ error?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
+  const params = await props.params;
   const profile = await getCurrentProfile();
   const supabase = createClient();
 

@@ -10,7 +10,8 @@ export const dynamic = "force-dynamic";
  * Global search across people, communities and career roles. One box in the
  * top bar, one results page, three clear groups.
  */
-export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
+export default async function SearchPage(props: { searchParams: Promise<{ q?: string }> }) {
+  const searchParams = await props.searchParams;
   const q = (searchParams.q ?? "").trim().slice(0, 80);
   const me = await getCurrentProfile();
   const supabase = createClient();

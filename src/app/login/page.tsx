@@ -8,11 +8,12 @@ import { safeNext } from "./safe-next";
 export const metadata = { title: "Sign in | ASCENDR" };
 
 
-export default function LoginPage({
-  searchParams,
-}: {
-  searchParams: { error?: string; mode?: string; next?: string; redirect?: string };
-}) {
+export default async function LoginPage(
+  props: {
+    searchParams: Promise<{ error?: string; mode?: string; next?: string; redirect?: string }>;
+  }
+) {
+  const searchParams = await props.searchParams;
   const isSignup = searchParams.mode === "signup";
 
   // `next` is the return path; `redirect` is the legacy name. Both are
