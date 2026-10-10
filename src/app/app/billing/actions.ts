@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { track } from "@/lib/analytics";
 import { backWithToast } from "@/lib/toast";
-import { appUrl, billingConfigured, isPaidPlan, paystack, planCode, PLAN_PRICE_KES, BILLING_CURRENCY, upsertSubscription } from "@/lib/billing";
+import { appUrl, billingConfigured, isPaidPlan, isRecurring, paystack, planCode, PLAN_PRICE_KES, BILLING_CURRENCY, upsertSubscription } from "@/lib/billing";
 
 /** Start a Paystack checkout for Starter or Pro. Falls back to early-access interest if billing isn't configured. */
 export async function startCheckout(formData: FormData) {
@@ -15,7 +15,7 @@ export async function startCheckout(formData: FormData) {
   const profile = await getCurrentProfile();
   if (profile == null) redirect("/login?next=/app/plans");
 
-  if (billingConfigured() === false) {
+  if (billingConfigured(plan) === false) {
     await track("pro_interest", { userId: profile.id, props: { plan } });
     backWithToast("Payments open soon. You're on the early-access list", "/app/plans");
   }
@@ -32,7 +32,8 @@ export async function startCheckout(formData: FormData) {
       email,
       amount: PLAN_PRICE_KES[plan] * 100,
       currency: BILLING_CURRENCY,
-      plan: planCode(plan),
+      // Plus is a one-off payment: offer M-Pesa (mobile money) first, card as fallback.
+      ...(isRecurring(plan) ? { plan: planCode(plan) } : { channels: ["mobile_money", "card"] }),
       callback_url: `${appUrl(origin)}/app/billing/callback`,
       metadata: { profile_id: profile.id, plan },
     },
@@ -41,7 +42,10 @@ export async function startCheckout(formData: FormData) {
     backWithToast(`Checkout could not start: ${res.message}`, "/app/plans");
   }
 
-  await upsertSubscription({ user_id: profile.id, plan, status: "pending", email: email?.toLowerCase(), last_reference: res.data.reference });
+  // Renewing Plus while it is still active must not flip the member to pending.
+  const { data: current } = await supabase.from("subscriptions").select("plan, status").eq("user_id", profile.id).maybeSingle();
+  const keepActive = current?.plan === plan && current.status === "active";
+  await upsertSubscription({ user_id: profile.id, plan, status: keepActive ? "active" : "pending", email: email?.toLowerCase(), last_reference: res.data.reference });
   await track("pro_interest", { userId: profile.id, props: { plan, step: "checkout_started" } });
   redirect(res.data.authorization_url);
 }

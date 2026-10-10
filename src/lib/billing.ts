@@ -10,20 +10,34 @@ import { createAdminClient } from "@/lib/supabase/admin";
  *   NEXT_PUBLIC_APP_URL      e.g. https://ascendr-two.vercel.app
  */
 
-export type PaidPlan = "starter" | "pro";
+export type PaidPlan = "plus" | "starter" | "pro";
 
-export const PLAN_LABEL: Record<PaidPlan, string> = { starter: "Starter", pro: "Pro" };
-export const PLAN_PRICE_KES: Record<PaidPlan, number> = { starter: 13000, pro: 26000 };
+/**
+ * Plus is for individuals and is a one-off monthly payment (M-Pesa or card),
+ * not a Paystack subscription: mobile money can't be charged automatically,
+ * so the member renews by paying again. Starter and Pro are card
+ * subscriptions on Paystack plans.
+ */
+export function isRecurring(plan: PaidPlan): boolean {
+  return plan !== "plus";
+}
+
+export const PLAN_LABEL: Record<PaidPlan, string> = { plus: "Plus", starter: "Starter", pro: "Pro" };
+export const PLAN_PRICE_KES: Record<PaidPlan, number> = { plus: 499, starter: 13000, pro: 26000 };
 export const BILLING_CURRENCY = "KES";
+
+/** Flat fee the hiring company pays per confirmed hire (migration 0022). */
+export const HIRE_FEE = { amountKes: 25000, networkShareKes: 5000 };
 export function formatKes(n: number) {
   return `KES ${n.toLocaleString("en-US")}`;
 }
 
 export function isPaidPlan(v: unknown): v is PaidPlan {
-  return v === "starter" || v === "pro";
+  return v === "plus" || v === "starter" || v === "pro";
 }
 
 export function planCode(plan: PaidPlan): string | null {
+  if (plan === "plus") return null;
   const code = plan === "starter" ? process.env.PAYSTACK_PLAN_STARTER : process.env.PAYSTACK_PLAN_PRO;
   return code && code.trim().length > 0 ? code.trim() : null;
 }
@@ -35,8 +49,10 @@ export function planFromCode(code: string | null | undefined): PaidPlan | null {
   return null;
 }
 
-export function billingConfigured(): boolean {
-  return Boolean(process.env.PAYSTACK_SECRET_KEY && planCode("starter") && planCode("pro"));
+export function billingConfigured(plan?: PaidPlan): boolean {
+  if (!process.env.PAYSTACK_SECRET_KEY) return false;
+  if (plan) return isRecurring(plan) ? planCode(plan) != null : true;
+  return Boolean(planCode("starter") && planCode("pro"));
 }
 
 export function appUrl(fallbackOrigin?: string): string {

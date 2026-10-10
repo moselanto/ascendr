@@ -27,7 +27,7 @@ const GROUPS: Group[] = [
       },
       {
         q: "Do I need to pay to start?",
-        a: "No. The Free plan includes your skills gap for one target role, a 90-day roadmap and learning paths, 25 AI coach messages and 5 mock interviews a day, plus communities, mentors and messaging. Upgrade only when you need more.",
+        a: "No. The Free plan includes your skills gap for one target role, a 90-day roadmap and learning paths, 25 AI coach messages and 5 mock interviews a day, plus communities, mentors and messaging. Upgrade only when you need more. Plus, for individuals, costs KES 499 a month and you can pay by M-Pesa.",
       },
       {
         q: "Do I need to install an app?",
@@ -101,6 +101,10 @@ const GROUPS: Group[] = [
         a: "Nobody is removed. New members and new roles are paused until you upgrade or free up space.",
       },
       {
+        q: "Is there a fee when someone is hired?",
+        a: "Yes. When an introduction made through ASCENDR ends in a hire, the hiring company pays a one-off fee of KES 25,000. The network that introduced the candidate receives KES 5,000 of it. Members never pay this fee.",
+      },
+      {
         q: "Can we run a pilot first?",
         a: "Yes. Contact us and we will set up your network, help you invite your first members and agree what success looks like before you commit to a plan.",
       },
@@ -111,11 +115,11 @@ const GROUPS: Group[] = [
     items: [
       {
         q: "How much does ASCENDR cost?",
-        a: "Free is KES 0. Starter is KES 13,000 a month and Pro is KES 26,000 a month. Custom plans for universities and large networks are priced to fit. Full details are on the pricing page.",
+        a: "Free is KES 0. Plus, for individuals, is KES 499 a month. Starter is KES 13,000 a month and Pro is KES 26,000 a month. Custom plans for universities and large networks are priced to fit. Full details are on the pricing page.",
       },
       {
         q: "How do I pay, and can I cancel?",
-        a: "Starter and Pro are billed monthly in KES by card through Paystack. You can update your card or cancel from Billing at any time and keep your plan until the end of the period you paid for.",
+        a: "Plus is a one-off monthly payment by M-Pesa or card through Paystack; pay again to add another month. Starter and Pro are billed monthly in KES by card through Paystack. You can update your card or cancel from Billing at any time and keep your plan until the end of the period you paid for.",
       },
       {
         q: "Do you offer annual billing or invoices?",

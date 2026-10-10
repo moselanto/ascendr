@@ -30,7 +30,7 @@ export const PLANS: Plan[] = [
   {
     key: "starter",
     name: "Starter",
-    tagline: "Small networks and serious job seekers.",
+    tagline: "Small networks and teams.",
     price: "KES 13,000",
     per: "/month",
     features: [
@@ -62,3 +62,11 @@ export const PLANS: Plan[] = [
     features: ["Unlimited members and cohorts", "Custom roles and skill frameworks", "Single sign-on", "Onboarding and invoicing"],
   },
 ];
+
+/** Individual plan, shown beside the network plans on public pages. */
+export const PLUS = {
+  name: "Plus",
+  price: "KES 499",
+  per: "/month",
+  summary: `For individuals: ${LIMITS["ai:coach"].plus} AI coach messages, ${LIMITS["ai:interview"].plus} mock interviews and ${LIMITS["ai:resume-review"].plus} resume reviews a day. Pay by M-Pesa, no automatic renewal.`,
+};

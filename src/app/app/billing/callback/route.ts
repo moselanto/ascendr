@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/data";
+import { createClient } from "@/lib/supabase/server";
 import { addMonth, isPaidPlan, paystack, PLAN_LABEL, upsertSubscription } from "@/lib/billing";
 
 type Verify = {
@@ -25,13 +26,22 @@ export async function GET(req: Request) {
   const meta = res.data.metadata ?? {};
   if (meta.profile_id !== profile.id || isPaidPlan(meta.plan) === false) return back("This payment belongs to another account");
 
+  // A Plus renewal paid before the period ends adds a month on top of the time left.
+  const { data: existing } = await createClient()
+    .from("subscriptions")
+    .select("plan, current_period_end, last_reference")
+    .eq("user_id", profile.id)
+    .maybeSingle();
+  const left = existing?.plan === meta.plan && existing.current_period_end ? new Date(existing.current_period_end) : null;
+  const from = left && left.getTime() > Date.now() ? left : new Date();
+  const alreadyApplied = existing?.last_reference === res.data.reference && left != null && left.getTime() > Date.now() && meta.plan === "plus";
   await upsertSubscription({
     user_id: profile.id,
     plan: meta.plan,
     status: "active",
     email: res.data.customer?.email?.toLowerCase() ?? null,
     customer_code: res.data.customer?.customer_code ?? null,
-    current_period_end: addMonth(),
+    current_period_end: alreadyApplied ? existing?.current_period_end : addMonth(meta.plan === "plus" ? from : new Date()),
     last_reference: res.data.reference,
   });
   return back(`Welcome to ${PLAN_LABEL[meta.plan]}. Your new limits are active`);

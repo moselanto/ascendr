@@ -1,9 +1,22 @@
 import Link from "next/link";
-import { PLANS } from "@/lib/plans";
+import { PLANS, PLUS } from "@/lib/plans";
 import { PILOT_CONTACT, SIGNUP } from "@/components/home/links";
 
 export function PricingCards() {
   return (
+    <div className="space-y-4">
+    <div className="flex flex-col gap-3 rounded-2xl border border-brand-100 bg-brand-50/60 px-6 py-4 md:flex-row md:items-center md:justify-between">
+      <p className="text-[14px] leading-relaxed text-text-secondary">
+        <span className="font-semibold text-ink">
+          {PLUS.name} {PLUS.price}
+          {PLUS.per}
+        </span>{" "}
+        {PLUS.summary}
+      </p>
+      <Link href={SIGNUP} className="w-fit shrink-0 rounded-full bg-ink px-4 py-2 text-[14px] font-medium text-white hover:bg-ink-700">
+        Choose Plus
+      </Link>
+    </div>
     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       {PLANS.map((p) => (
         <div
@@ -37,6 +50,7 @@ export function PricingCards() {
           </Link>
         </div>
       ))}
+    </div>
     </div>
   );
 }

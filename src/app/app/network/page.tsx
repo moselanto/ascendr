@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { initials } from "@/lib/people";
 import { getNetworkUsage, NETWORK_PLAN_LABEL } from "@/lib/network-limits";
+import { HIRE_FEE, formatKes } from "@/lib/billing";
 import {
   createOrganization,
   createInvite,
@@ -489,7 +490,7 @@ export default async function NetworkPage({ searchParams }: { searchParams: { or
             </div>
             {pipeline.length === 0 ? (
               <p className="px-5 py-6 text-[13px] text-text-secondary">
-                Use <span className="font-medium text-ink">Invite to pathway</span> or <span className="font-medium text-ink">Propose intro</span> on a member in the readiness map. Members must consent before anything is shared.
+                Use <span className="font-medium text-ink">Invite to pathway</span> or <span className="font-medium text-ink">Propose intro</span> on a member in the readiness map. Members must consent before anything is shared. When an introduction ends in a hire, the hiring company pays a one-off fee of {formatKes(HIRE_FEE.amountKes)}, and your network receives {formatKes(HIRE_FEE.networkShareKes)} of it.
               </p>
             ) : (
               <ul className="max-h-[420px] divide-y divide-border overflow-auto">

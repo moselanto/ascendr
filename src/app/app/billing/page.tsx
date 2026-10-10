@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { getTier, LIMITS } from "@/lib/usage";
 import { PLAN_LABEL, PLAN_PRICE_KES, formatKes, isPaidPlan } from "@/lib/billing";
-import { manageSubscription, cancelSubscription } from "./actions";
+import { manageSubscription, cancelSubscription, startCheckout } from "./actions";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Billing | ASCENDR" };
@@ -27,7 +27,8 @@ export default async function BillingPage() {
     .eq("user_id", profile.id)
     .maybeSingle();
   const tier = await getTier(profile.id);
-  const paid = tier === "starter" || tier === "pro";
+  const paid = tier === "plus" || tier === "starter" || tier === "pro";
+  const isPlus = tier === "plus";
   const st = sub ? STATUS[sub.status] ?? STATUS.pending : null;
   const renews = sub?.current_period_end
     ? new Date(sub.current_period_end).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
@@ -62,7 +63,7 @@ export default async function BillingPage() {
             )}
             {paid && renews && (
               <p className="mt-2 text-[13px] text-white/70">
-                {sub?.status === "non_renewing" ? `Access until ${renews}` : `Renews on ${renews}`}
+                {isPlus || sub?.status === "non_renewing" ? `Access until ${renews}` : `Renews on ${renews}`}
               </p>
             )}
           </div>
@@ -71,6 +72,19 @@ export default async function BillingPage() {
           </Link>
         </div>
       </section>
+
+      {isPlus && (
+        <section className="rounded-2xl border border-border bg-white p-5 shadow-card">
+          <h2 className="text-[16px] font-semibold text-ink">Renew Plus</h2>
+          <p className="mt-1 text-[13px] text-text-secondary">
+            Plus doesn&apos;t renew automatically. Pay again by M-Pesa or card at any time and another month is added to the time you have left.
+          </p>
+          <form action={startCheckout} className="mt-4">
+            <input type="hidden" name="plan" value="plus" />
+            <button className="rounded-full bg-ink px-4 py-2.5 text-[14px] font-medium text-white hover:bg-ink-700">Add another month ({formatKes(PLAN_PRICE_KES.plus)})</button>
+          </form>
+        </section>
+      )}
 
       <section className="rounded-2xl border border-border bg-white shadow-card">
         <div className="border-b border-border px-5 py-4">

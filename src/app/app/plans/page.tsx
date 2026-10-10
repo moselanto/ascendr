@@ -8,11 +8,11 @@ import { getTier } from "@/lib/usage";
 export const metadata = { title: "Plans and pricing | ASCENDR" };
 
 const USAGE = [
-  { label: "AI career coach conversations", free: LIMITS["ai:coach"].free, starter: LIMITS["ai:coach"].starter, pro: LIMITS["ai:coach"].pro },
-  { label: "Mock interviews with feedback", free: LIMITS["ai:interview"].free, starter: LIMITS["ai:interview"].starter, pro: LIMITS["ai:interview"].pro },
-  { label: "Resume reviews", free: LIMITS["ai:resume-review"].free, starter: LIMITS["ai:resume-review"].starter, pro: LIMITS["ai:resume-review"].pro },
-  { label: "AI career plans", free: LIMITS["ai:career-plan"].free, starter: LIMITS["ai:career-plan"].starter, pro: LIMITS["ai:career-plan"].pro },
-  { label: "Questions to mentor AI clones", free: LIMITS["ai:mentor-ask"].free, starter: LIMITS["ai:mentor-ask"].starter, pro: LIMITS["ai:mentor-ask"].pro },
+  { label: "AI career coach conversations", free: LIMITS["ai:coach"].free, plus: LIMITS["ai:coach"].plus, starter: LIMITS["ai:coach"].starter, pro: LIMITS["ai:coach"].pro },
+  { label: "Mock interviews with feedback", free: LIMITS["ai:interview"].free, plus: LIMITS["ai:interview"].plus, starter: LIMITS["ai:interview"].starter, pro: LIMITS["ai:interview"].pro },
+  { label: "Resume reviews", free: LIMITS["ai:resume-review"].free, plus: LIMITS["ai:resume-review"].plus, starter: LIMITS["ai:resume-review"].starter, pro: LIMITS["ai:resume-review"].pro },
+  { label: "AI career plans", free: LIMITS["ai:career-plan"].free, plus: LIMITS["ai:career-plan"].plus, starter: LIMITS["ai:career-plan"].starter, pro: LIMITS["ai:career-plan"].pro },
+  { label: "Questions to mentor AI clones", free: LIMITS["ai:mentor-ask"].free, plus: LIMITS["ai:mentor-ask"].plus, starter: LIMITS["ai:mentor-ask"].starter, pro: LIMITS["ai:mentor-ask"].pro },
 ];
 
 type Plan = {
@@ -47,7 +47,7 @@ const PLANS: Plan[] = [
   {
     key: "starter",
     name: "Starter",
-    tagline: "For small networks and serious job seekers.",
+    tagline: "For small networks and teams.",
     price: "KES 13,000",
     per: "/month",
     intro: "Everything in Free, plus:",
@@ -101,8 +101,9 @@ const PLANS: Plan[] = [
 
 const FAQ = [
   { q: "Can I keep using ASCENDR for free?", a: "Yes. The Free plan stays free, with daily limits on AI tools and one target role." },
-  { q: "Who are Starter and Pro for?", a: "Individuals who want much more AI coaching and interview practice, and network operators such as funds and accelerators who want to develop and place their members." },
-  { q: "How does billing work?", a: "Starter and Pro are billed monthly by card through Paystack. You can update your card or cancel from Billing at any time, and keep your plan until the period ends." },
+  { q: "Which plan is for me as an individual?", a: "Plus. It costs KES 499 a month, you can pay by M-Pesa, and it more than doubles your daily AI coaching, interview practice and resume reviews." },
+  { q: "Who are Starter and Pro for?", a: "Network operators such as funds, accelerators and associations who want to develop and place their members." },
+  { q: "How does billing work?", a: "Plus is a one-off monthly payment by M-Pesa or card; pay again to add another month. Starter and Pro are billed monthly by card through Paystack. You can update your card or cancel from Billing at any time, and keep your plan until the period ends." },
   { q: "Do you offer annual billing?", a: "Yes, through the Custom plan. Contact sales for annual contracts and invoicing." },
   { q: "We're a university. Which plan fits?", a: "Custom. We set up your programs, cohorts and skill frameworks, and connect your sign-in system." },
 ];
@@ -126,6 +127,30 @@ export default async function PlansPage() {
           Start free. Upgrade when you need more AI coaching, interview practice, or a network of people to develop and place.
         </p>
       </div>
+
+      {/* Individuals */}
+      <section className="flex flex-col gap-4 rounded-2xl border border-brand-100 bg-brand-50/60 p-6 md:flex-row md:items-center md:justify-between">
+        <div>
+          <p className="text-[12px] font-semibold uppercase tracking-[0.14em] text-brand-600">For individuals</p>
+          <p className="mt-1.5 text-[22px] font-semibold tracking-tight text-ink">
+            Plus <span className="text-[16px] font-normal text-text-secondary">KES 499/month, pay by M-Pesa</span>
+          </p>
+          <p className="mt-1 max-w-xl text-[14px] leading-relaxed text-text-secondary">
+            {LIMITS["ai:coach"].plus} AI coach messages, {LIMITS["ai:interview"].plus} mock interviews and {LIMITS["ai:resume-review"].plus} resume reviews a day. No
+            automatic renewal: pay again when you want another month.
+          </p>
+        </div>
+        {tier === "plus" ? (
+          <Link href="/app/billing" className="w-fit rounded-full bg-white px-5 py-2.5 text-[14px] font-semibold text-ink ring-1 ring-ink/10 hover:ring-ink/30">
+            Your current plan
+          </Link>
+        ) : (
+          <form action={startCheckout}>
+            <input type="hidden" name="plan" value="plus" />
+            <button className="rounded-full bg-ink px-5 py-2.5 text-[14px] font-semibold text-white hover:bg-ink-700">Get Plus</button>
+          </form>
+        )}
+      </section>
 
       {/* Plans */}
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -182,16 +207,18 @@ export default async function PlansPage() {
 
       {/* Limits table */}
       <section className="overflow-hidden rounded-2xl border border-border bg-white shadow-card">
-        <div className="grid grid-cols-[1.6fr_1fr_1fr_1fr] border-b border-border bg-surface px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
+        <div className="grid grid-cols-[1.6fr_1fr_1fr_1fr_1fr] border-b border-border bg-surface px-5 py-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-text-secondary">
           <span>Daily AI limits</span>
           <span className="text-center">Free</span>
+          <span className="text-center">Plus</span>
           <span className="text-center">Starter</span>
           <span className="text-center">Pro</span>
         </div>
         {USAGE.map((u) => (
-          <div key={u.label} className="grid grid-cols-[1.6fr_1fr_1fr_1fr] items-center border-b border-border px-5 py-3.5 last:border-0">
+          <div key={u.label} className="grid grid-cols-[1.6fr_1fr_1fr_1fr_1fr] items-center border-b border-border px-5 py-3.5 last:border-0">
             <span className="text-[14px] text-ink">{u.label}</span>
             <span className="nums text-center text-[14px] text-text-secondary">{u.free}</span>
+            <span className="nums text-center text-[14px] text-ink">{u.plus}</span>
             <span className="nums text-center text-[14px] text-ink">{u.starter}</span>
             <span className="nums text-center text-[14px] font-semibold text-ink">{u.pro}</span>
           </div>

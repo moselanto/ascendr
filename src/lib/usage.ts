@@ -24,7 +24,7 @@ export type QuotaBucket =
   | "ai:mentor-ask"
   | "ai:mentor-ingest";
 
-export type Tier = "free" | "starter" | "pro" | "premium";
+export type Tier = "free" | "plus" | "starter" | "pro" | "premium";
 
 /**
  * Daily call limits per tier.
@@ -34,14 +34,14 @@ export type Tier = "free" | "starter" | "pro" | "premium";
  * scripted loop stops within a few dollars. Tune once real usage data exists.
  */
 export const LIMITS: Record<QuotaBucket, Record<Tier, number>> = {
-  "ai:coach":             { free: 25, starter: 100, pro: 200, premium: 600 },
-  "ai:career-plan":       { free: 3, starter: 10,  pro: 25,  premium: 100 },
-  "ai:career-plan-step":  { free: 20, starter: 75, pro: 150, premium: 500 },
-  "ai:interview":         { free: 5, starter: 20,  pro: 50,  premium: 200 },
-  "ai:resume-review":     { free: 3, starter: 12,  pro: 30,  premium: 120 },
-  "ai:mentor-ask":        { free: 20, starter: 75, pro: 150, premium: 500 },
+  "ai:coach":             { free: 25, plus: 60, starter: 100, pro: 200, premium: 600 },
+  "ai:career-plan":       { free: 3, plus: 6, starter: 10,  pro: 25,  premium: 100 },
+  "ai:career-plan-step":  { free: 20, plus: 40, starter: 75, pro: 150, premium: 500 },
+  "ai:interview":         { free: 5, plus: 12, starter: 20,  pro: 50,  premium: 200 },
+  "ai:resume-review":     { free: 3, plus: 6, starter: 12,  pro: 30,  premium: 120 },
+  "ai:mentor-ask":        { free: 20, plus: 40, starter: 75, pro: 150, premium: 500 },
   // Ingestion is the expensive one: embeddings scale with document size.
-  "ai:mentor-ingest":     { free: 2, starter: 8,  pro: 20,  premium: 60 },
+  "ai:mentor-ingest":     { free: 2, plus: 4, starter: 8,  pro: 20,  premium: 60 },
 };
 
 const WINDOW_SECS = 86_400; // 24h fixed window
@@ -149,7 +149,7 @@ export async function getTier(profileId: string): Promise<Tier> {
     if (data == null) return "free";
     const live = data.status === "active" || data.status === "non_renewing" || data.status === "past_due";
     const inPeriod = data.current_period_end == null || new Date(data.current_period_end).getTime() > Date.now();
-    if (live && inPeriod && (data.plan === "starter" || data.plan === "pro")) return data.plan;
+    if (live && inPeriod && (data.plan === "plus" || data.plan === "starter" || data.plan === "pro")) return data.plan;
     return "free";
   } catch {
     // Billing table missing (migration 0017 not run) or a transient error: fail to free.
