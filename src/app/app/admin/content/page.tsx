@@ -11,6 +11,7 @@ import {
   formatDate,
   formatNumber,
 } from "../_components/ui";
+import { memberLabel } from "@/lib/plural";
 
 export const dynamic = "force-dynamic";
 
@@ -117,7 +118,7 @@ export default async function AdminContentPage() {
                     </p>
                   </div>
                   <div className="flex shrink-0 items-center gap-2">
-                    <span className="nums text-[13px] text-text-secondary">{formatNumber(c.member_count ?? 0)} members</span>
+                    <span className="nums text-[13px] text-text-secondary">{memberLabel(c.member_count)}</span>
                     <Chip tone={c.visibility === "paid" ? "amber" : c.visibility === "private" ? "neutral" : "emerald"}>
                       {c.visibility ?? "public"}
                     </Chip>

@@ -173,17 +173,7 @@ export async function joinCommunity(formData: FormData) {
   });
 
   if (!error) {
-    const { data: c } = await supabase
-      .from("communities")
-      .select("member_count")
-      .eq("id", communityId)
-      .single();
-    if (c) {
-      await supabase
-        .from("communities")
-        .update({ member_count: (c.member_count ?? 0) + 1 })
-        .eq("id", communityId);
-    }
+    // member_count is kept in step by a database trigger (migration 0029).
     await awardXp(profile.id, "community_join", 15, communityId);
   }
 
@@ -344,17 +334,7 @@ export async function leaveCommunity(formData: FormData) {
     redirect(`/app/communities/${slug}?error=${encodeURIComponent(error.message)}`);
   }
 
-  const { data: c } = await supabase
-    .from("communities")
-    .select("member_count")
-    .eq("id", communityId)
-    .single();
-  if (c) {
-    await supabase
-      .from("communities")
-      .update({ member_count: Math.max(0, (c.member_count ?? 1) - 1) })
-      .eq("id", communityId);
-  }
+  // member_count is kept in step by a database trigger (migration 0029).
 
   revalidatePath("/app/communities");
   revalidatePath(`/app/communities/${slug}`);

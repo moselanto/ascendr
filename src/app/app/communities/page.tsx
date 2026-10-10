@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import type { Community } from "@/lib/types";
+import { memberLabel } from "@/lib/plural";
 
 export const dynamic = "force-dynamic";
 
@@ -137,7 +138,7 @@ export default async function CommunitiesPage() {
                     {c.description || "A community on ASCENDR."}
                   </p>
                 </div>
-                <span className="hidden text-[12px] text-text-secondary sm:inline">{c.member_count} members</span>
+                <span className="hidden text-[12px] text-text-secondary sm:inline">{memberLabel(c.member_count)}</span>
                 {unread.has(c.id) ? (
                   <span className="flex items-center gap-1.5 rounded-full bg-brand-50 px-2.5 py-1 text-[12px] font-medium text-brand-700">
                     <span className="h-1.5 w-1.5 rounded-full bg-brand-600" />
@@ -189,7 +190,7 @@ export default async function CommunitiesPage() {
                   {c.description || "A community on ASCENDR."}
                 </p>
                 <div className="mt-4 flex items-center justify-between text-[12px] text-text-secondary">
-                  <span>{c.member_count} members</span>
+                  <span>{memberLabel(c.member_count)}</span>
                   <span className="rounded-full bg-brand-50 px-2.5 py-1 font-medium text-brand-700">
                     View {"→"}
                   </span>

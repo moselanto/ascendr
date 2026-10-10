@@ -6,6 +6,7 @@ import { buildRoadmap, type RoadmapStep } from "@/lib/career/roadmap";
 import { findOpportunities, type Opportunity } from "@/lib/opportunities";
 import { pickNextAction } from "@/components/app/CareerSnapshot";
 import { togglePlanStep } from "@/app/app/career/actions";
+import { memberLabel } from "@/lib/plural";
 
 export const dynamic = "force-dynamic";
 
@@ -539,7 +540,7 @@ export default async function HomePage() {
                         {initials(c.name)}
                       </span>
                       <span className="flex-1 truncate text-[14px] font-medium text-ink">{c.name}</span>
-                      <span className="nums text-[12px] text-text-secondary">{c.member_count ?? 0} {(c.member_count ?? 0) === 1 ? "member" : "members"}</span>
+                      <span className="nums text-[12px] text-text-secondary">{memberLabel(c.member_count)}</span>
                     </Link>
                   </li>
                 ))}

@@ -5,6 +5,7 @@ import { getCurrentProfile } from "@/lib/data";
 import { joinCommunity, leaveCommunity, createChannel, deleteChannel } from "../actions";
 import ChannelChat from "./ChannelChat";
 import type { ChannelMessage, Community } from "@/lib/types";
+import { memberLabel } from "@/lib/plural";
 
 export const dynamic = "force-dynamic";
 
@@ -184,7 +185,7 @@ export default async function CommunityHome(
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2 text-[12px] text-text-secondary">
                 <span className="rounded-full bg-surface px-2.5 py-1 font-medium text-ink">
-                  {c.member_count} members
+                  {memberLabel(c.member_count)}
                 </span>
                 <span className="rounded-full bg-surface px-2.5 py-1 font-medium text-ink">
                   {channels.length} channel{channels.length === 1 ? "" : "s"}

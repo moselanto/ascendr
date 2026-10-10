@@ -3,6 +3,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/data";
 import { initials } from "@/lib/people";
+import { memberLabel } from "@/lib/plural";
 
 export const dynamic = "force-dynamic";
 
@@ -107,7 +108,7 @@ export default async function SearchPage(props: { searchParams: Promise<{ q?: st
                       <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface text-[12px] font-semibold text-ink">{initials(c.name)}</span>
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-[14px] font-semibold text-ink">{c.name}</p>
-                        <p className="truncate text-[12px] text-text-secondary">{c.description ?? `${c.member_count ?? 0} members`}</p>
+                        <p className="truncate text-[12px] text-text-secondary">{c.description ?? memberLabel(c.member_count)}</p>
                       </div>
                     </Link>
                   </li>

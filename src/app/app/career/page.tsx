@@ -10,6 +10,7 @@ import { OUTCOME_KINDS, outcomeLabel } from "@/lib/career/outcomes";
 import { findOpportunities } from "@/lib/opportunities";
 import { buildRoadmap } from "@/lib/career/roadmap";
 import { Roadmap } from "@/components/app/Roadmap";
+import { memberLabel } from "@/lib/plural";
 
 export const dynamic = "force-dynamic";
 
@@ -364,7 +365,7 @@ export default async function CareerPage() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[14px] font-semibold text-ink">{c.name}</p>
                       <p className="truncate text-[12px] text-text-secondary">
-                        {c.hits.length > 0 ? `Related to ${c.hits.join(", ")}` : "Popular on ASCENDR"} · {c.member_count ?? 0} members
+                        {c.hits.length > 0 ? `Related to ${c.hits.join(", ")}` : "Popular on ASCENDR"} · {memberLabel(c.member_count)}
                       </p>
                     </div>
                   </Link>
