@@ -238,6 +238,8 @@ patterns for review.
 
 ### M-5 — No CSRF hardening documented
 
+**Status:** Resolved. `src/lib/supabase/cookie-options.ts` sets `Path=/`, `SameSite=Lax` and `Secure` (production) on every Supabase auth cookie in middleware, the server client and the browser client. Server Actions keep Next.js's Origin/Host check. HttpOnly stays off by design because the browser client reads the session; the enforcing CSP limits XSS exposure.
+
 Next.js Server Actions have built-in CSRF protections, and Supabase cookies
 should be `SameSite=Lax`. Neither was verified during this review, and
 `src/lib/supabase/middleware.ts` sets cookies without explicit attributes.
